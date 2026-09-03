@@ -3,6 +3,9 @@
 
 #define MAX_SERVO_ANGLE     140 //temp value
 #define MIN_SERVO_ANGLE     40  //temp value  
+#define SERVO_CH0_PIN       0   //temp value
+#define SERVO_CH1_PIN       1   //temp value
+
 
 // define servos
 static servo_handle_t roll_servo = NULL;
@@ -11,7 +14,7 @@ static servo_handle_t pitch_servo = NULL;
 esp_err_t motor_init(void)
 {
     if (roll_servo || pitch_servo) return ESP_ERR_INVALID_STATE;
-    
+
     //configure roll servo to LEDC Low, provision LEDC channel and GPIO 
     servo_config_t servo_cfg = SERVO_CONFIG_DEFAULT(LEDC_LOW_SPEED_MODE, LEDC_TIMER_0, LEDC_CHANNEL_0, SERVO_CH0_PIN);
     
