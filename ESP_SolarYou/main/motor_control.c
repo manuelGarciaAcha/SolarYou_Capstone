@@ -39,7 +39,7 @@ esp_err_t motor_init(void)
 
 
 // abstracted motor movement function
-esp_err_t roll_pitch_angle_set(float roll_angle, float pitch_angle)
+esp_err_t command_motor_angle(float roll_angle, float pitch_angle)
 {
     if ((roll_angle < MIN_SERVO_ANGLE) || (roll_angle > MAX_SERVO_ANGLE)){
         return ESP_ERR_INVALID_ARG;

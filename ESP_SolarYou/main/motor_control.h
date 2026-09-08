@@ -4,7 +4,7 @@
 #include "esp_err.h"
 
 esp_err_t motor_init(void);
-esp_err_t roll_pitch_angle_set(float roll_angle, float pitch_angle);
+esp_err_t command_motor_angle(float roll_angle, float pitch_angle);
 esp_err_t motor_del(void);
 
 #endif
