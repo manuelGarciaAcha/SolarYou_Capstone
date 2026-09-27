@@ -1,0 +1,4 @@
+[wokwi]
+version = 1
+firmware = '../../build-wokwi-imu/flasher_args.json'
+elf = '../../build-wokwi-imu/solaryou_sensor.elf'

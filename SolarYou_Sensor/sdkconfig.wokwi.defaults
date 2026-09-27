@@ -1,0 +1,4 @@
+CONFIG_SOLARYOU_SIMULATION=y
+# Wokwi shows UART0 in its monitor. The real Heltec build still uses USB CDC.
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+# CONFIG_ESP_CONSOLE_USB_CDC is not set

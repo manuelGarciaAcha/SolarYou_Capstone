@@ -1,0 +1,35 @@
+menu "SolarYou sensor service"
+
+config SOLARYOU_SIMULATION
+    bool "Use adjustable Wokwi sensor backends"
+    default n
+    help
+        Build the real sensor_adapter_* API with analog Wokwi inputs in
+        place of the BNO085 and INA219 hardware interfaces. The four light
+        inputs continue through the production light algorithm. Leave this
+        disabled for physical hardware builds.
+
+choice SOLARYOU_VALIDATION_MODE
+    prompt "Sensor paths included in the validation application"
+    default SOLARYOU_VALIDATION_ALL
+    help
+        Select which sensor path the standalone validation application owns.
+        The normal physical build and combined Wokwi build use all sensors.
+        The individual Wokwi builds compile and exercise only one path while
+        preserving the same public sensor_adapter_* API.
+
+config SOLARYOU_VALIDATION_ALL
+    bool "IMU, light array, and power"
+
+config SOLARYOU_VALIDATION_LIGHT_ONLY
+    bool "Four-light array only"
+
+config SOLARYOU_VALIDATION_IMU_ONLY
+    bool "IMU only"
+
+config SOLARYOU_VALIDATION_POWER_ONLY
+    bool "Power sensor only"
+
+endchoice
+
+endmenu

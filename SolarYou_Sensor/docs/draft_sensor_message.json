@@ -1,0 +1,58 @@
+{
+  "schema_version": 0,
+  "contract_status": "draft",
+  "device_uptime_ms": 123456,
+  "sequence": 42,
+  "valid": true,
+  "imu": {
+    "valid": true,
+    "pitch_deg": -2.35,
+    "roll_deg": 0.7,
+    "health": {
+      "state": 3,
+      "active_faults": 0,
+      "latched_faults": 0,
+      "sample_time_ms": 123452,
+      "age_ms": 4,
+      "sequence": 416,
+      "error_count": 0,
+      "has_sample": true
+    }
+  },
+  "light": {
+    "valid": true,
+    "pitch_error_norm": 0.1042,
+    "roll_error_norm": -0.0317,
+    "top_left_adc": 1820,
+    "top_right_adc": 1760,
+    "bottom_left_adc": 1510,
+    "bottom_right_adc": 1580,
+    "health": {
+      "state": 3,
+      "active_faults": 0,
+      "latched_faults": 0,
+      "sample_time_ms": 123455,
+      "age_ms": 1,
+      "sequence": 466,
+      "error_count": 0,
+      "has_sample": true
+    }
+  },
+  "power": {
+    "valid": true,
+    "load_voltage_v": 12.48,
+    "current_a": 0.73,
+    "power_w": 9.1104,
+    "shunt_voltage_mv": 73.0,
+    "health": {
+      "state": 3,
+      "active_faults": 0,
+      "latched_faults": 0,
+      "sample_time_ms": 123456,
+      "age_ms": 0,
+      "sequence": 417,
+      "error_count": 0,
+      "has_sample": true
+    }
+  }
+}

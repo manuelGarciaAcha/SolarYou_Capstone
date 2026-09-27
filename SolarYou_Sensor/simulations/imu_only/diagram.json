@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "author": "SolarYou sensor workstream",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp",
+      "top": 105,
+      "left": 390,
+      "attrs": { "serialInterface": "USB_SERIAL_JTAG" }
+    },
+    { "type": "wokwi-potentiometer", "id": "imuPitch", "top": 15, "left": 80, "attrs": { "value": "512" } },
+    { "type": "wokwi-potentiometer", "id": "imuRoll", "top": 275, "left": 80, "attrs": { "value": "512" } },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "imuTimeout",
+      "top": 535,
+      "left": 400,
+      "attrs": { "label": "IMU timeout", "color": "red", "key": "T", "bounce": "0" }
+    },
+    { "type": "wokwi-text", "id": "title", "top": -125, "left": 245, "attrs": { "text": "SolarYou ESP-IDF 5.5 - IMU ONLY" } },
+    { "type": "wokwi-text", "id": "pitchLabel", "top": -25, "left": 20, "attrs": { "text": "PITCH -45..+45 deg - GPIO7" } },
+    { "type": "wokwi-text", "id": "rollLabel", "top": 235, "left": 20, "attrs": { "text": "ROLL -45..+45 deg - GPIO8" } },
+    { "type": "wokwi-text", "id": "notice", "top": 625, "left": 190, "attrs": { "text": "Application mock: not a BNO085 protocol/electrical simulation." } }
+  ],
+  "connections": [
+    [ "imuPitch:VCC", "esp:3V3.1", "red", [] ],
+    [ "imuPitch:GND", "esp:GND.1", "black", [] ],
+    [ "imuPitch:SIG", "esp:7", "purple", [] ],
+    [ "imuRoll:VCC", "esp:3V3.1", "red", [] ],
+    [ "imuRoll:GND", "esp:GND.1", "black", [] ],
+    [ "imuRoll:SIG", "esp:8", "cyan", [] ],
+    [ "imuTimeout:1.l", "esp:11", "red", [] ],
+    [ "imuTimeout:2.l", "esp:GND.1", "black", [] ]
+  ],
+  "serialMonitor": { "display": "terminal" },
+  "dependencies": {}
+}

@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "author": "SolarYou sensor workstream",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp",
+      "top": 105,
+      "left": 390,
+      "attrs": { "serialInterface": "USB_SERIAL_JTAG" }
+    },
+    { "type": "wokwi-potentiometer", "id": "lightTL", "top": -90, "left": 20, "attrs": { "value": "512" } },
+    { "type": "wokwi-potentiometer", "id": "lightTR", "top": -90, "left": 825, "attrs": { "value": "512" } },
+    { "type": "wokwi-potentiometer", "id": "lightBL", "top": 470, "left": 20, "attrs": { "value": "512" } },
+    { "type": "wokwi-potentiometer", "id": "lightBR", "top": 470, "left": 825, "attrs": { "value": "512" } },
+    { "type": "wokwi-text", "id": "title", "top": -190, "left": 245, "attrs": { "text": "SolarYou ESP-IDF 5.5 - LIGHT ONLY" } },
+    { "type": "wokwi-text", "id": "notice", "top": 650, "left": 190, "attrs": { "text": "Pots are adjustable TEMT6000 signal stand-ins. Start centered." } },
+    { "type": "wokwi-text", "id": "labelTL", "top": -140, "left": 0, "attrs": { "text": "TOP LEFT - GPIO3" } },
+    { "type": "wokwi-text", "id": "labelTR", "top": -140, "left": 790, "attrs": { "text": "TOP RIGHT - GPIO4" } },
+    { "type": "wokwi-text", "id": "labelBL", "top": 565, "left": 0, "attrs": { "text": "BOTTOM LEFT - GPIO5" } },
+    { "type": "wokwi-text", "id": "labelBR", "top": 565, "left": 790, "attrs": { "text": "BOTTOM RIGHT - GPIO6" } }
+  ],
+  "connections": [
+    [ "lightTL:VCC", "esp:3V3.1", "red", [] ],
+    [ "lightTL:GND", "esp:GND.1", "black", [] ],
+    [ "lightTL:SIG", "esp:3", "blue", [] ],
+    [ "lightTR:VCC", "esp:3V3.1", "red", [] ],
+    [ "lightTR:GND", "esp:GND.1", "black", [] ],
+    [ "lightTR:SIG", "esp:4", "green", [] ],
+    [ "lightBL:VCC", "esp:3V3.1", "red", [] ],
+    [ "lightBL:GND", "esp:GND.1", "black", [] ],
+    [ "lightBL:SIG", "esp:5", "yellow", [] ],
+    [ "lightBR:VCC", "esp:3V3.1", "red", [] ],
+    [ "lightBR:GND", "esp:GND.1", "black", [] ],
+    [ "lightBR:SIG", "esp:6", "orange", [] ]
+  ],
+  "serialMonitor": { "display": "terminal" },
+  "dependencies": {}
+}

@@ -1,0 +1,11 @@
+build/
+build-wokwi/
+build-wokwi-*/
+managed_components/
+.downloads/
+.vscode/
+components/*/vendor/
+sdkconfig
+sdkconfig.old
+wokwi.vcd
+wokwi-output*.log

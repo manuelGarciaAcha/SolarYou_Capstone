@@ -1,0 +1,34 @@
+name: SolarYou ESP-IDF 5.5 light-only validation
+version: 1
+author: SolarYou sensor workstream
+
+steps:
+  - wait-serial: 'VALIDATION MODE: LIGHT ONLY'
+  - wait-serial: 'sensor_init=1 sensor_calibration=1'
+  - wait-serial: 'light: valid=1 state=valid active=0x00000000'
+
+  # Move one corner by itself and leave the other three centered.
+  - set-control: { part-id: lightTL, control: position, value: 0.80 }
+  - delay: 1s
+  - wait-serial: 'light_values:'
+  - set-control: { part-id: lightTL, control: position, value: 0.50 }
+
+  # All dark means we don't have a usable light direction.
+  - set-control: { part-id: lightTL, control: position, value: 0.0 }
+  - set-control: { part-id: lightTR, control: position, value: 0.0 }
+  - set-control: { part-id: lightBL, control: position, value: 0.0 }
+  - set-control: { part-id: lightBR, control: position, value: 0.0 }
+  - wait-serial: 'light: valid=0 state=degraded active=0x00000040'
+
+  # All the way up should trip saturation and near short faults.
+  - set-control: { part-id: lightTL, control: position, value: 1.0 }
+  - set-control: { part-id: lightTR, control: position, value: 1.0 }
+  - set-control: { part-id: lightBL, control: position, value: 1.0 }
+  - set-control: { part-id: lightBR, control: position, value: 1.0 }
+  - wait-serial: 'light: valid=0 state=fault active=0x00000280'
+
+  - set-control: { part-id: lightTL, control: position, value: 0.5 }
+  - set-control: { part-id: lightTR, control: position, value: 0.5 }
+  - set-control: { part-id: lightBL, control: position, value: 0.5 }
+  - set-control: { part-id: lightBR, control: position, value: 0.5 }
+  - wait-serial: 'light: valid=1 state=valid active=0x00000000'

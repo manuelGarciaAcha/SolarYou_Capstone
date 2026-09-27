@@ -1,0 +1,92 @@
+name: SolarYou ESP-IDF adapter normal and fault-path demonstration
+version: 1
+author: SolarYou sensor workstream
+
+steps:
+  - wait-serial: 'SIMULATION MODE: adjustable mock backends are active.'
+  - wait-serial: 'sensor_init=1 sensor_calibration=1'
+  - wait-serial: 'imu: valid=1 state=valid active=0x00000000'
+  - wait-serial: 'light: valid=1 state=valid active=0x00000000'
+  - wait-serial: 'power: valid=1 state=valid active=0x00000000'
+
+  # Moves just the IMU pitch so we can see its positive direction.
+  - set-control:
+      part-id: imuPitch
+      control: position
+      value: 0.80
+  - delay: 1s
+  - set-control:
+      part-id: imuPitch
+      control: position
+      value: 0.50
+  - wait-serial: 'imu: valid=1 state=valid active=0x00000000'
+
+  # Turns all four light inputs down to check the too dark fault.
+  - set-control: { part-id: lightTL, control: position, value: 0.0 }
+  - set-control: { part-id: lightTR, control: position, value: 0.0 }
+  - set-control: { part-id: lightBL, control: position, value: 0.0 }
+  - set-control: { part-id: lightBR, control: position, value: 0.0 }
+  - wait-serial: 'light: valid=0 state=degraded active=0x00000040'
+
+  # Turns all four up to check saturation and the near short fault.
+  - set-control: { part-id: lightTL, control: position, value: 1.0 }
+  - set-control: { part-id: lightTR, control: position, value: 1.0 }
+  - set-control: { part-id: lightBL, control: position, value: 1.0 }
+  - set-control: { part-id: lightBR, control: position, value: 1.0 }
+  - wait-serial: 'light: valid=0 state=fault active=0x00000280'
+
+  # Puts the light controls back near where we calibrated them.
+  - set-control: { part-id: lightTL, control: position, value: 0.5 }
+  - set-control: { part-id: lightTR, control: position, value: 0.5 }
+  - set-control: { part-id: lightBL, control: position, value: 0.5 }
+  - set-control: { part-id: lightBR, control: position, value: 0.5 }
+  - wait-serial: 'light: valid=1 state=valid active=0x00000000'
+
+# Makes the top light sensors much brighter than the bottom ones. We can watch the direction value change; the test checks that the reading stays valid.
+  - set-control: { part-id: lightTL, control: position, value: 0.95 }
+  - set-control: { part-id: lightTR, control: position, value: 0.95 }
+  - set-control: { part-id: lightBL, control: position, value: 0.02 }
+  - set-control: { part-id: lightBR, control: position, value: 0.02 }
+  - wait-serial: 'light: valid=1 state=valid active=0x00000000'
+  - set-control: { part-id: lightTL, control: position, value: 0.5 }
+  - set-control: { part-id: lightTR, control: position, value: 0.5 }
+  - set-control: { part-id: lightBL, control: position, value: 0.5 }
+  - set-control: { part-id: lightBR, control: position, value: 0.5 }
+  - wait-serial: 'light: valid=1 state=valid active=0x00000000'
+
+# Sets the simulation knob to maximum. The mock treats that as about 30 V, which is above the 26 V limit, so we expect an out of range fault.
+  - set-control: { part-id: pvVoltage, control: position, value: 1.0 }
+  - wait-serial: 'power: valid=0 state=fault active=0x00001000'
+  - set-control: { part-id: pvVoltage, control: position, value: 0.5 }
+  - wait-serial: 'power: valid=1 state=valid active=0x00000000'
+
+  # Sets the simulated current to -0.5 A to check that reverse current is reported as a fault.
+  - set-control: { part-id: pvCurrent, control: position, value: 0.0 }
+  - wait-serial: 'power: valid=0 state=fault active=0x00004000'
+  - set-control: { part-id: pvCurrent, control: position, value: 0.5 }
+  - wait-serial: 'power: valid=1 state=valid active=0x00000000'
+
+# Holds the mock IMU timeout button for 1 second. That's longer than the code's 250 ms stale-data limit, so both timeout and stale-data faults are expected.
+  - set-control:
+      part-id: imuTimeout
+      control: pressed
+      value: 1
+  - delay: 1s
+  - wait-serial: 'imu: valid=0 state=fault active=0x00000018'
+  - set-control:
+      part-id: imuTimeout
+      control: pressed
+      value: 0
+  - wait-serial: 'imu: valid=1 state=valid active=0x00000000'
+
+  # Presses and releases the power fault button to check recovery.
+  - set-control:
+      part-id: powerCommFault
+      control: pressed
+      value: 1
+  - wait-serial: 'power: valid=0 state=fault active=0x00000004'
+  - set-control:
+      part-id: powerCommFault
+      control: pressed
+      value: 0
+  - wait-serial: 'power: valid=1 state=valid active=0x00000000'

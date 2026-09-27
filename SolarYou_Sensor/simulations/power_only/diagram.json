@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "author": "SolarYou sensor workstream",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp",
+      "top": 105,
+      "left": 390,
+      "attrs": { "serialInterface": "USB_SERIAL_JTAG" }
+    },
+    { "type": "wokwi-potentiometer", "id": "pvVoltage", "top": 15, "left": 80, "attrs": { "value": "512" } },
+    { "type": "wokwi-potentiometer", "id": "pvCurrent", "top": 275, "left": 80, "attrs": { "value": "512" } },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "powerCommFault",
+      "top": 535,
+      "left": 400,
+      "attrs": { "label": "Power communication fault", "color": "orange", "key": "P", "bounce": "0" }
+    },
+    { "type": "wokwi-text", "id": "title", "top": -125, "left": 235, "attrs": { "text": "SolarYou ESP-IDF 5.5 - POWER ONLY" } },
+    { "type": "wokwi-text", "id": "voltageLabel", "top": -25, "left": 20, "attrs": { "text": "PV VOLTAGE 0..30 V - GPIO9" } },
+    { "type": "wokwi-text", "id": "currentLabel", "top": 235, "left": 20, "attrs": { "text": "PV CURRENT -0.5..+2.5 A - GPIO10" } },
+    { "type": "wokwi-text", "id": "notice", "top": 625, "left": 200, "attrs": { "text": "Application mock: not an INA219 protocol/electrical simulation." } }
+  ],
+  "connections": [
+    [ "pvVoltage:VCC", "esp:3V3.1", "red", [] ],
+    [ "pvVoltage:GND", "esp:GND.1", "black", [] ],
+    [ "pvVoltage:SIG", "esp:9", "magenta", [] ],
+    [ "pvCurrent:VCC", "esp:3V3.1", "red", [] ],
+    [ "pvCurrent:GND", "esp:GND.1", "black", [] ],
+    [ "pvCurrent:SIG", "esp:10", "limegreen", [] ],
+    [ "powerCommFault:1.l", "esp:12", "orange", [] ],
+    [ "powerCommFault:2.l", "esp:GND.1", "black", [] ]
+  ],
+  "serialMonitor": { "display": "terminal" },
+  "dependencies": {}
+}

@@ -1,0 +1,31 @@
+name: SolarYou ESP-IDF 5.5 power-only validation
+version: 1
+author: SolarYou sensor workstream
+
+steps:
+  - wait-serial: 'VALIDATION MODE: POWER ONLY'
+  - wait-serial: 'sensor_init=1 sensor_calibration=1'
+  - wait-serial: 'power: valid=1 state=valid active=0x00000000'
+
+  - set-control: { part-id: pvVoltage, control: position, value: 1.0 }
+  - wait-serial: 'power: valid=0 state=fault active=0x00001000'
+  - set-control: { part-id: pvVoltage, control: position, value: 0.5 }
+  - wait-serial: 'power: valid=1 state=valid active=0x00000000'
+
+  - set-control: { part-id: pvCurrent, control: position, value: 0.0 }
+  - wait-serial: 'power: valid=0 state=fault active=0x00004000'
+  - set-control: { part-id: pvCurrent, control: position, value: 0.5 }
+  - wait-serial: 'power: valid=1 state=valid active=0x00000000'
+
+  - set-control:
+      part-id: powerCommFault
+      control: pressed
+      value: 1
+  - wait-serial: 'power: valid=0 state=fault active=0x00000004'
+  - delay: 1s
+  - wait-serial: 'power: valid=0 state=fault active=0x00000014'
+  - set-control:
+      part-id: powerCommFault
+      control: pressed
+      value: 0
+  - wait-serial: 'power: valid=1 state=valid active=0x00000000'

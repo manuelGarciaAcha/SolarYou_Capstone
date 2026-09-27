@@ -1,0 +1,25 @@
+name: SolarYou ESP-IDF 5.5 IMU-only validation
+version: 1
+author: SolarYou sensor workstream
+
+steps:
+  - wait-serial: 'VALIDATION MODE: IMU ONLY'
+  - wait-serial: 'sensor_init=1 sensor_calibration=1'
+  - wait-serial: 'imu: valid=1 state=valid active=0x00000000'
+
+  - set-control: { part-id: imuPitch, control: position, value: 0.80 }
+  - delay: 1s
+  - wait-serial: 'imu_values:'
+  - set-control: { part-id: imuPitch, control: position, value: 0.50 }
+
+  - set-control:
+      part-id: imuTimeout
+      control: pressed
+      value: 1
+  - delay: 1s
+  - wait-serial: 'imu: valid=0 state=fault active=0x00000018'
+  - set-control:
+      part-id: imuTimeout
+      control: pressed
+      value: 0
+  - wait-serial: 'imu: valid=1 state=valid active=0x00000000'
