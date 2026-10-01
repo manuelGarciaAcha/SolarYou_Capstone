@@ -1,6 +1,8 @@
 absl-py==2.3.1
 astunparse==1.6.3
+async-timeout==5.0.1
 bidict==0.23.1
+bleak==1.1.1
 blinker==1.9.0
 certifi==2026.7.22
 charset-normalizer==3.5.1
@@ -32,6 +34,11 @@ packaging==26.3
 pillow==11.3.0
 protobuf==6.33.6
 Pygments==2.21.0
+pyobjc-core==11.1
+pyobjc-framework-Cocoa==11.1
+pyobjc-framework-CoreBluetooth==11.1
+pyobjc-framework-libdispatch==11.1
+pyserial==3.5
 python-engineio==4.14.0
 python-socketio==5.16.4
 requests==2.32.5
