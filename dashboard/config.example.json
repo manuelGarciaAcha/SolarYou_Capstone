@@ -1,0 +1,9 @@
+{
+  "serial_port": "/dev/tty.usbserial-XXXX",
+  "serial_baud": 115200,
+
+  "wifi_url": "ws://192.168.1.50/ws",
+
+  "ble_name": "SolarYou-ASSTP",
+  "ble_characteristic": "TODO-CHARACTERISTIC-UUID"
+}

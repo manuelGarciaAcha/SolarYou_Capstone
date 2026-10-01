@@ -7,21 +7,21 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <!-- Header: static, no live data -->
     <header>
         <h1>Active Stabilization &amp; Solar Tracking Platform</h1>
-        <p class="subtitle">Live Dashboard <span class="mock-badge">MOCK DATA</span></p>
+        <p class="subtitle">
+            Live Dashboard
+            <span id="connectionStatus" class="status-badge status-connecting">Connecting...</span>
+        </p>
     </header>
 
-    <!-- Chart + readout are updated live by dashboard.js on each
-         "sensor_update" event pushed from app.py -->
     <main>
-        <section class="chart-card">
+        <section class="card chart-card">
             <h2>Pitch &amp; Roll (degrees)</h2>
             <canvas id="orientationChart"></canvas>
         </section>
 
-        <section class="stats-card">
+        <section class="card stats-card">
             <h2>Current Readings</h2>
             <dl>
                 <dt>Pitch</dt><dd id="pitchValue">--</dd>
@@ -29,11 +29,19 @@
                 <dt>Power</dt><dd id="powerValue">--</dd>
             </dl>
         </section>
+
+        <section class="card power-avg-card">
+            <div class="power-avg-header">
+                <h2>Average Power</h2>
+                <span class="power-avg-window">last 60 samples</span>
+            </div>
+            <p class="power-avg-value"><span id="powerAvgValue">--</span> <span class="unit">W</span></p>
+            <canvas id="powerAvgChart"></canvas>
+        </section>
     </main>
 
-    <!-- Socket.IO client + Chart.js, loaded from CDN -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/vendor/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/vendor/chart.umd.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>
