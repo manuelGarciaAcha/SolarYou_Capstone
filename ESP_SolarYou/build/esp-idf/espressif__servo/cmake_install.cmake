@@ -1,4 +1,4 @@
-# Install script for directory: /home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/managed_components/espressif__servo
+# Install script for directory: /home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/managed_components/espressif__servo
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

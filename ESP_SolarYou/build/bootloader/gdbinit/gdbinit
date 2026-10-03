@@ -1,2 +1,2 @@
-source /home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader/gdbinit/symbols
-source /home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader/gdbinit/connect
+source /home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader/gdbinit/symbols
+source /home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader/gdbinit/connect

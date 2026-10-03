@@ -18,8 +18,8 @@ end
 
 # Load bootloader symbols
 set confirm off
-    add-symbol-file /home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.elf
+    add-symbol-file /home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.elf
 set confirm on
 
 # Load application symbols
-file /home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/ESP_SolarYou.elf
+file /home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/ESP_SolarYou.elf

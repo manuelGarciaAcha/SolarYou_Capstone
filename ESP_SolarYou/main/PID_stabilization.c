@@ -11,7 +11,7 @@
 #define PID_DT      0.010f  // example value
 
 
-void pid_init (PID_controller *pid)
+void pid_init (pid_controller_t *pid)
 {
     // temp init values for pid 
     
@@ -22,7 +22,7 @@ void pid_init (PID_controller *pid)
     pid->prev_deriv = 0; 
 }
 
-void pid_tune (PID_controller *pid, float Kp, float Ki, float Kd, float T_C)
+void pid_tune (pid_controller_t *pid, float Kp, float Ki, float Kd, float T_C)
 {
     pid->Kp = Kp;
     pid->Ki = Ki;
@@ -30,7 +30,7 @@ void pid_tune (PID_controller *pid, float Kp, float Ki, float Kd, float T_C)
     pid->T_C = T_C;
 }
 
-float pid_calculate (PID_controller *pid, float measured_angle, float target_angle)
+float pid_calculate (pid_controller_t *pid, float measured_angle, float target_angle)
 {
     float err;
     float command;
@@ -82,7 +82,7 @@ float pid_calculate (PID_controller *pid, float measured_angle, float target_ang
     return command;
 }
 
-void pid_reset (PID_controller *pid)
+void pid_reset (pid_controller_t *pid)
 {
     pid->prev_err = 0;
     pid->integral_accum_err = 0;

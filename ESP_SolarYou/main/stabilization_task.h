@@ -5,7 +5,14 @@
 #include "motor_control.h"
 #include "PID_stabilization.h"
 
-esp_err_t stabilization_init(PID_controller *roll, PID_controller *pitch);
-void stabilization_reset(PID_controller *roll, PID_controller *pitch);
-esp_err_t stabilization_update(PID_controller *roll, PID_controller *pitch);
+typedef struct {
+    float roll_imu;
+    float pitch_imu;
+    float roll_cmd;
+    float pitch_cmd;
+} stab_output_t;
+
+esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch);
+void stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch);
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output);
 #endif

@@ -10,18 +10,18 @@ if(NOT EXISTS "/home/manuel/.espressif/v5.5.5/esp-idf/components/bootloader/subp
   file(MAKE_DIRECTORY "/home/manuel/.espressif/v5.5.5/esp-idf/components/bootloader/subproject")
 endif()
 file(MAKE_DIRECTORY
-  "/home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader"
-  "/home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix"
-  "/home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/tmp"
-  "/home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src/bootloader-stamp"
-  "/home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src"
-  "/home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src/bootloader-stamp"
+  "/home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader"
+  "/home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix"
+  "/home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/tmp"
+  "/home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src/bootloader-stamp"
+  "/home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src"
+  "/home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "/home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "/home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "/home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "/home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

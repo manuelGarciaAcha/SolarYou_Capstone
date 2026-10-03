@@ -1,72 +1,109 @@
 #include <stdio.h>
-#include <math.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
-#include "esp_err.h"
-#include "motor_control.h"
+#include <stdint.h>
+#include "system_state.h"
 #include "PID_stabilization.h"
+#include "stabilization_task.h"
+#include "esp_err.h"
+#include "esp_timer.h"
 
-#define PI     3.14159265f 
 
-//basic testing values, tuned params
-float Kp = 0.8f;
-float Ki = 0.05f;
-float Kd = 0.10f;
-float T_C = 0.050f;
+pid_controller_t roll_ctlr;
+pid_controller_t pitch_ctlr;
 
-//simulated real world values
-float target_angle = 0;
+// placeholder
+void gui_dash_init(void)
+{
+    return;
+}
+
+void power_telemetry_init(void)
+{
+    return;
+}
+
+float read_power_placeholder(void){
+    return 0;
+}
+
+void power_telemetry_update(system_state_t *state)
+{   
+    float power = read_power_placeholder();
+    state->power = power;
+    state->power_samples ++;
+    state->avg_power += (power - state->avg_power) / state->power_samples;
+}
 
 void app_main(void)
 {
-    PID_controller roll;
-    PID_controller pitch;
+    system_state_t curr_state;
 
-    esp_err_t try_motor_init = motor_init();
-    if(try_motor_init != ESP_OK){
-        printf("Motor command failed: %s\n", esp_err_to_name(try_motor_init));
+    // Set system state
+    sys_state_reset(&curr_state);
+
+
+    // Initialize Tasks
+    esp_err_t try_stab_init = stabilization_init(&roll_ctlr, &pitch_ctlr);
+    if (try_stab_init != ESP_OK){
+        curr_state.mode = SYSTEM_ERROR;
+        printf("Stabilization Initialization failed: %s\n", esp_err_to_name(try_stab_init));
         return;
     }
 
-    pid_init(&roll);
-    pid_init(&pitch);
+    gui_dash_init();
+    power_telemetry_init();
 
+    // 
 
-    pid_tune(&roll, Kp, Ki, Kd, T_C);
-    pid_tune(&pitch, Kp, Ki, Kd, T_C);
+    curr_state.mode = SYSTEM_BASIC_CONTROL;
+    int64_t curr_time;
+    int64_t last_light_time = 0;
+    int64_t last_stabilize_time = 0;
+    int64_t last_telem_time = 0;
+    int32_t stabilization_err_cnt = 0;
 
-    float t = 0.0f;
+    while(1){
+        //curr_state.task = TASK_NONE;
+        curr_time = esp_timer_get_time();
 
-    while (t < 100.0f){
-        float roll_imu = 8.0f * sinf(2.0f * PI * t / 10.0f);
+        if(curr_time - last_stabilize_time >= STAB_TASK_DT_US){
+            last_stabilize_time += STAB_TASK_DT_US;
 
-        float pitch_imu = 5.0f * sinf((2.0f * PI * t / 14.0f) + PI / 3.0f);
+            stab_output_t stab_output = {0};
+            esp_err_t try_stabilization = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output);
 
-         // fetch measured(IMU) and target(light) angle
+            if (try_stabilization != ESP_OK){
+                printf("Motor command failed: %s\n", esp_err_to_name(try_stabilization));
+                //stabilization_err_cnt ++;
 
-        // determine PID command
-        float roll_command = pid_calculate(&roll, roll_imu, target_angle);
-        float pitch_command = pid_calculate(&pitch, pitch_imu, target_angle);
+            } else {
+                curr_state.roll_imu = stab_output.roll_imu;
+                curr_state.pitch_imu = stab_output.pitch_imu;
+                curr_state.roll_cmd = stab_output.roll_cmd;
+                curr_state.pitch_cmd = stab_output.pitch_cmd;
 
-        // map PID command angles to servo angles
-        float servo_roll_angle = roll_command + 90;
-        float servo_pitch_angle = pitch_command + 90;
+            }
 
-        esp_err_t try_command_motor = command_motor_angle(servo_roll_angle, servo_pitch_angle);
-        if (try_command_motor != ESP_OK){
-            printf("Motor command failed: %s\n", esp_err_to_name(try_command_motor));
-            return;
+            curr_time = esp_timer_get_time();
         }
- 
-        t += 0.010f;
-        vTaskDelay(pdMS_TO_TICKS(100));
-    }
 
-    esp_err_t try_motor_del = motor_del();
-    if(try_motor_del != ESP_OK){
-        printf("Motor command failed: %s\n", esp_err_to_name(try_motor_del));
-        return;
-    }
+        if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
+            last_light_time += LIGHT_TASK_DT_US;
 
+            // light tracking functionality
+
+            curr_time = esp_timer_get_time();
+        }
+
+        if(curr_time - last_telem_time >= TELEM_TASK_DT_US){
+            last_telem_time += TELEM_TASK_DT_US;
+               
+            power_telemetry_update(&curr_state);
+
+
+            // telemetry and power functions
+
+            curr_time = esp_timer_get_time();
+        }
+        
+    }
 }

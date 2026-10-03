@@ -15,11 +15,11 @@ typedef struct {
     float T_C;                  // Derivative Filter Time Constant
     float prev_deriv;           // Previous derivative value
 
-} PID_controller;
+} pid_controller_t;
 
-void pid_init (PID_controller *pid);
-void pid_tune (PID_controller *pid, float Kp, float Ki, float Kd, float T_C);
-float pid_calculate (PID_controller *pid, float measured_angle, float target_angle);
-void pid_reset (PID_controller *pid);
+void pid_init (pid_controller_t *pid);
+void pid_tune (pid_controller_t *pid, float Kp, float Ki, float Kd, float T_C);
+float pid_calculate (pid_controller_t *pid, float measured_angle, float target_angle);
+void pid_reset (pid_controller_t *pid);
 
 #endif

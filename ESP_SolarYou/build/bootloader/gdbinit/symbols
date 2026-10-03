@@ -22,4 +22,4 @@ set confirm off
 set confirm on
 
 # Load application symbols
-file /home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.elf
+file /home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.elf

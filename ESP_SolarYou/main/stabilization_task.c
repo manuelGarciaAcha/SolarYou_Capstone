@@ -13,6 +13,17 @@ static float Kd = 0.5;
 
 // --------------------------------- //
 // Placeholder functions (JENNIFER)
+
+void imu_init(void)
+{
+    return;
+}
+
+void light_init(void)
+{
+    return;
+}
+
 float imu_get_roll(void)
 {
     return 0.0f;
@@ -35,7 +46,7 @@ float light_get_pitch(void)
 
 // --------------------------------- //
 
-esp_err_t stabilization_init(PID_controller *roll, PID_controller *pitch)
+esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch)
 {
     
     esp_err_t try_motor_init = motor_init();
@@ -46,6 +57,9 @@ esp_err_t stabilization_init(PID_controller *roll, PID_controller *pitch)
     pid_init(roll);
     pid_init(pitch);
 
+    imu_init();
+    light_init();
+
     pid_tune(roll, Kp, Ki, Kd, T_C);
     pid_tune(pitch, Kp, Ki, Kd, T_C);
 
@@ -53,13 +67,13 @@ esp_err_t stabilization_init(PID_controller *roll, PID_controller *pitch)
 }
 
 
-void stabilization_reset(PID_controller *roll, PID_controller *pitch)
+void stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch)
 {
     pid_reset(roll);
     pid_reset(pitch);
 }
 
-esp_err_t stabilization_update(PID_controller *roll, PID_controller *pitch)
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output)
 {
     // fetch measured(IMU) and target(light) angles
     float roll_imu_angle = imu_get_roll();         //placeholder;
@@ -83,6 +97,11 @@ esp_err_t stabilization_update(PID_controller *roll, PID_controller *pitch)
     if (try_command_motor != ESP_OK){
         return try_command_motor;
     }
+
+    output->roll_imu = roll_imu_angle;
+    output->pitch_imu = pitch_imu_angle;
+    output->roll_cmd = roll_command;
+    output->pitch_cmd = pitch_command;
 
     return ESP_OK;
 }

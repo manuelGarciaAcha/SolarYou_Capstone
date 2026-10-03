@@ -1,4 +1,4 @@
-/* * Data converted from /home/manuel/Documents/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from /home/manuel/Documents/Fall_26/Senior_Design2/SolarYou_Capstone/ESP_SolarYou/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 #if !defined (__APPLE__) && !defined (__linux__)
