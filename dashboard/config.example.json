@@ -1,9 +1,9 @@
 {
-  "serial_port": "/dev/tty.usbserial-XXXX",
+  "serial_port": "/dev/tty.usbmodemXXXX",
   "serial_baud": 115200,
 
-  "wifi_url": "ws://192.168.1.50/ws",
+  "wifi_url": "ws://192.168.4.1/ws",
 
   "ble_name": "SolarYou-ASSTP",
-  "ble_characteristic": "TODO-CHARACTERISTIC-UUID"
+  "ble_characteristic": "f2d2680c-66bc-4e24-8eac-d8013a99320b"
 }

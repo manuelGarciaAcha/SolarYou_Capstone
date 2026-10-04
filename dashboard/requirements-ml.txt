@@ -1,0 +1,5 @@
+Flask>=3.0
+Flask-SocketIO>=5.3
+websocket-client>=1.6
+pyserial>=3.5
+bleak>=0.22

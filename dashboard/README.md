@@ -1,9 +1,11 @@
 # Dashboard (Debug View)
 
 Live sensor dashboard for the stabilization platform. Supports four data
-sources, picked at startup with --source. Currently nothing real to
-connect to yet, so mock (the default) is what everyone should run until
-the ESP32 side has real data.
+sources, picked at startup with --source. Mock (the default) is what
+everyone should run until the ESP32 side has real data.
+
+Working on the ESP32 firmware? Read `ESP32_INTEGRATION.md`. It covers the
+message format, what each connection type needs, and how to debug it.
 
 ## How it works
 
@@ -18,7 +20,7 @@ flowchart LR
 
 ## Setup
 
-1. Make sure you have Python 3.9+ installed (`python3 --version` to check).
+1. Make sure you have Python 3.9 or newer installed (`python3 --version` to check).
 
 2. From this `dashboard/` folder, create and activate a virtual environment:
    ```
@@ -30,6 +32,8 @@ flowchart LR
    ```
    pip install -r requirements.txt
    ```
+   This is only the five packages the dashboard uses. TensorFlow is not
+   needed here (the ML packages live in `requirements-ml.txt`).
 
 4. Create your own local config (gitignored, each person's values differ):
    ```
@@ -44,14 +48,19 @@ flowchart LR
    python app.py --source wifi
    python app.py --source ble
    ```
+   Optional: `--port 5002` if 5001 is taken. `--debug` turns on Flask's
+   debug mode, which exposes a debugger page to everyone on the network,
+   so leave it off for demos.
 
 6. Open a browser to:
    ```
    http://localhost:5001
    ```
    You should see the dashboard with a connection status badge in the
-   header (green once connected), a live-updating chart, and the
-   pitch/roll/power readout changing.
+   header, a live-updating chart, and the pitch/roll/power readout
+   changing. The badge is green once data is actually arriving. If it says
+   "Connected, waiting for data", the link is up but nothing usable has
+   come through yet, so check the terminal for warnings.
 
 ## What each source needs in config.json
 
@@ -63,7 +72,8 @@ flowchart LR
 | ble | ble_name, ble_characteristic |
 
 A missing field shows up clearly in the terminal and on the status badge,
-not as a silent failure.
+not as a silent failure. Optional extras (`serial_baud`,
+`wifi_idle_timeout`) are listed in `ESP32_INTEGRATION.md`.
 
 ## Viewing from another device (phone, another laptop)
 
@@ -97,9 +107,15 @@ running the server, including over BLE with no WiFi at all.
 ```
 dashboard/
   app.py                     <- Flask server + all four data sources
+  ESP32_INTEGRATION.md       <- message format and firmware guide
   config.example.json        <- template, copy to config.json
   config.json                <- your own local settings, gitignored
-  requirements.txt
+  requirements.txt           <- just what the dashboard needs
+  requirements-ml.txt        <- full package list incl. TensorFlow (later)
+  tools/
+    fake_esp32_ws.py          <- stand-in ESP32 WebSocket server for testing
+  tests/
+    test_messages.py          <- checks for the message handling
   templates/
     index.html                <- page structure
   static/
