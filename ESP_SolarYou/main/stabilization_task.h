@@ -4,6 +4,7 @@
 #include "esp_err.h"
 #include "motor_control.h"
 #include "PID_stabilization.h"
+#include "esp_log.h"
 
 typedef struct {
     float roll_imu;
@@ -12,7 +13,22 @@ typedef struct {
     float pitch_cmd;
 } stab_output_t;
 
-esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch);
-void stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch);
-esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output);
+typedef struct {
+    float roll_Kp;
+    float roll_Ki;
+    float roll_Kd;
+    float pitch_Kp;
+    float pitch_Ki;
+    float pitch_Kd;
+    float deriv_time_const;
+    float roll_servo_center;
+    float pitch_servo_center;
+    float pid_cmd_min;
+    float pid_cmd_max;
+    float task_dt; 
+} stab_config_t;
+
+esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config);
+esp_err_t stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch);
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output, const float *dt);
 #endif

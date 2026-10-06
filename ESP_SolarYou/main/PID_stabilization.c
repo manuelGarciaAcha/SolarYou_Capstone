@@ -1,66 +1,145 @@
-
 /*
     Parameters that require adjustment based on Physical Implementation:
         - PID gain constants: Kp, Ki, Kd
         - Derivative filtering time constant
 */
 
-
 #include "PID_stabilization.h"
 
-#define PID_DT      0.010f  // example value
+static const char *TAG = "PID";
 
-
-void pid_init (pid_controller_t *pid)
+esp_err_t pid_init (pid_controller_t *pid, 
+                const float Kp, 
+                const float Ki, 
+                const float Kd,
+                const float T_C,
+                const float output_min,
+                const float output_max,
+                const float servo_center)
 {
+    if(pid == NULL){
+        return ESP_ERR_INVALID_ARG;
+    }
+
     // temp init values for pid 
-    
-    pid->prev_err = 0;             
-    pid->integral_accum_err = 0;   
-    pid->max = 50;                  // assumed centerpoint 90deg              
-    pid->min = -50;                        
-    pid->prev_deriv = 0; 
-}
+    memset(pid, 0, sizeof(*pid));
 
-void pid_tune (pid_controller_t *pid, float Kp, float Ki, float Kd, float T_C)
-{
+    if (!isfinite(Kp) || 
+        !isfinite(Ki) || 
+        !isfinite(Kd) || 
+        !isfinite(T_C) ||
+        !isfinite(output_min) ||
+        !isfinite(output_max) ||
+        !isfinite(servo_center) ||
+        T_C <= 0.0f ||
+        output_min >= output_max)
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+
     pid->Kp = Kp;
     pid->Ki = Ki;
     pid->Kd = Kd;
     pid->T_C = T_C;
+    pid->cmd_cap_min = output_min;
+    pid->cmd_cap_max = output_max;
+    pid->servo_center = servo_center;
+    pid->deriv_init = true;
+
+    return ESP_OK;
 }
 
-float pid_calculate (pid_controller_t *pid, float measured_angle, float target_angle)
+esp_err_t pid_tune (pid_controller_t *pid, 
+                const float Kp, 
+                const float Ki, 
+                const float Kd, 
+                const float T_C,
+                const float output_min,
+                const float output_max,
+                const float servo_center)
 {
+    if (!isfinite(Kp) || 
+        !isfinite(Ki) || 
+        !isfinite(Kd) || 
+        !isfinite(T_C) ||
+        !isfinite(output_min) ||
+        !isfinite(output_max) ||
+        !isfinite(servo_center) ||
+        T_C <= 0.0f || 
+        output_min >= output_max)
+    {
+        ESP_LOGW(TAG, "Tuning failed: %s\n", esp_err_to_name(ESP_ERR_INVALID_ARG));
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    pid->Kp = Kp;
+    pid->Ki = Ki;
+    pid->Kd = Kd;
+    pid->T_C = T_C;
+    pid->cmd_cap_min = output_min;
+    pid->cmd_cap_max = output_max;
+    pid->servo_center = servo_center;
+
+    return ESP_OK;
+}
+
+esp_err_t pid_calculate (pid_controller_t *pid, 
+                    float measured_angle, 
+                    float target_angle,
+                    float *output,
+                    float dt)
+{
+    // input sanity check
+    if (pid == NULL || output == NULL){
+        return ESP_ERR_INVALID_ARG;
+    } 
+    
+    if (!isfinite(target_angle) || !isfinite(measured_angle) || !isfinite(dt) || dt <= 0.0f){
+        return ESP_ERR_INVALID_ARG;
+    }
+
     float err;
     float command;
 
     // Error 
     err = target_angle - measured_angle;
 
-    // Integral error accumulation 
-    float old_accum = pid->integral_accum_err;
-    float candidate_accum = old_accum + err * PID_DT;
-
-    // PID component 
+    // Proportional component calculation
     float proportional = err;
 
-    // Integral calculation for anti-windup conditional logic
-    float candidate_integral = candidate_accum;
-    float old_integral = old_accum;
+    // Integral error accumulation 
+    float old_accum = pid->integral_accum_err;
+    float candidate_accum = old_accum + err * dt;
 
-    // Derivative calculation with low-pass filter for IMU noise
-    float derivative = (err - pid->prev_err + (pid->T_C * pid->prev_deriv))/(PID_DT + pid->T_C);
+    // Derivative first pass priming
+    float derivative = 0.0f;
+    if (pid->deriv_init){
+
+        // prime
+        pid->prev_measurement = measured_angle;
+        pid->prev_deriv = 0.0f;
+        pid->deriv_init = false;
+    }else{
+
+        // Derivative calculation with low-pass filter for IMU noise
+        derivative = (-(measured_angle - pid->prev_measurement) + (pid->T_C * pid->prev_deriv))/(dt + pid->T_C);
+        
+        // set values for next iteration
+        pid->prev_measurement = measured_angle;
+        pid->prev_deriv = derivative;
+    }
+
 
     // Candidate command calculation with saturation check
-    command = (pid->Kp * proportional) + (pid->Ki * candidate_integral) + (pid->Kd * derivative);
+    command = (pid->Kp * proportional) + (pid->Ki * candidate_accum) + (pid->Kd * derivative);
     
-    if ((command > pid->max) && (err > 0)){
-        command = (pid->Kp * proportional) + (pid->Ki * old_integral) + (pid->Kd * derivative);
+    // anti-windup logic -- integral value accumulation protection
+    if ((command > pid->cmd_cap_max) && (err > 0)){
+        command = (pid->Kp * proportional) + (pid->Ki * old_accum) + (pid->Kd * derivative);
         pid->integral_accum_err = old_accum;
     } 
-    else if ((command < pid->min) && (err < 0)){
-        command = (pid->Kp * proportional) + (pid->Ki * old_integral) + (pid->Kd * derivative);
+    else if ((command < pid->cmd_cap_min) && (err < 0)){
+        command = (pid->Kp * proportional) + (pid->Ki * old_accum) + (pid->Kd * derivative);
         pid->integral_accum_err = old_accum;
     } 
     else {
@@ -68,23 +147,27 @@ float pid_calculate (pid_controller_t *pid, float measured_angle, float target_a
     }
 
     // command saturation protection
-    if (command > pid->max){
-        command = pid->max;
+    if (command < pid->cmd_cap_min){
+        command = pid->cmd_cap_min;
     }
-    else if(command < pid->min){
-        command = pid->min;
+    else if(command > pid->cmd_cap_max){
+        command = pid->cmd_cap_max;
     }
-
-    // set values for next iteration
-    pid->prev_err = err;
-    pid->prev_deriv = derivative;
     
-    return command;
+    *output = command;
+    return ESP_OK;
 }
 
-void pid_reset (pid_controller_t *pid)
+esp_err_t pid_reset (pid_controller_t *pid)
 {
-    pid->prev_err = 0;
-    pid->integral_accum_err = 0;
-    pid->prev_deriv = 0;
+    if (pid == NULL){
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    pid->prev_measurement = 0.0f;
+    pid->integral_accum_err = 0.0f;
+    pid->prev_deriv = 0.0f;
+    pid->deriv_init = true;
+
+    return ESP_OK;
 }

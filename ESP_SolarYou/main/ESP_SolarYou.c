@@ -6,9 +6,25 @@
 #include "esp_err.h"
 #include "esp_timer.h"
 
+static const char *TAG  = "Main";
 
 pid_controller_t roll_ctlr;
 pid_controller_t pitch_ctlr;
+
+static const stab_config_t stab_config = {
+    .roll_Kp = 0.5f,
+    .roll_Ki = 0.5f,
+    .roll_Kd = 0.5f,
+    .pitch_Kp = 0.5f,
+    .pitch_Ki = 0.5f,
+    .pitch_Kd = 0.5f,
+    .deriv_time_const = 0.05f,
+    .roll_servo_center = 90.0f,
+    .pitch_servo_center = 90.0f,
+    .pid_cmd_min = -50.0f,
+    .pid_cmd_max = 50.0f,
+    .task_dt = 0.02f,
+};
 
 // placeholder
 void gui_dash_init(void)
@@ -42,10 +58,10 @@ void app_main(void)
 
 
     // Initialize Tasks
-    esp_err_t try_stab_init = stabilization_init(&roll_ctlr, &pitch_ctlr);
-    if (try_stab_init != ESP_OK){
+    esp_err_t err = stabilization_init(&roll_ctlr, &pitch_ctlr, &stab_config);
+    if (err != ESP_OK){
         curr_state.mode = SYSTEM_ERROR;
-        printf("Stabilization Initialization failed: %s\n", esp_err_to_name(try_stab_init));
+        ESP_LOGE(TAG, "Stabilization Initialization failed: %s\n", esp_err_to_name(err));
         return;
     }
 
@@ -56,10 +72,10 @@ void app_main(void)
 
     curr_state.mode = SYSTEM_BASIC_CONTROL;
     int64_t curr_time;
-    int64_t last_light_time = 0;
-    int64_t last_stabilize_time = 0;
-    int64_t last_telem_time = 0;
-    int32_t stabilization_err_cnt = 0;
+    int64_t last_stabilize_time = esp_timer_get_time();
+    int64_t last_light_time = esp_timer_get_time();
+    int64_t last_telem_time = esp_timer_get_time();
+
 
     while(1){
         //curr_state.task = TASK_NONE;
@@ -69,10 +85,10 @@ void app_main(void)
             last_stabilize_time += STAB_TASK_DT_US;
 
             stab_output_t stab_output = {0};
-            esp_err_t try_stabilization = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output);
+            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt);
 
-            if (try_stabilization != ESP_OK){
-                printf("Motor command failed: %s\n", esp_err_to_name(try_stabilization));
+            if (err != ESP_OK){
+                ESP_LOGE(TAG, "Stabilization Task failed: %s\n", esp_err_to_name(err));
                 //stabilization_err_cnt ++;
 
             } else {
@@ -91,18 +107,18 @@ void app_main(void)
 
             // light tracking functionality
 
-            curr_time = esp_timer_get_time();
+            //curr_time = esp_timer_get_time();
         }
 
         if(curr_time - last_telem_time >= TELEM_TASK_DT_US){
-            last_telem_time += TELEM_TASK_DT_US;
+            //last_telem_time += TELEM_TASK_DT_US;
                
-            power_telemetry_update(&curr_state);
+            //power_telemetry_update(&curr_state);
 
 
             // telemetry and power functions
 
-            curr_time = esp_timer_get_time();
+            //curr_time = esp_timer_get_time();
         }
         
     }
