@@ -5,8 +5,12 @@
 #include "stabilization_task.h"
 #include "esp_err.h"
 #include "esp_timer.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 static const char *TAG  = "Main";
+
+system_state_t curr_state;
 
 pid_controller_t roll_ctlr;
 pid_controller_t pitch_ctlr;
@@ -23,7 +27,7 @@ static const stab_config_t stab_config = {
     .pitch_servo_center = 90.0f,
     .pid_cmd_min = -50.0f,
     .pid_cmd_max = 50.0f,
-    .task_dt = 0.02f,
+    .task_dt = STAB_TASK_DT_US / 1000000000.0f,
 };
 
 // placeholder
@@ -51,7 +55,6 @@ void power_telemetry_update(system_state_t *state)
 
 void app_main(void)
 {
-    system_state_t curr_state;
 
     // Set system state
     sys_state_reset(&curr_state);
@@ -82,7 +85,7 @@ void app_main(void)
         curr_time = esp_timer_get_time();
 
         if(curr_time - last_stabilize_time >= STAB_TASK_DT_US){
-            last_stabilize_time += STAB_TASK_DT_US;
+            last_stabilize_time = curr_time;
 
             stab_output_t stab_output = {0};
             err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt);
@@ -103,7 +106,7 @@ void app_main(void)
         }
 
         if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
-            last_light_time += LIGHT_TASK_DT_US;
+            last_light_time = curr_time;
 
             // light tracking functionality
 
@@ -111,7 +114,7 @@ void app_main(void)
         }
 
         if(curr_time - last_telem_time >= TELEM_TASK_DT_US){
-            //last_telem_time += TELEM_TASK_DT_US;
+            last_telem_time = curr_time;
                
             //power_telemetry_update(&curr_state);
 
@@ -120,6 +123,7 @@ void app_main(void)
 
             //curr_time = esp_timer_get_time();
         }
-        
+    
+        vTaskDelay(1);
     }
 }

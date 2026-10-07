@@ -2,3 +2,6 @@ idf_component_register(SRCS "ESP_SolarYou.c" "PID_stabilization.c" "motor_contro
                     INCLUDE_DIRS "."
                     REQUIRES esp_http_server esp_wifi esp_timer
                     )
+
+target_compile_options(${COMPONENT_LIB} PRIVATE -Wall -Wextra -Wconversion -Wdouble-promotion)
+

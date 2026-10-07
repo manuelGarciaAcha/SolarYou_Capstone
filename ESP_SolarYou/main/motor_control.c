@@ -1,5 +1,6 @@
 #include "iot_servo.h"
 #include "motor_control.h"
+#include <math.h>
 
 #define SERVO_CH0_PIN       33   //temp value
 #define SERVO_CH1_PIN       32   //temp value
@@ -39,12 +40,20 @@ esp_err_t motor_init(void)
 // abstracted motor movement function
 esp_err_t command_motor_angle(float roll_angle, float pitch_angle)
 {
-    if ((roll_angle < MIN_SERVO_ANGLE) || (roll_angle > MAX_SERVO_ANGLE)){
+    if (!isfinite(roll_angle) || !isfinite(pitch_angle)){
         return ESP_ERR_INVALID_ARG;
     }
+    
+    if (roll_angle < MIN_SERVO_ANGLE){
+        roll_angle = MIN_SERVO_ANGLE;
+    }else if (roll_angle > MAX_SERVO_ANGLE){
+        roll_angle = MAX_SERVO_ANGLE;
+    }
 
-    if ((pitch_angle < MIN_SERVO_ANGLE) || (pitch_angle > MAX_SERVO_ANGLE)){
-        return ESP_ERR_INVALID_ARG;
+    if (pitch_angle < MIN_SERVO_ANGLE){
+        pitch_angle = MIN_SERVO_ANGLE;
+    }else if (pitch_angle > MAX_SERVO_ANGLE){
+        pitch_angle = MAX_SERVO_ANGLE;
     }
 
 // might need review since it bails on roll fail (is that bad given next iter?)
