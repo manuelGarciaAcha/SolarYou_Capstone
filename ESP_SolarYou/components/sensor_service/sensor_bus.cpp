@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "component_config.h"
+#include "board_config.h"
 
 static bool busReady = false;
 

@@ -27,7 +27,7 @@ static const stab_config_t stab_config = {
     .pitch_servo_center = 90.0f,
     .pid_cmd_min = -50.0f,
     .pid_cmd_max = 50.0f,
-    .task_dt = STAB_TASK_DT_US / 1000000000.0f,
+    .task_dt = STAB_TASK_DT_US / 1000000.0f,
 };
 
 // placeholder

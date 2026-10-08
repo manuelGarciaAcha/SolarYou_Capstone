@@ -33,6 +33,7 @@ idf_component_register(
     SRCS ${sensor_service_sources}
     INCLUDE_DIRS "include"
     REQUIRES arduino-esp32 json adafruit_bno08x adafruit_ina219
+    PRIV_REQUIRES board_config
 )
 
 target_compile_features(${COMPONENT_LIB} PUBLIC cxx_std_11)

@@ -8,6 +8,7 @@
 #include "component_config.h"
 #include "sensor_bus.h"
 #include "sensor_math.h"
+#include "board_config.h"
 
 static Adafruit_BNO08x bno085(-1);
 static sh2_SensorValue_t sensorValue;

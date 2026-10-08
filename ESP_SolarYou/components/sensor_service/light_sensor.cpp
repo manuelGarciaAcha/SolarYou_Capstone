@@ -4,6 +4,7 @@
 #include <cmath>
 #include "component_config.h"
 #include "sensor_math.h"
+#include "board_config.h"
 
 static bool initialized = false;
 static bool neutralValid = false;

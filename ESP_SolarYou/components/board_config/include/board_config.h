@@ -19,8 +19,9 @@
 #define SENSOR_I2C_SDA_GPIO 47
 #define SENSOR_I2C_SCL_GPIO 48
 
-#define SERVO_CH0_PIN       33   
-#define SERVO_CH1_PIN       32   
+// may require changes based on board type
+#define SERVO_CH0_PIN       33   // temp
+#define SERVO_CH1_PIN       32   // temp
 
 #define LIGHT_TOP_LEFT_GPIO      3
 #define LIGHT_TOP_RIGHT_GPIO     4

@@ -24,9 +24,6 @@ esp_err_t pid_init (pid_controller_t *pid,
         return ESP_ERR_INVALID_ARG;
     }
 
-    // temp init values for pid 
-    memset(pid, 0, sizeof(*pid));
-
     if (!isfinite(Kp) || 
         !isfinite(Ki) || 
         !isfinite(Kd) || 
@@ -39,6 +36,8 @@ esp_err_t pid_init (pid_controller_t *pid,
     {
         return ESP_ERR_INVALID_ARG;
     }
+    
+    memset(pid, 0, sizeof(*pid));
 
     pid->Kp = Kp;
     pid->Ki = Ki;
@@ -61,6 +60,10 @@ esp_err_t pid_tune (pid_controller_t *pid,
                 const float output_max,
                 const float servo_center)
 {
+    if(pid == NULL){
+        return ESP_ERR_INVALID_ARG;
+    }
+    
     if (!isfinite(Kp) || 
         !isfinite(Ki) || 
         !isfinite(Kd) || 

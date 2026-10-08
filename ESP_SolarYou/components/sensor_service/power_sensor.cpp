@@ -8,6 +8,7 @@
 #include "component_config.h"
 #include "sensor_bus.h"
 #include "sensor_math.h"
+#include "board_config.h"
 
 static Adafruit_INA219 ina219(POWER_I2C_ADDRESS);
 static bool initialized = false;

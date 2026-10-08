@@ -39,7 +39,9 @@ float light_get_pitch(void)
 
 esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config)
 {
-    
+    if(roll == NULL || pitch == NULL || config == NULL){
+        return ESP_ERR_INVALID_ARG;
+    }
     esp_err_t err = motor_init();
     if (err != ESP_OK){
         ESP_LOGE(TAG, "Motor initalization failed %s\n", esp_err_to_name(err));
@@ -87,6 +89,10 @@ esp_err_t stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch)
 
 esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output, const float *dt)
 {
+    if(output == NULL || dt == NULL){
+        return ESP_ERR_INVALID_ARG;
+    }
+
     float roll_cmd;
     float pitch_cmd;
 
@@ -129,6 +135,5 @@ esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, 
     output->roll_cmd = roll_cmd;
     output->pitch_cmd = pitch_cmd;
 
-    ESP_LOGI(TAG, "Update Successul");
     return ESP_OK;
 }

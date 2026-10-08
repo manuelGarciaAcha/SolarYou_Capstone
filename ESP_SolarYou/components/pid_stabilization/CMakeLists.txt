@@ -1,4 +1,4 @@
 idf_component_register(
-    SRCS "PID_Stabilization.c"
+    SRCS "PID_stabilization.c"
     INCLUDE_DIRS "include"
 )
