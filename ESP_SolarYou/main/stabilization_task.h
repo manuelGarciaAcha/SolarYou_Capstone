@@ -14,21 +14,28 @@ typedef struct {
 } stab_output_t;
 
 typedef struct {
+    // PID gains
     float roll_Kp;
     float roll_Ki;
     float roll_Kd;
     float pitch_Kp;
     float pitch_Ki;
     float pitch_Kd;
+
+    // PID tunable parameters
     float deriv_time_const;
     float roll_servo_center;
     float pitch_servo_center;
     float pid_cmd_min;
     float pid_cmd_max;
-    float task_dt; 
+    float task_dt;
+
+    // Solar tracking gain
+    float track_k;
+    
 } stab_config_t;
 
 esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config);
 esp_err_t stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch);
-esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output, const float *dt);
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output, const float *dt, float roll_light_angle, float pitch_light_angle);
 #endif

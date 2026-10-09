@@ -1,41 +1,10 @@
 #include "stabilization_task.h"
+#include "sensor_api.h"
+#include "system_state.h"
+#include <math.h>
 
-static const char *TAG = "Stabilization";
+static const char *TAG = "Stabilization Task";
 
-// --------------------------------- //
-// Placeholder functions (JENNIFER)
-
-void imu_init(void)
-{
-    return;
-}
-
-void light_init(void)
-{
-    return;
-}
-
-float imu_get_roll(void)
-{
-    return 0.0f;
-}
-
-float imu_get_pitch(void)
-{
-    return 0.0f;
-}
-
-float light_get_roll(void)
-{
-    return 0.0f;
-}
-
-float light_get_pitch(void)
-{
-    return 0.0f;
-}
-
-// --------------------------------- //
 
 esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config)
 {
@@ -60,10 +29,6 @@ esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch, co
         return err;
     }
 
-
-    imu_init();
-    light_init();
-
     ESP_LOGI(TAG, "Initialization Successul");
     return ESP_OK;
 }
@@ -87,21 +52,28 @@ esp_err_t stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch)
     return ESP_OK;
 }
 
-esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output, const float *dt)
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output, const float *dt, float roll_light_angle, float pitch_light_angle)
 {
-    if(output == NULL || dt == NULL){
+    if(roll == NULL || pitch == NULL || output == NULL || dt == NULL){
         return ESP_ERR_INVALID_ARG;
     }
 
+    if(!isfinite(roll_light_angle) || !isfinite(pitch_light_angle)){
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    sensor_imu_sample_t imu = {0};
+
+    if(!sensor_adapter_read_imu(&imu) || !imu.valid){
+        ESP_LOGW(TAG, "IMU read failed");
+        return ESP_ERR_INVALID_STATE;
+    }
     float roll_cmd;
     float pitch_cmd;
 
     // fetch measured(IMU) and target(light) angles
-    float roll_imu_angle = imu_get_roll();         //placeholder;
-    float pitch_imu_angle = imu_get_pitch();       //placeholder;
-
-    float roll_light_angle = light_get_roll();     //placeholder
-    float pitch_light_angle = light_get_pitch();   //placeholder
+    float roll_imu_angle = imu.roll_deg;         //placeholder;
+    float pitch_imu_angle = imu.pitch_deg;      //placeholder;
 
     float roll_offset_baseline = roll_light_angle + roll->servo_center;
     float pitch_offset_baseline = pitch_light_angle + pitch->servo_center;

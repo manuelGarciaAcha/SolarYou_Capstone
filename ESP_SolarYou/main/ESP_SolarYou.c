@@ -7,6 +7,8 @@
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "sensor_api.h"
+#include "light_task.h"
 
 static const char *TAG  = "Main";
 
@@ -28,18 +30,8 @@ static const stab_config_t stab_config = {
     .pid_cmd_min = -50.0f,
     .pid_cmd_max = 50.0f,
     .task_dt = STAB_TASK_DT_US / 1000000.0f,
+    .track_k = 2.0f,
 };
-
-// placeholder
-void gui_dash_init(void)
-{
-    return;
-}
-
-void power_telemetry_init(void)
-{
-    return;
-}
 
 float read_power_placeholder(void){
     return 0;
@@ -59,6 +51,26 @@ void app_main(void)
     // Set system state
     sys_state_reset(&curr_state);
 
+    // initialize sensors
+    if(!sensor_adapter_init()){
+        curr_state.mode = SYSTEM_ERROR;
+        ESP_LOGE(TAG, "Sensor Initialization failed");
+        return;
+    }
+
+    // calibrate IMU (50 samples in sensor_service/include/component_config.h)
+    if(!sensor_adapter_capture_imu_neutral()){
+        curr_state.mode = SYSTEM_ERROR;
+        ESP_LOGE(TAG, "IMU Calibration Error");
+        return;
+    }
+
+    // calibrate light sensors (50 samples in sensor_service/include/component_config.h)
+    if(!sensor_adapter_capture_light_neutral()){
+        curr_state.mode = SYSTEM_ERROR;
+        ESP_LOGE(TAG, "Light Sensor Calibration Error");
+        return;
+    }
 
     // Initialize Tasks
     esp_err_t err = stabilization_init(&roll_ctlr, &pitch_ctlr, &stab_config);
@@ -68,11 +80,6 @@ void app_main(void)
         return;
     }
 
-    gui_dash_init();
-    power_telemetry_init();
-
-    // 
-
     curr_state.mode = SYSTEM_BASIC_CONTROL;
     int64_t curr_time;
     int64_t last_stabilize_time = esp_timer_get_time();
@@ -81,18 +88,17 @@ void app_main(void)
 
 
     while(1){
-        //curr_state.task = TASK_NONE;
         curr_time = esp_timer_get_time();
 
         if(curr_time - last_stabilize_time >= STAB_TASK_DT_US){
             last_stabilize_time = curr_time;
 
             stab_output_t stab_output = {0};
-            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt);
+            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt, curr_state.roll_light, curr_state.pitch_light);
 
             if (err != ESP_OK){
-                ESP_LOGE(TAG, "Stabilization Task failed: %s\n", esp_err_to_name(err));
-                //stabilization_err_cnt ++;
+                curr_state.mode = SYSTEM_ERROR;
+                ESP_LOGE(TAG, "Stabilization task failed: %s\n", esp_err_to_name(err));
 
             } else {
                 curr_state.roll_imu = stab_output.roll_imu;
@@ -108,9 +114,13 @@ void app_main(void)
         if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
             last_light_time = curr_time;
 
-            // light tracking functionality
+            err = light_update(&curr_state, &stab_config);
+            if(err != ESP_OK){
+                curr_state.mode = SYSTEM_ERROR;
+                ESP_LOGE(TAG, "Light task failed: %s\n", esp_err_to_name(err));
+            }
 
-            //curr_time = esp_timer_get_time();
+            curr_time = esp_timer_get_time();
         }
 
         if(curr_time - last_telem_time >= TELEM_TASK_DT_US){

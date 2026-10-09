@@ -17,6 +17,8 @@ static uint32_t snapshotSequence = 0U;
 
 bool sensor_adapter_init(void)
 {
+    initArduino();
+
 #if CONFIG_SOLARYOU_VALIDATION_ALL || CONFIG_SOLARYOU_VALIDATION_IMU_ONLY
     imuInitialized = imuSensorBegin();
     imuCalibrated = false;
