@@ -1,0 +1,3 @@
+Command: cmake -G Ninja -DPYTHON_DEPS_CHECKED=1 -DPYTHON=/home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python -DESP_PLATFORM=1 -DIDF_TARGET=esp32s3 -DCCACHE_ENABLE=0 /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou
+ESP Insights Project commit: e0afe2f-dirty
+ESP RainMaker Project commit: e0afe2f-dirty

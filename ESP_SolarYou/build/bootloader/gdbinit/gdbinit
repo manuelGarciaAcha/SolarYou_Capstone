@@ -1,0 +1,2 @@
+source /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/gdbinit/symbols
+source /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/gdbinit/connect
