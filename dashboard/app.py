@@ -10,9 +10,9 @@ Pick the data source at startup instead of editing code:
     python app.py --source ble
 
 Per-machine connection details (serial port, WiFi URL, BLE device name)
-live in config.json, NOT in this file -- see config.example.json. Each
-teammate keeps their own config.json locally; it's gitignored since a
-Mac's serial port path looks nothing like a Windows one.
+go in config.json, not in this file. Copy config.example.json to start.
+Each teammate keeps their own config.json, and git ignores it, because a
+Mac's serial port name looks nothing like a Windows one.
 
 What a message needs to look like is documented in ESP32_INTEGRATION.md.
 """
@@ -39,7 +39,7 @@ app.config["SECRET_KEY"] = "dev"
 # would then stall the whole server.
 socketio = SocketIO(app, async_mode="threading")
 
-UPDATE_INTERVAL_SECONDS = 1.0
+MOCK_INTERVAL_SECONDS = 0.2   # 5 mock messages per second, close to the planned telemetry rate
 RETRY_SECONDS = 2
 MAX_MESSAGE_BYTES = 65536   # anything bigger is garbage, not a sensor reading
 MAX_BATCH_SIZE = 500        # readings accepted from one message if it's a JSON array
@@ -49,17 +49,15 @@ CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 
 def load_config():
     """
-    Per-machine settings (serial port, WiFi URL, BLE device name). Falls
-    back to empty values if config.json doesn't exist yet -- the relevant
-    data-source function will raise a clear error if something's missing
-    rather than failing silently.
+    Per-machine settings (serial port, WiFi URL, BLE device name). Returns
+    an empty dict if config.json doesn't exist yet. Each data source checks
+    for the settings it needs and raises a clear error if one is missing.
     """
     if not os.path.exists(CONFIG_PATH):
         return {}
     try:
-        # utf-8-sig so a file saved by Windows Notepad (which can add a
-        # byte order mark) still loads instead of failing on an invisible
-        # character
+        # utf-8-sig so a file saved by Windows Notepad, which can add an
+        # invisible byte order mark at the start, still loads
         with open(CONFIG_PATH, encoding="utf-8-sig") as f:
             config = json.load(f)
     except ValueError as exc:
@@ -77,14 +75,10 @@ connection_state = {"status": "connecting"}
 
 def set_connection_status(status, message=None):
     """
-    Tracks the current connection state and broadcasts it. Plain
-    socketio.emit() only reaches clients connected *right now* -- a
-    browser that loads the page after the ESP32 already connected would
-    never see that "connected" event and the badge would stay stuck on
-    whatever the HTML's initial text was, forever. Keeping the latest
-    state here means a newly-connecting browser can be caught up
-    immediately (see browser_connected() below), not just clients that
-    happened to already be watching.
+    Save the connection state and send it to every open page. emit() only
+    reaches pages that are already open, so a page opened later would
+    never hear about the change and its badge would stay on "Connecting".
+    Saving the state lets browser_connected() send it to each new page.
     """
     global connection_state
     connection_state = {"status": status}
@@ -101,13 +95,10 @@ def browser_connected():
 
 def run_data_source(fn, config):
     """
-    Wraps whichever data-source function is running in the background
-    thread. Exceptions raised inside a thread don't propagate to the main
-    thread or crash Flask -- they just print a traceback and the thread
-    quietly dies, with nothing on the dashboard showing anything went
-    wrong. This makes failures visible in both places: the terminal, and
-    the dashboard itself, since that's what's actually being watched
-    during a demo, not the terminal.
+    Run a data source in the background thread. An exception in a thread
+    only prints a traceback and ends the thread, so the page would sit on
+    its last status with no sign of the problem. This catches it and shows
+    the reason in the terminal and on the badge.
     """
     try:
         set_connection_status("connecting")
@@ -127,11 +118,16 @@ FIELDS = (
     ("pitch", "pitch", "imu", "pitch_deg"),
     ("roll", "roll", "imu", "roll_deg"),
     ("power", "power", "power", "power_w"),
+    # Optional. The angle the controller is steering toward (the sun target).
+    # When these arrive, the page measures error from the target instead of
+    # tilt from level. Firmware that never sends them gets the level view.
+    ("pitch_target", "pitch_target", None, None),
+    ("roll_target", "roll_target", None, None),
 )
 # A message with none of these is not something the dashboard can use.
 # (light is recognized so a light-only message is ignored quietly, since
 # the dashboard doesn't display it yet.)
-RECOGNIZED_KEYS = {"pitch", "roll", "power", "imu", "light"}
+RECOGNIZED_KEYS = {"pitch", "roll", "power", "imu", "light", "pitch_target", "roll_target"}
 
 
 def clean_number(value):
@@ -139,7 +135,7 @@ def clean_number(value):
     A finite number, or None. Booleans, strings, NaN, and infinity all
     become None: NaN would be sent to the browser as an invalid JSON
     token, and a number that arrives as a string would silently break
-    the rolling average (text concatenation instead of addition).
+    the rolling average.
     """
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
@@ -155,7 +151,7 @@ def pick(reading, flat_key, group_key, nested_key):
     value = reading.get(flat_key, MISSING)
     if isinstance(value, dict):
         value = MISSING  # "power" is a whole sensor group here, not a number
-    if value is MISSING:
+    if value is MISSING and group_key:
         group = reading.get(group_key)
         if isinstance(group, dict):
             value = group.get(nested_key, MISSING)
@@ -164,12 +160,11 @@ def pick(reading, flat_key, group_key, nested_key):
 
 def normalize_reading(reading):
     """
-    The one seam between whatever the ESP32 actually sends and what the
-    dashboard expects. dashboard.js only ever knows about a flat
-    {pitch, roll, power} shape. It doesn't care whether the firmware sent
-    that flat shape or grouped it by sensor the way Jennifer's draft does
-    (imu.pitch_deg, imu.roll_deg, power.power_w, each with a health
-    block). If the real schema changes, this is the only function to edit.
+    Convert a message from the ESP32 into the flat shape dashboard.js
+    uses: pitch, roll, power, and the optional targets. The firmware can
+    send that flat shape or group fields by sensor the way Jennifer's
+    draft does (imu.pitch_deg, imu.roll_deg, power.power_w). If the field
+    names change, FIELDS above is the only thing to edit.
 
     A field the message does not mention at all is left out of the result,
     so the dashboard keeps showing its last value for a moment. A field
@@ -192,10 +187,9 @@ _first_reading_logged = False
 
 def warn_dropped(reason, message):
     """
-    Bad messages get skipped instead of crashing the data source, but
-    skipping silently makes firmware debugging miserable ("it says
-    Connected but nothing shows up"). Print a short warning, at most once
-    per second so a badly broken stream doesn't flood the terminal.
+    Print why a message was skipped. Without this, a firmware mistake
+    looks like "Connected, but nothing shows up". Limited to once per
+    second so a broken stream doesn't flood the terminal.
     """
     global _last_drop_warning
     now = time.monotonic()
@@ -207,6 +201,7 @@ def warn_dropped(reason, message):
 
 
 def emit_reading(reading, raw):
+    """Check one parsed message and send its values to the browsers."""
     global _first_reading_logged
     if not isinstance(reading, dict):
         warn_dropped("JSON is not an object", raw)
@@ -225,19 +220,12 @@ def emit_reading(reading, raw):
 
 def process_reading(message):
     """
-    Single entry point for a reading from any data source, regardless of
-    transport. Accepts a dict (mock data, native Python already), raw
-    bytes or a bytearray (serial and BLE hand over undecoded bytes; bleak
-    specifically delivers a bytearray), or a string (websocket already
-    decodes text frames on its own). A JSON array of readings is accepted
-    too, in case the firmware ever batches. Anything malformed is dropped
-    with a warning instead of being allowed to kill the data source
-    thread. This is also where future logic goes, once instead of once
-    per source:
-      - validate schema
-      - normalize units
-      - reject stale/invalid sensor values
-      - calculate any derived dashboard fields
+    Entry point for a message from any data source. Accepts a dict (mock
+    data), bytes or a bytearray (serial and BLE; bleak hands over a
+    bytearray), or a str (WebSocket text frames). A JSON array of readings
+    also works, in case the firmware ever sends several at once. A bad
+    message is dropped with a warning and never stops the data source.
+    Checks that apply to every source belong here, not in each loop.
     """
     raw = message
     try:
@@ -264,9 +252,9 @@ def process_reading(message):
             try:
                 parsed = json.loads(message)
             except (ValueError, RecursionError):
-                # ValueError covers bad JSON and also numbers too long for
-                # newer Pythons to convert; RecursionError covers absurdly
-                # deep nesting
+                # ValueError covers bad JSON and numbers too long for newer
+                # Pythons to convert. RecursionError covers extremely deep
+                # nesting.
                 warn_dropped("not valid JSON", raw)
                 return
             readings = parsed[:MAX_BATCH_SIZE] if isinstance(parsed, list) else [parsed]
@@ -281,27 +269,50 @@ def process_reading(message):
 # ---- mock data ----
 
 def generate_mock_reading(t):
-    decay = math.exp(-0.05 * t)
-    pitch = 8 * decay * math.sin(0.5 * t) + random.uniform(-0.3, 0.3)
-    roll = 6 * decay * math.cos(0.4 * t) + random.uniform(-0.3, 0.3)
+    """
+    Made-up readings for testing without hardware: a tilt that settles
+    back to level, repeating every 40 seconds so the page keeps moving.
+    """
+    cycle = t % 40.0
+    decay = math.exp(-0.08 * cycle)
+    pitch = 8 * decay * math.sin(0.5 * cycle) + random.uniform(-0.3, 0.3)
+    roll = 6 * decay * math.cos(0.4 * cycle) + random.uniform(-0.3, 0.3)
     power = 1.2 + 0.1 * math.sin(0.1 * t) + random.uniform(-0.05, 0.05)
     return {"pitch": round(pitch, 2), "roll": round(roll, 2), "power": round(power, 2)}
 
 
+def generate_tracking_reading(t):
+    """
+    Like generate_mock_reading(), but following a slowly moving sun target
+    instead of holding level, the way the real firmware does. Used with
+    --mock-tracking.
+    """
+    reading = generate_mock_reading(t)
+    pitch_target = 12 * math.sin(2 * math.pi * t / 120)
+    roll_target = 8 * math.sin(2 * math.pi * t / 90)
+    reading["pitch"] = round(reading["pitch"] + pitch_target, 2)
+    reading["roll"] = round(reading["roll"] + roll_target, 2)
+    reading["pitch_target"] = round(pitch_target, 2)
+    reading["roll_target"] = round(roll_target, 2)
+    return reading
+
+
 def mock_data_loop(config):
+    """Send a made-up reading 5 times a second, forever."""
     set_connection_status("connected")
+    generate = generate_tracking_reading if config.get("mock_tracking") else generate_mock_reading
     t = 0
     while True:
-        process_reading(generate_mock_reading(t))  # dict, passed straight through
-        t += UPDATE_INTERVAL_SECONDS
-        time.sleep(UPDATE_INTERVAL_SECONDS)
+        process_reading(generate(t))  # dict, passed straight through
+        t += MOCK_INTERVAL_SECONDS
+        time.sleep(MOCK_INTERVAL_SECONDS)
 
 
 # ---- serial (needs: pip install pyserial) ----
 #
 # Lines this accepts, so the firmware doesn't have to change how it prints:
 #   {"pitch": ...}                       plain JSON, one object per line
-#   sensor_json,{"imu": ...}             Jennifer's labeled line
+#   sensor_json,{"imu": ...}             Jen's labeled line
 #   I (1234) tag: {"pitch": ...}         JSON sent through ESP_LOGI
 # Everything else on the port (boot messages, other log lines) is ignored.
 
@@ -321,36 +332,203 @@ def json_from_serial_line(line):
     return None
 
 
-def serial_data_loop(config):
-    import serial
+class SerialLines:
+    """
+    Splits a raw byte stream into lines. Reading whatever has arrived in
+    one call (instead of pyserial's read_until, which reads one byte per
+    call) keeps CPU use low even when the board prints a lot.
+    """
 
-    port = config.get("serial_port")
-    if not port:
-        raise ValueError('config.json is missing "serial_port"')
+    def __init__(self, max_line=MAX_SERIAL_LINE):
+        self.buffer = bytearray()
+        self.max_line = max_line
+
+    def feed(self, chunk):
+        self.buffer += chunk
+        lines = []
+        while True:
+            end = self.buffer.find(b"\n")
+            if end < 0:
+                break
+            lines.append(bytes(self.buffer[:end]))
+            del self.buffer[:end + 1]
+        if len(self.buffer) > self.max_line:
+            self.buffer.clear()  # runaway line with no newline: drop it
+        return lines
+
+
+# USB vendor IDs used by ESP32 boards. The Heltec V4 the team uses is
+# Espressif's own native USB (303A); the others are common USB-serial chips.
+ESP_USB_VENDORS = {
+    0x303A: "Espressif native USB",
+    0x10C4: "Silicon Labs CP210x",
+    0x1A86: "WCH CH340/CH343/CH9102",
+    0x0403: "FTDI",
+}
+
+
+def describe_ports(ports):
+    return ", ".join(f"{p.device} ({p.description})" for p in ports) or "none"
+
+
+def pick_serial_port(ports):
+    """
+    Pick the board from serial.tools.list_ports.comports() output.
+    Returns (port, how it was chosen), or (None, why not).
+    """
+    usb = [p for p in ports if p.vid is not None]
+    known = [p for p in usb if p.vid in ESP_USB_VENDORS]
+    if len(known) == 1:
+        return known[0].device, ESP_USB_VENDORS[known[0].vid]
+    espressif = [p for p in known if p.vid == 0x303A]
+    if len(known) > 1 and len(espressif) == 1:
+        return espressif[0].device, "Espressif native USB"
+    if len(known) > 1:
+        return None, ("found several possible boards: " + describe_ports(known) +
+                      ". Unplug the extra one or pass --serial-port")
+    if len(usb) == 1:
+        return usb[0].device, "the only USB serial port"
+    if not usb:
+        return None, ("no ESP32 board found. Plug it in with a data cable "
+                      "(some USB cables only charge), or pass --serial-port")
+    return None, ("several USB serial ports and none look like an ESP32: " +
+                  describe_ports(usb) + ". Pass --serial-port")
+
+
+def port_group(port):
+    """
+    The group that owns a serial port on Linux: dialout on Ubuntu and Debian,
+    uucp on Arch and Fedora. Ask system instead of guessing.
+    """
+    try:
+        import grp
+        return grp.getgrgid(os.stat(port).st_gid).gr_name
+    except (ImportError, OSError, KeyError):
+        return "dialout"
+
+
+def explain_serial_error(exc, port):
+    """Turn pyserial's error into something we can act on."""
+    text = str(exc) or type(exc).__name__
+    low = text.lower()
+    if ("exclusively lock" in low or "resource busy" in low or "errno 16" in low
+            or (os.name == "nt" and "access is denied" in low)):
+        return (f"{port} is being used by another program (idf.py monitor, Arduino "
+                "Serial Monitor, or another copy of the dashboard). Close it.")
+    if "permission denied" in low and sys.platform.startswith("linux"):
+        return (f"no permission to open {port}. Run: sudo usermod -aG {port_group(port)} $USER "
+                "then log out and back in")
+    if "no such file" in low or "cannot find the file" in low or "filenotfound" in low:
+        return f"{port} is not there any more (unplugged, resetting, or renamed)"
+    if "returned no data" in low or "device disconnected" in low or "clearcommerror" in low:
+        return f"lost {port} (board unplugged or reset)"
+    return text
+
+
+def open_serial(serial, port, baud):
+    """
+    Open the port the way Espressif's own idf.py monitor does when told not
+    to reset the board: DTR and RTS set before opening, then RTS released
+    before DTR. On ESP32 boards those two lines drive reset and boot mode,
+    so opening a port carelessly can reboot the board or hold it in the
+    bootloader. Exclusive access means two programs can't both read the
+    port and split the lines between them.
+    """
+    ser = serial.serial_for_url(port, baudrate=baud, timeout=0.5,
+                                do_not_open=True, exclusive=True)
+    try:
+        ser.rts = True
+        ser.dtr = True
+    except Exception:
+        pass  # network ports (socket://, rfc2217://) may not support these
+    ser.open()
+    try:
+        ser.rts = False
+        ser.dtr = False
+    except Exception:
+        pass
+    return ser
+
+
+QUIET_HINT_SECONDS = 8
+
+
+def serial_data_loop(config):
+    """Read lines from the board's USB serial port, reconnecting when it drops."""
+    import serial
+    from serial.tools import list_ports
+
+    configured = config.get("serial_port") or "auto"
     baud = int(config.get("serial_baud", 115200))
+    last_problem = None
+
+    def report_problem(reason):
+        # Printed once per new problem, so a long unplug doesn't fill the terminal.
+        nonlocal last_problem
+        if reason != last_problem:
+            print(f"Serial: {reason}. Retrying every {RETRY_SECONDS} seconds...", flush=True)
+            last_problem = reason
+        set_connection_status("reconnecting", reason)
 
     while True:
+        port = configured
+        how = "from settings"
+        if configured.lower() == "auto":
+            port, how = pick_serial_port(list_ports.comports())
+            if port is None:
+                report_problem(how)
+                time.sleep(RETRY_SECONDS)
+                continue
+
         ser = None
         try:
-            # serial_for_url takes a normal port name or a URL such as
-            # rfc2217://localhost:4000, which is how Wokwi exposes a
-            # simulated board's serial port.
-            ser = serial.serial_for_url(port, baudrate=baud)
-            print(f"Serial connected ({port})")
+            ser = open_serial(serial, port, baud)
+            last_problem = None
+            print(f"Serial connected: {port} ({how})", flush=True)
             set_connection_status("connected")
 
+            splitter = SerialLines()
+            opened_at = time.monotonic()
+            any_bytes = False
+            json_lines = 0
+            last_other_line = None
+            hinted = False
+
             while True:
-                line = json_from_serial_line(ser.read_until(b"\n", MAX_SERIAL_LINE))
-                if line:
-                    process_reading(line)
+                chunk = ser.read(ser.in_waiting or 1)
+                if chunk:
+                    any_bytes = True
+                    for line in splitter.feed(chunk):
+                        data = json_from_serial_line(line)
+                        if data:
+                            json_lines += 1
+                            if hinted and json_lines == 1:
+                                set_connection_status("connected")  # clear the hint
+                            process_reading(data)
+                        elif line.strip():
+                            last_other_line = line.strip()
+
+                # A connection that stays green with nothing on screen is the
+                # most confusing failure, so say what is (or isn't) arriving.
+                if (not hinted and json_lines == 0
+                        and time.monotonic() - opened_at > QUIET_HINT_SECONDS):
+                    hinted = True
+                    if not any_bytes:
+                        hint = ("port is open but the board is sending nothing. If idf.py "
+                                "monitor shows output on this port, press the board's RST "
+                                "button; it may be stuck in the bootloader")
+                    else:
+                        hint = ("the board is printing, but no line contains sensor JSON. "
+                                f"Last line: {ascii(last_other_line)[:70]}. See "
+                                "ESP32_INTEGRATION.md for the line format")
+                    print(f"[HINT] Serial {hint}", flush=True)
+                    set_connection_status("connected", hint)
 
         except (serial.SerialException, OSError) as exc:
-            # A board that resets or gets reflashed drops its USB port for
-            # a moment. Retrying means the dashboard survives that.
-            reason = str(exc) or type(exc).__name__
-            print(f"Serial connection lost: {reason}")
-            print(f"Retrying in {RETRY_SECONDS} seconds...")
-            set_connection_status("reconnecting", reason)
+            # A board that resets or gets reflashed drops its USB port for a
+            # moment. Retrying (and re-detecting in auto mode, since the port
+            # name can change) means the dashboard survives that.
+            report_problem(explain_serial_error(exc, port))
             time.sleep(RETRY_SECONDS)
         finally:
             if ser is not None:
@@ -363,6 +541,7 @@ def serial_data_loop(config):
 # ---- WiFi / WebSocket (needs: pip install websocket-client) ----
 
 def websocket_data_loop(config):
+    """Receive messages from the ESP32's WebSocket server, reconnecting when it drops."""
     import websocket
 
     url = config.get("wifi_url")
@@ -418,6 +597,7 @@ def websocket_data_loop(config):
 # working the same way on macOS and Windows.
 
 def ble_data_loop(config):
+    """Subscribe to the ESP32's BLE notifications, rescanning when the link drops."""
     import asyncio
     from bleak import BleakScanner, BleakClient
     try:
@@ -441,9 +621,9 @@ def ble_data_loop(config):
                 if device is None:
                     raise RuntimeError(f"Could not find BLE device '{device_name}'")
 
-                # sleep() alone would never notice a real disconnect --
-                # the callback is what actually signals one, so the
-                # retry loop below has something to wait on.
+                # The disconnect callback sets this event, which gives the
+                # code below something to wait on. Sleeping in a loop
+                # would never notice the link dropping.
                 disconnected = asyncio.Event()
 
                 def on_disconnect(_client):
@@ -493,8 +673,8 @@ def port_is_free(port):
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         if sys.platform != "win32":
-            # same setting the web server uses, so a port that is merely
-            # in its post-restart wait period doesn't count as "in use"
+            # Same setting the web server uses, so a port still in its
+            # short wait period after a restart doesn't count as in use.
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             s.bind(("0.0.0.0", port))
@@ -524,13 +704,41 @@ if __name__ == "__main__":
         help="Port for the dashboard web page (default: 5001)",
     )
     parser.add_argument(
+        "--serial-port", metavar="PORT",
+        help="Serial port to use (overrides config.json). Default: find the board automatically",
+    )
+    parser.add_argument(
+        "--mock-tracking", action="store_true",
+        help="With --source mock: send a moving sun target too, like the real firmware",
+    )
+    parser.add_argument(
+        "--list-ports", action="store_true",
+        help="List the serial ports this computer can see, then exit",
+    )
+    parser.add_argument(
         "--debug", action="store_true",
         help="Flask debug mode. Leave off for demos: it exposes the debugger "
              "to everyone on the network, not just this machine.",
     )
     args = parser.parse_args()
 
+    if args.list_ports:
+        from serial.tools import list_ports
+        ports = list_ports.comports()
+        for p in ports:
+            vid = f"{p.vid:04X}" if p.vid is not None else "----"
+            print(f"{p.device:30s} vid {vid}  {p.description}")
+        if not ports:
+            print("No serial ports found.")
+        picked, how = pick_serial_port(ports)
+        print(f"\nAuto-detect would use: {picked} ({how})" if picked else f"\nAuto-detect: {how}")
+        sys.exit(0)
+
     config = load_config()
+    if args.serial_port:
+        config["serial_port"] = args.serial_port
+    if args.mock_tracking:
+        config["mock_tracking"] = True
     if not port_is_free(args.port):
         sys.exit(f"Port {args.port} is already in use. Is another copy of the dashboard "
                  f"still running? Close it, or start this one with --port {args.port + 1}.")
@@ -542,10 +750,9 @@ if __name__ == "__main__":
 
     socketio.start_background_task(run_data_source, DATA_SOURCES[args.source], config)
 
-    # use_reloader=False: the reloader spawns a second process that runs
-    # this whole file again, including the data source above -- without
-    # this, debug mode silently opens two serial/WiFi/BLE connections at
-    # once. It's also just wrong for this app: auto-restart-on-save would
-    # drop a live hardware connection every time a file is saved.
+    # use_reloader=False: the reloader starts a second process that runs
+    # this file again, data source included, so debug mode would open two
+    # serial, WiFi, or BLE connections at once. Restarting on every file
+    # save would also drop the hardware connection each time.
     socketio.run(app, host="0.0.0.0", port=args.port, debug=args.debug,
                  use_reloader=False, allow_unsafe_werkzeug=True)

@@ -1,5 +1,16 @@
+# local settings (copied from config.example.json, may hold a port name)
+config.json
+.env
 
+# Python
 __pycache__/
 *.pyc
-.env
-config.json
+env/
+.venv/
+venv/
+
+# macOS Finder files
+.DS_Store
+
+# CSV exports saved next to the code by accident
+solaryou_*.csv

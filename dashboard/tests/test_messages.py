@@ -80,6 +80,19 @@ class NormalizeTests(unittest.TestCase):
         self.assertIsNone(dashboard.clean_number(float("inf")))
         self.assertIsNone(dashboard.clean_number(10 ** 400))
 
+    def test_targets_pass_through_when_sent(self):
+        message = {"pitch": 10.5, "roll": -3, "power": 1.2, "pitch_target": 12, "roll_target": None}
+        self.assertEqual(dashboard.normalize_reading(message),
+                         {"pitch": 10.5, "roll": -3.0, "power": 1.2,
+                          "pitch_target": 12.0, "roll_target": None})
+
+    def test_target_is_not_looked_up_inside_a_sensor_group(self):
+        self.assertEqual(dashboard.normalize_reading({"imu": {"pitch_target": 5}}), {})
+
+    def test_tracking_mock_carries_targets(self):
+        reading = dashboard.generate_tracking_reading(30.0)
+        self.assertEqual(set(reading), {"pitch", "roll", "power", "pitch_target", "roll_target"})
+
 
 class ProcessReadingTests(Capture):
     def test_accepts_dict_str_bytes_and_bytearray(self):
@@ -140,7 +153,7 @@ class RandomInputTests(Capture):
             self.emitted.clear()
             dashboard.process_reading(message)
             for reading in self.readings():
-                self.assertLessEqual(set(reading), {"pitch", "roll", "power"})
+                self.assertLessEqual(set(reading), {"pitch", "roll", "power", "pitch_target", "roll_target"})
                 for value in reading.values():
                     self.assertTrue(value is None or (isinstance(value, float) and math.isfinite(value)))
 

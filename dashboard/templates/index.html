@@ -1,45 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark" data-palette="reef">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team 11 - Stabilization Dashboard</title>
+    <script>
+        // Set the theme and line colors before the page draws, so it doesn't
+        // flash the wrong theme. ?theme=light and ?palette=lagoon also work.
+        (function () {
+            var root = document.documentElement;
+            var params = new URLSearchParams(location.search);
+            var saved = {};
+            try { saved = JSON.parse(localStorage.getItem("solaryou-look") || "{}"); } catch (e) {}
+            var theme = params.get("theme") || saved.theme;
+            var palette = params.get("palette") || saved.palette;
+            if (theme === "light" || theme === "dark") root.setAttribute("data-theme", theme);
+            if (palette === "reef" || palette === "lagoon" || palette === "sunset") root.setAttribute("data-palette", palette);
+            if (params.has("theme") || params.has("palette")) {
+                try {
+                    localStorage.setItem("solaryou-look", JSON.stringify({
+                        theme: root.getAttribute("data-theme"), palette: root.getAttribute("data-palette")
+                    }));
+                } catch (e) {}
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    <!-- Header: title, connection badge, run controls, theme switch -->
     <header>
-        <h1>Active Stabilization &amp; Solar Tracking Platform</h1>
-        <p class="subtitle">
-            Live Dashboard
-            <span id="connectionStatus" class="status-badge status-connecting">Connecting...</span>
-        </p>
+        <div class="title-block">
+            <h1>Active Stabilization &amp; Solar Tracking Platform</h1>
+            <p class="subtitle">
+                Team 11 live dashboard
+                <span id="connectionStatus" class="status-badge status-connecting">Connecting...</span>
+            </p>
+        </div>
+        <div class="actions">
+            <span class="run-label">Run <span id="runNumber">1</span></span>
+            <button id="newRun" type="button"
+                    title="Clears the stability stats and energy total and starts a new run number in the CSV">New run</button>
+            <button id="exportCsv" type="button"
+                    title="Downloads every reading this page has received since it was opened">
+                Export CSV <span id="csvCount">(0 rows)</span>
+            </button>
+            <button id="themeToggle" type="button" class="icon-button"
+                    title="Switch between the dark and light themes" aria-label="Switch theme">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="theme-icon-sun" cx="12" cy="12" r="4.5"/>
+                    <path class="theme-icon-rays" d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/>
+                </svg>
+            </button>
+        </div>
     </header>
+
+    <!-- Live numbers, large enough to read from across a table -->
+    <section class="hero" aria-label="Live readings">
+        <div class="stat">
+            <p class="stat-label"><span class="key key-pitch"></span>Pitch</p>
+            <p class="stat-value" id="pitchValue">--</p>
+            <p class="stat-sub" id="pitchSub">degrees</p>
+        </div>
+        <div class="stat">
+            <p class="stat-label"><span class="key key-roll"></span>Roll</p>
+            <p class="stat-value" id="rollValue">--</p>
+            <p class="stat-sub" id="rollSub">degrees</p>
+        </div>
+        <div class="stat">
+            <p class="stat-label"><span class="key key-power"></span>Power</p>
+            <p class="stat-value"><span id="powerValue">--</span><span class="stat-unit">W</span></p>
+            <p class="stat-sub">avg <span id="powerAvgValue">--</span> W, last 60 s</p>
+        </div>
+        <div class="stat">
+            <p class="stat-label">Energy</p>
+            <p class="stat-value" id="energy">--</p>
+            <p class="stat-sub" id="energySub">since page opened</p>
+        </div>
+    </section>
 
     <main>
         <section class="card chart-card">
-            <h2>Pitch &amp; Roll (degrees)</h2>
-            <canvas id="orientationChart"></canvas>
-        </section>
-
-        <section class="card stats-card">
-            <h2>Current Readings</h2>
-            <dl>
-                <dt>Pitch</dt><dd id="pitchValue">--</dd>
-                <dt>Roll</dt><dd id="rollValue">--</dd>
-                <dt>Power</dt><dd id="powerValue">--</dd>
-            </dl>
-        </section>
-
-        <section class="card power-avg-card">
-            <div class="power-avg-header">
-                <h2>Average Power</h2>
-                <span class="power-avg-window">last 60 samples</span>
+            <div class="card-header">
+                <h2>Pitch &amp; Roll (degrees)</h2>
+                <span class="card-note">last 30 s</span>
             </div>
-            <p class="power-avg-value"><span id="powerAvgValue">--</span> <span class="unit">W</span></p>
-            <canvas id="powerAvgChart"></canvas>
+            <div class="chart-box"><canvas id="orientationChart"></canvas></div>
+        </section>
+
+        <!-- Level card: current tilt, bubble level, and the 30 s stability stats -->
+        <section class="card level-card">
+            <div class="card-header">
+                <h2 id="levelTitle">Tilt from level</h2>
+                <span class="card-note">rings 2&deg; / 5&deg; / 10&deg;</span>
+            </div>
+            <p class="level-now"><span id="tiltNow">--</span></p>
+            <svg id="levelSvg" viewBox="-100 -100 200 200" role="img"
+                 aria-label="Bubble level: the dot shows roll error left to right and pitch error up and down">
+                <line class="level-axis" x1="-95" y1="0" x2="95" y2="0"/>
+                <line class="level-axis" x1="0" y1="-95" x2="0" y2="95"/>
+                <circle class="level-ring" r="90"/>
+                <circle class="level-ring" r="45"/>
+                <circle class="level-band" id="bandRing" r="18"/>
+                <text class="level-label" x="66" y="-60">10&deg;</text>
+                <text class="level-label" x="34" y="-28">5&deg;</text>
+                <text class="level-label" x="95" y="-5" text-anchor="end">roll</text>
+                <text class="level-label" x="5" y="-88">pitch</text>
+                <polyline id="levelTrail" class="level-trail" points=""/>
+                <circle id="levelDot" class="level-dot" r="7" cx="0" cy="0" visibility="hidden"/>
+            </svg>
+            <dl class="level-stats">
+                <div><dt id="rmsLabel">RMS tilt</dt><dd id="tiltRms">--</dd></div>
+                <div><dt>Within <span id="bandLabel">2</span>&deg; of <span id="bandRef">level</span></dt><dd id="withinBand">--</dd></div>
+            </dl>
+            <p class="card-foot">last 30 s</p>
+        </section>
+
+        <section class="card attitude-card">
+            <div class="card-header">
+                <h2>Panel attitude</h2>
+                <span class="card-note" id="attitudeNote">outline = level</span>
+            </div>
+            <div class="attitude-views">
+                <figure>
+                    <svg viewBox="-60 -38 120 76" role="img" aria-label="Side view of the panel tilted by the pitch angle">
+                        <line class="horizon" x1="-56" y1="0" x2="56" y2="0"/>
+                        <rect id="pitchGhost" class="panel-ghost" x="-42" y="-4" width="84" height="8" rx="3"/>
+                        <line class="mount" x1="0" y1="4" x2="0" y2="30"/>
+                        <line class="mount" x1="-14" y1="30" x2="14" y2="30"/>
+                        <g id="pitchPanel" class="panel-group">
+                            <rect class="panel panel-pitch" x="-42" y="-4" width="84" height="8" rx="3"/>
+                        </g>
+                        <circle class="pivot" r="3"/>
+                    </svg>
+                    <figcaption>Pitch, side view <strong id="pitchViewValue">--</strong></figcaption>
+                </figure>
+                <figure>
+                    <svg viewBox="-60 -38 120 76" role="img" aria-label="Front view of the panel tilted by the roll angle">
+                        <line class="horizon" x1="-56" y1="0" x2="56" y2="0"/>
+                        <rect id="rollGhost" class="panel-ghost" x="-42" y="-4" width="84" height="8" rx="3"/>
+                        <line class="mount" x1="0" y1="4" x2="0" y2="30"/>
+                        <line class="mount" x1="-14" y1="30" x2="14" y2="30"/>
+                        <g id="rollPanel" class="panel-group">
+                            <rect class="panel panel-roll" x="-42" y="-4" width="84" height="8" rx="3"/>
+                        </g>
+                        <circle class="pivot" r="3"/>
+                    </svg>
+                    <figcaption>Roll, front view <strong id="rollViewValue">--</strong></figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="card power-card">
+            <div class="card-header">
+                <h2>Power (watts)</h2>
+                <span class="card-note">last 60 s</span>
+            </div>
+            <div class="chart-box chart-box-short"><canvas id="powerChart"></canvas></div>
         </section>
     </main>
 
+    <!-- Socket.IO client + Chart.js, bundled locally so the page works offline -->
     <script src="{{ url_for('static', filename='js/vendor/socket.io.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/chart.umd.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
