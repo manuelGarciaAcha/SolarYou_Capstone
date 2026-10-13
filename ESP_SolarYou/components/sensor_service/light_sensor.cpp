@@ -66,18 +66,28 @@ bool lightSensorCaptureNeutral(size_t sampleCount)
     float rollMin = INFINITY, rollMax = -INFINITY;
     for (size_t i = 0; i < sampleCount; ++i) {
         LightRawReading raw;
-        if (!readRaw(raw)) return false;
+         if (!readRaw(raw)) {
+            ESP_LOGE("LIGHT", "readRaw failed at sample %u of %u",
+                     (unsigned)i, (unsigned)sampleCount);
+            return false;
+        }
         float pitch = 0.0f, roll = 0.0f;
         const sensor_fault_flags_t faults = evaluateLightReading(
             raw, LIGHT_MIN_TOTAL_COUNT, LIGHT_SATURATION_COUNT,
             LIGHT_OPEN_COUNT, LIGHT_SHORT_COUNT, pitch, roll);
         if (faults != SENSOR_FAULT_NONE) {
+            ESP_LOGE("LIGHT", "Fault 0x%x at sample %u: TL=%u TR=%u BL=%u BR=%u",
+                     (unsigned)faults, (unsigned)i,
+                     (unsigned)raw.topLeft, (unsigned)raw.topRight,
+                     (unsigned)raw.bottomLeft, (unsigned)raw.bottomRight);
             sensorHealthSetActiveFaults(
                 &health, faults | SENSOR_FAULT_CALIBRATION_REQUIRED);
             return false;
         }
         if (std::fabs(pitch) > LIGHT_CAL_MAX_ABS_ERROR ||
             std::fabs(roll) > LIGHT_CAL_MAX_ABS_ERROR) {
+ESP_LOGE("LIGHT", "Unbalanced at sample %u: pitch %.3f roll %.3f (limit %.3f)",
+                     (unsigned)i, pitch, roll, (double)LIGHT_CAL_MAX_ABS_ERROR);
             sensorHealthSetActiveFaults(
                 &health, SENSOR_FAULT_CALIBRATION_REQUIRED);
             return false;
@@ -92,12 +102,16 @@ bool lightSensorCaptureNeutral(size_t sampleCount)
     }
     if ((pitchMax - pitchMin) > LIGHT_CAL_MAX_SPREAD ||
         (rollMax - rollMin) > LIGHT_CAL_MAX_SPREAD) {
+      ESP_LOGE("LIGHT", "Unstable: pitch spread %.3f roll spread %.3f (limit %.3f)",
+                 pitchMax - pitchMin, rollMax - rollMin, (double)LIGHT_CAL_MAX_SPREAD);
         sensorHealthRaiseFaults(&health, SENSOR_FAULT_CALIBRATION_UNSTABLE);
         return false;
     }
     neutralPitch = pitchSum / sampleCount;
     neutralRoll = rollSum / sampleCount;
     neutralValid = true;
+    ESP_LOGI("LIGHT", "Calibrated: neutral pitch %.3f roll %.3f",
+             neutralPitch, neutralRoll);
     sensorHealthSetActiveFaults(&health, SENSOR_FAULT_NONE);
     sensorHealthSetState(&health, SENSOR_STATE_VALID);
     return true;

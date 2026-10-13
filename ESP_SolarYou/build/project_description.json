@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "ESP_SolarYou",
-    "project_version":    "e0afe2f-dirty",
+    "project_version":    "aa09d63-dirty",
     "project_path":       "/home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou",
     "idf_path":           "/home/rudy/esp/esp-idf",
     "build_dir":          "/home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build",

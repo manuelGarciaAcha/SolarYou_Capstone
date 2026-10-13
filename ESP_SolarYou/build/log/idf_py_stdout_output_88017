@@ -1,0 +1,2096 @@
+Command: /home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python /home/rudy/esp/esp-idf/tools/idf_monitor.py -p /dev/ttyACM1 -b 115200 --toolchain-prefix xtensa-esp32s3-elf- --target esp32s3 --revision 0 /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/ESP_SolarYou.elf /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.elf -m '/home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python' '/home/rudy/esp/esp-idf/tools/idf.py' '-p' '/dev/ttyACM1'
+[0;32mI (114) esp_image: segment 3: paddr=00030020 vaddr=42000020 sizeESP-ROM:esp32s3-20210327[0m
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x9 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x42008073
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2eec
+entry 0x403c8924
+[0;32mI (24) boot: ESP-IDF v5.5.5 2nd stage bootloader[0m
+[0;32mI (24) boot: compile time Oct 10 2026 22:57:59[0m
+[0;32mI (25) boot: Multicore bootloader[0m
+[0;32mI (26) boot: chip revision: v0.2[0m
+[0;32mI (27) boot: efuse block revision: v1.4[0m
+[0;32mI (31) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (35) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32s3: SPI Flash Size : 16MB[0m
+[0;32mI (43) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (50) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (76) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3c040020 size=1286ch ( 75884) map[0m
+[0;32mI (100) esp_image: segment 1: paddr=00022894 vaddr=3fc96f00 size=0367ch ( 13948) load[0m
+[0;32mI (104) esp_image: segment 2: paddr=00025f18 vaddr=40374000 size=0a100h ( 41216) load[0m
+[0;32mI (114) esp_image: segment 3: paddr=00030020 vaddr=42000020 size=33370h (209776) map[0m
+[0;32mI (153) esp_image: segment 4: paddr=00063398 vaddr=4037e100 size=08d2ch ( 36140) load[0m
+[0;32mI (161) esp_image: segment 5: paddr=0006c0cc vaddr=50000000 size=00020h (    32) load[0m
+[0;32mI (169) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (169) boot: Disabling RNG early entropy source...[0m
+[0;32mI (179) esp_psram: Found 2MB PSRAM device[0m
+[0;32mI (180) esp_psram: Speed: 40MHz[0m
+[0;32mI (180) cpu_start: Multicore app[0m
+[0;32mI (600) esp_psram: SPI SRAM memory test OK[0m
+[0;32mI (608) cpu_start: GPIO 44 and 43 are used as console UART I/O pins[0m
+[0;32mI (609) cpu_start: Pro cpu start user code[0m
+[0;32mI (609) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (610) app_init: Application information:[0m
+[0;32mI (614) app_init: Project name:     ESP_SolarYou[0m
+[0;32mI (618) app_init: App version:      aa09d63-dirty[0m
+[0;32mI (623) app_init: Compile time:     Oct 12 2026 18:13:26[0m
+[0;32mI (628) app_init: ELF file SHA256:  1dd5d1ba1...[0m
+[0;32mI (632) app_init: ESP-IDF:          v5.5.5[0m
+[0;32mI (636) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (640) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (644) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (648) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (654) heap_init: At 3FC9C9F0 len 0004CD20 (307 KiB): RAM[0m
+[0;32mI (659) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (664) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (669) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM[0m
+[0;32mI (675) esp_psram: Adding pool of 2048K of PSRAM memory to heap allocator[0m
+[0;32mI (682) spi_flash: detected chip: boya[0m
+[0;32mI (685) spi_flash: flash io: dio[0m
+[0;32mI (688) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (694) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (701) main_task: Started on CPU0[0m
+[0;32mI (704) esp_psram: Reserving pool of 32K of internal memory for DMA/internal allocations[0m
+[0;32mI (712) main_task: Calling app_main()[0m
+[0;32mI (2823) LIGHT: Calibrated: neutral pitch 0.137 roll -0.427[0m
+[0;32mI (2824) Stabilization Task: Initialization Successul[0m
+[  2574][E][esp32-hal-i2c-ng.c:321] i2cRead(): i2c_master_receive failed: [259] ESP_ERR_INVALID_STATE
+[  2583][E][Wire.cpp:539] requestFrom(): i2cRead returned Error 259
+[  2590][E][esp32-hal-i2c-ng.c:321] i2cRead(): i2c_master_receive failed: [259] ESP_ERR_INVALID_STATE
+[  2599][E][Wire.cpp:539] requestFrom(): i2cRead returned Error 259
+[  2606][E][esp32-hal-i2c-ng.c:321] i2cRead(): i2c_master_receive failed: [259] ESP_ERR_INVALID_STATE
+[  2615][E][Wire.cpp:539] requestFrom(): i2cRead returned Error 259
+[  2622][E][esp32-hal-i2c-ng.c:321] i2cRead(): i2c_master_receive failed: [259] ESP_ERR_INVALID_STATE
+[  2631][E][Wire.cpp:539] requestFrom(): i2cRead returned Error 259
+[  2638][E][esp32-hal-i2c-ng.c:321] i2cRead(): i2c_master_receive failed: [259] ESP_ERR_INVALID_STATE
+[  2647][E][Wire.cpp:539] requestFrom(): i2cRead returned Error 259
+[  2654][E][esp32-hal-i2c-ng.c:321] i2cRead(): i2c_master_receive failed: [259] ESP_ERR_INVALID_STATE
+[  2663][E][Wire.cpp:539] requestFrom(): i2cRead returned Error 259
+[0;33mW (3417) Stabilization Task: IMU read failed[0m
+[1;31mE (3418) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3424) Stabilization Task: IMU read failed[0m
+[1;31mE (3424) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3445) Stabilization Task: IMU read failed[0m
+[1;31mE (3445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3465) Stabilization Task: IMU read failed[0m
+[1;31mE (3465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3485) Stabilization Task: IMU read failed[0m
+[1;31mE (3485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3505) Stabilization Task: IMU read failed[0m
+[1;31mE (3505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3525) Stabilization Task: IMU read failed[0m
+[1;31mE (3525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3545) Stabilization Task: IMU read failed[0m
+[1;31mE (3545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3565) Stabilization Task: IMU read failed[0m
+[1;31mE (3565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3585) Stabilization Task: IMU read failed[0m
+[1;31mE (3585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3605) Stabilization Task: IMU read failed[0m
+[1;31mE (3605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3625) Stabilization Task: IMU read failed[0m
+[1;31mE (3625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3645) Stabilization Task: IMU read failed[0m
+[1;31mE (3645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3665) Stabilization Task: IMU read failed[0m
+[1;31mE (3665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3685) Stabilization Task: IMU read failed[0m
+[1;31mE (3685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3705) Stabilization Task: IMU read failed[0m
+[1;31mE (3705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3725) Stabilization Task: IMU read failed[0m
+[1;31mE (3725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3745) Stabilization Task: IMU read failed[0m
+[1;31mE (3745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3765) Stabilization Task: IMU read failed[0m
+[1;31mE (3765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3785) Stabilization Task: IMU read failed[0m
+[1;31mE (3785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3805) Stabilization Task: IMU read failed[0m
+[1;31mE (3805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3825) Stabilization Task: IMU read failed[0m
+[1;31mE (3825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3845) Stabilization Task: IMU read failed[0m
+[1;31mE (3845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3865) Stabilization Task: IMU read failed[0m
+[1;31mE (3865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3885) Stabilization Task: IMU read failed[0m
+[1;31mE (3885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3905) Stabilization Task: IMU read failed[0m
+[1;31mE (3905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3925) Stabilization Task: IMU read failed[0m
+[1;31mE (3925) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3945) Stabilization Task: IMU read failed[0m
+[1;31mE (3945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3965) Stabilization Task: IMU read failed[0m
+[1;31mE (3965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (3985) Stabilization Task: IMU read failed[0m
+[1;31mE (3985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4005) Stabilization Task: IMU read failed[0m
+[1;31mE (4005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4025) Stabilization Task: IMU read failed[0m
+[1;31mE (4025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4045) Stabilization Task: IMU read failed[0m
+[1;31mE (4045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4065) Stabilization Task: IMU read failed[0m
+[1;31mE (4065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4085) Stabilization Task: IMU read failed[0m
+[1;31mE (4085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4105) Stabilization Task: IMU read failed[0m
+[1;31mE (4105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4125) Stabilization Task: IMU read failed[0m
+[1;31mE (4125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4145) Stabilization Task: IMU read failed[0m
+[1;31mE (4145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4165) Stabilization Task: IMU read failed[0m
+[1;31mE (4165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4185) Stabilization Task: IMU read failed[0m
+[1;31mE (4185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4205) Stabilization Task: IMU read failed[0m
+[1;31mE (4205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4225) Stabilization Task: IMU read failed[0m
+[1;31mE (4225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4245) Stabilization Task: IMU read failed[0m
+[1;31mE (4245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4265) Stabilization Task: IMU read failed[0m
+[1;31mE (4265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4285) Stabilization Task: IMU read failed[0m
+[1;31mE (4285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4305) Stabilization Task: IMU read failed[0m
+[1;31mE (4305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4325) Stabilization Task: IMU read failed[0m
+[1;31mE (4325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4345) Stabilization Task: IMU read failed[0m
+[1;31mE (4345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4365) Stabilization Task: IMU read failed[0m
+[1;31mE (4365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4385) Stabilization Task: IMU read failed[0m
+[1;31mE (4385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4405) Stabilization Task: IMU read failed[0m
+[1;31mE (4405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4425) Stabilization Task: IMU read failed[0m
+[1;31mE (4425) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4445) Stabilization Task: IMU read failed[0m
+[1;31mE (4445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4465) Stabilization Task: IMU read failed[0m
+[1;31mE (4465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4485) Stabilization Task: IMU read failed[0m
+[1;31mE (4485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4505) Stabilization Task: IMU read failed[0m
+[1;31mE (4505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4525) Stabilization Task: IMU read failed[0m
+[1;31mE (4525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4545) Stabilization Task: IMU read failed[0m
+[1;31mE (4545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4565) Stabilization Task: IMU read failed[0m
+[1;31mE (4565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4585) Stabilization Task: IMU read failed[0m
+[1;31mE (4585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4605) Stabilization Task: IMU read failed[0m
+[1;31mE (4605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4625) Stabilization Task: IMU read failed[0m
+[1;31mE (4625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4645) Stabilization Task: IMU read failed[0m
+[1;31mE (4645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4665) Stabilization Task: IMU read failed[0m
+[1;31mE (4665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4685) Stabilization Task: IMU read failed[0m
+[1;31mE (4685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4705) Stabilization Task: IMU read failed[0m
+[1;31mE (4705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4725) Stabilization Task: IMU read failed[0m
+[1;31mE (4725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4745) Stabilization Task: IMU read failed[0m
+[1;31mE (4745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4765) Stabilization Task: IMU read failed[0m
+[1;31mE (4765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4785) Stabilization Task: IMU read failed[0m
+[1;31mE (4785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4805) Stabilization Task: IMU read failed[0m
+[1;31mE (4805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4825) Stabilization Task: IMU read failed[0m
+[1;31mE (4825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4845) Stabilization Task: IMU read failed[0m
+[1;31mE (4845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4865) Stabilization Task: IMU read failed[0m
+[1;31mE (4865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4885) Stabilization Task: IMU read failed[0m
+[1;31mE (4885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4905) Stabilization Task: IMU read failed[0m
+[1;31mE (4905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4925) Stabilization Task: IMU read failed[0m
+[1;31mE (4925) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4945) Stabilization Task: IMU read failed[0m
+[1;31mE (4945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4965) Stabilization Task: IMU read failed[0m
+[1;31mE (4965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (4985) Stabilization Task: IMU read failed[0m
+[1;31mE (4985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5005) Stabilization Task: IMU read failed[0m
+[1;31mE (5005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5025) Stabilization Task: IMU read failed[0m
+[1;31mE (5025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5045) Stabilization Task: IMU read failed[0m
+[1;31mE (5045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5065) Stabilization Task: IMU read failed[0m
+[1;31mE (5065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5085) Stabilization Task: IMU read failed[0m
+[1;31mE (5085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5105) Stabilization Task: IMU read failed[0m
+[1;31mE (5105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5125) Stabilization Task: IMU read failed[0m
+[1;31mE (5125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5145) Stabilization Task: IMU read failed[0m
+[1;31mE (5145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5165) Stabilization Task: IMU read failed[0m
+[1;31mE (5165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5185) Stabilization Task: IMU read failed[0m
+[1;31mE (5185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5205) Stabilization Task: IMU read failed[0m
+[1;31mE (5205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5225) Stabilization Task: IMU read failed[0m
+[1;31mE (5225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5245) Stabilization Task: IMU read failed[0m
+[1;31mE (5245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5265) Stabilization Task: IMU read failed[0m
+[1;31mE (5265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5285) Stabilization Task: IMU read failed[0m
+[1;31mE (5285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5305) Stabilization Task: IMU read failed[0m
+[1;31mE (5305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5325) Stabilization Task: IMU read failed[0m
+[1;31mE (5325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5345) Stabilization Task: IMU read failed[0m
+[1;31mE (5345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5365) Stabilization Task: IMU read failed[0m
+[1;31mE (5365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5385) Stabilization Task: IMU read failed[0m
+[1;31mE (5385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5405) Stabilization Task: IMU read failed[0m
+[1;31mE (5405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5425) Stabilization Task: IMU read failed[0m
+[1;31mE (5425) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5445) Stabilization Task: IMU read failed[0m
+[1;31mE (5445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5465) Stabilization Task: IMU read failed[0m
+[1;31mE (5465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5485) Stabilization Task: IMU read failed[0m
+[1;31mE (5485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5505) Stabilization Task: IMU read failed[0m
+[1;31mE (5505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5525) Stabilization Task: IMU read failed[0m
+[1;31mE (5525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5545) Stabilization Task: IMU read failed[0m
+[1;31mE (5545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5565) Stabilization Task: IMU read failed[0m
+[1;31mE (5565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5585) Stabilization Task: IMU read failed[0m
+[1;31mE (5585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5605) Stabilization Task: IMU read failed[0m
+[1;31mE (5605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5625) Stabilization Task: IMU read failed[0m
+[1;31mE (5625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5645) Stabilization Task: IMU read failed[0m
+[1;31mE (5645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5665) Stabilization Task: IMU read failed[0m
+[1;31mE (5665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5685) Stabilization Task: IMU read failed[0m
+[1;31mE (5685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5705) Stabilization Task: IMU read failed[0m
+[1;31mE (5705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5725) Stabilization Task: IMU read failed[0m
+[1;31mE (5725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5745) Stabilization Task: IMU read failed[0m
+[1;31mE (5745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5765) Stabilization Task: IMU read failed[0m
+[1;31mE (5765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5785) Stabilization Task: IMU read failed[0m
+[1;31mE (5785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5805) Stabilization Task: IMU read failed[0m
+[1;31mE (5805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5825) Stabilization Task: IMU read failed[0m
+[1;31mE (5825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5845) Stabilization Task: IMU read failed[0m
+[1;31mE (5845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5865) Stabilization Task: IMU read failed[0m
+[1;31mE (5865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5885) Stabilization Task: IMU read failed[0m
+[1;31mE (5885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5905) Stabilization Task: IMU read failed[0m
+[1;31mE (5905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5925) Stabilization Task: IMU read failed[0m
+[1;31mE (5925) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5945) Stabilization Task: IMU read failed[0m
+[1;31mE (5945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5965) Stabilization Task: IMU read failed[0m
+[1;31mE (5965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (5985) Stabilization Task: IMU read failed[0m
+[1;31mE (5985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6005) Stabilization Task: IMU read failed[0m
+[1;31mE (6005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6025) Stabilization Task: IMU read failed[0m
+[1;31mE (6025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6045) Stabilization Task: IMU read failed[0m
+[1;31mE (6045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6065) Stabilization Task: IMU read failed[0m
+[1;31mE (6065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6085) Stabilization Task: IMU read failed[0m
+[1;31mE (6085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6105) Stabilization Task: IMU read failed[0m
+[1;31mE (6105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6125) Stabilization Task: IMU read failed[0m
+[1;31mE (6125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6145) Stabilization Task: IMU read failed[0m
+[1;31mE (6145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6165) Stabilization Task: IMU read failed[0m
+[1;31mE (6165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6185) Stabilization Task: IMU read failed[0m
+[1;31mE (6185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6205) Stabilization Task: IMU read failed[0m
+[1;31mE (6205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6225) Stabilization Task: IMU read failed[0m
+[1;31mE (6225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6245) Stabilization Task: IMU read failed[0m
+[1;31mE (6245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6265) Stabilization Task: IMU read failed[0m
+[1;31mE (6265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6285) Stabilization Task: IMU read failed[0m
+[1;31mE (6285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6305) Stabilization Task: IMU read failed[0m
+[1;31mE (6305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6325) Stabilization Task: IMU read failed[0m
+[1;31mE (6325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6345) Stabilization Task: IMU read failed[0m
+[1;31mE (6345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6365) Stabilization Task: IMU read failed[0m
+[1;31mE (6365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6385) Stabilization Task: IMU read failed[0m
+[1;31mE (6385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6405) Stabilization Task: IMU read failed[0m
+[1;31mE (6405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6425) Stabilization Task: IMU read failed[0m
+[1;31mE (6425) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6445) Stabilization Task: IMU read failed[0m
+[1;31mE (6445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6465) Stabilization Task: IMU read failed[0m
+[1;31mE (6465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6485) Stabilization Task: IMU read failed[0m
+[1;31mE (6485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6505) Stabilization Task: IMU read failed[0m
+[1;31mE (6505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6525) Stabilization Task: IMU read failed[0m
+[1;31mE (6525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6545) Stabilization Task: IMU read failed[0m
+[1;31mE (6545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6565) Stabilization Task: IMU read failed[0m
+[1;31mE (6565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6585) Stabilization Task: IMU read failed[0m
+[1;31mE (6585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6605) Stabilization Task: IMU read failed[0m
+[1;31mE (6605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6625) Stabilization Task: IMU read failed[0m
+[1;31mE (6625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6645) Stabilization Task: IMU read failed[0m
+[1;31mE (6645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6665) Stabilization Task: IMU read failed[0m
+[1;31mE (6665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6685) Stabilization Task: IMU read failed[0m
+[1;31mE (6685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6705) Stabilization Task: IMU read failed[0m
+[1;31mE (6705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6725) Stabilization Task: IMU read failed[0m
+[1;31mE (6725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6745) Stabilization Task: IMU read failed[0m
+[1;31mE (6745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6765) Stabilization Task: IMU read failed[0m
+[1;31mE (6765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6785) Stabilization Task: IMU read failed[0m
+[1;31mE (6785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6805) Stabilization Task: IMU read failed[0m
+[1;31mE (6805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6825) Stabilization Task: IMU read failed[0m
+[1;31mE (6825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6845) Stabilization Task: IMU read failed[0m
+[1;31mE (6845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6865) Stabilization Task: IMU read failed[0m
+[1;31mE (6865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6885) Stabilization Task: IMU read failed[0m
+[1;31mE (6885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6905) Stabilization Task: IMU read failed[0m
+[1;31mE (6905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6923) Light Task: Light sensor read failed[0m
+[1;31mE (6923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6925) Stabilization Task: IMU read failed[0m
+[1;31mE (6925) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6945) Stabilization Task: IMU read failed[0m
+[1;31mE (6945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6965) Stabilization Task: IMU read failed[0m
+[1;31mE (6965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (6985) Stabilization Task: IMU read failed[0m
+[1;31mE (6985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7005) Stabilization Task: IMU read failed[0m
+[1;31mE (7005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7025) Stabilization Task: IMU read failed[0m
+[1;31mE (7025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7045) Stabilization Task: IMU read failed[0m
+[1;31mE (7045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7065) Stabilization Task: IMU read failed[0m
+[1;31mE (7065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7085) Stabilization Task: IMU read failed[0m
+[1;31mE (7085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7105) Stabilization Task: IMU read failed[0m
+[1;31mE (7105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7125) Stabilization Task: IMU read failed[0m
+[1;31mE (7125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7145) Stabilization Task: IMU read failed[0m
+[1;31mE (7145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7165) Stabilization Task: IMU read failed[0m
+[1;31mE (7165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7185) Stabilization Task: IMU read failed[0m
+[1;31mE (7185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7205) Stabilization Task: IMU read failed[0m
+[1;31mE (7205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7225) Stabilization Task: IMU read failed[0m
+[1;31mE (7225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7245) Stabilization Task: IMU read failed[0m
+[1;31mE (7245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7265) Stabilization Task: IMU read failed[0m
+[1;31mE (7265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7285) Stabilization Task: IMU read failed[0m
+[1;31mE (7285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7305) Stabilization Task: IMU read failed[0m
+[1;31mE (7305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7325) Stabilization Task: IMU read failed[0m
+[1;31mE (7325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7345) Stabilization Task: IMU read failed[0m
+[1;31mE (7345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7365) Stabilization Task: IMU read failed[0m
+[1;31mE (7365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7385) Stabilization Task: IMU read failed[0m
+[1;31mE (7385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7405) Stabilization Task: IMU read failed[0m
+[1;31mE (7405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7423) Light Task: Light sensor read failed[0m
+[1;31mE (7423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7425) Stabilization Task: IMU read failed[0m
+[1;31mE (7425) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7445) Stabilization Task: IMU read failed[0m
+[1;31mE (7445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7465) Stabilization Task: IMU read failed[0m
+[1;31mE (7465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7485) Stabilization Task: IMU read failed[0m
+[1;31mE (7485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7505) Stabilization Task: IMU read failed[0m
+[1;31mE (7505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7525) Stabilization Task: IMU read failed[0m
+[1;31mE (7525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7545) Stabilization Task: IMU read failed[0m
+[1;31mE (7545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7565) Stabilization Task: IMU read failed[0m
+[1;31mE (7565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7585) Stabilization Task: IMU read failed[0m
+[1;31mE (7585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7605) Stabilization Task: IMU read failed[0m
+[1;31mE (7605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7625) Stabilization Task: IMU read failed[0m
+[1;31mE (7625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7645) Stabilization Task: IMU read failed[0m
+[1;31mE (7645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7665) Stabilization Task: IMU read failed[0m
+[1;31mE (7665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7685) Stabilization Task: IMU read failed[0m
+[1;31mE (7685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7705) Stabilization Task: IMU read failed[0m
+[1;31mE (7705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7725) Stabilization Task: IMU read failed[0m
+[1;31mE (7725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7745) Stabilization Task: IMU read failed[0m
+[1;31mE (7745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7765) Stabilization Task: IMU read failed[0m
+[1;31mE (7765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7785) Stabilization Task: IMU read failed[0m
+[1;31mE (7785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7805) Stabilization Task: IMU read failed[0m
+[1;31mE (7805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7825) Stabilization Task: IMU read failed[0m
+[1;31mE (7825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7845) Stabilization Task: IMU read failed[0m
+[1;31mE (7845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7865) Stabilization Task: IMU read failed[0m
+[1;31mE (7865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7885) Stabilization Task: IMU read failed[0m
+[1;31mE (7885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7905) Stabilization Task: IMU read failed[0m
+[1;31mE (7905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7923) Light Task: Light sensor read failed[0m
+[1;31mE (7923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7925) Stabilization Task: IMU read failed[0m
+[1;31mE (7925) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7945) Stabilization Task: IMU read failed[0m
+[1;31mE (7945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7965) Stabilization Task: IMU read failed[0m
+[1;31mE (7965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (7985) Stabilization Task: IMU read failed[0m
+[1;31mE (7985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8005) Stabilization Task: IMU read failed[0m
+[1;31mE (8005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8025) Stabilization Task: IMU read failed[0m
+[1;31mE (8025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8045) Stabilization Task: IMU read failed[0m
+[1;31mE (8045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8065) Stabilization Task: IMU read failed[0m
+[1;31mE (8065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8085) Stabilization Task: IMU read failed[0m
+[1;31mE (8085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8105) Stabilization Task: IMU read failed[0m
+[1;31mE (8105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8125) Stabilization Task: IMU read failed[0m
+[1;31mE (8125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8145) Stabilization Task: IMU read failed[0m
+[1;31mE (8145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8165) Stabilization Task: IMU read failed[0m
+[1;31mE (8165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8185) Stabilization Task: IMU read failed[0m
+[1;31mE (8185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8205) Stabilization Task: IMU read failed[0m
+[1;31mE (8205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8225) Stabilization Task: IMU read failed[0m
+[1;31mE (8225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8245) Stabilization Task: IMU read failed[0m
+[1;31mE (8245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8265) Stabilization Task: IMU read failed[0m
+[1;31mE (8265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8285) Stabilization Task: IMU read failed[0m
+[1;31mE (8285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8305) Stabilization Task: IMU read failed[0m
+[1;31mE (8305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8325) Stabilization Task: IMU read failed[0m
+[1;31mE (8325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8345) Stabilization Task: IMU read failed[0m
+[1;31mE (8345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8365) Stabilization Task: IMU read failed[0m
+[1;31mE (8365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8385) Stabilization Task: IMU read failed[0m
+[1;31mE (8385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8405) Stabilization Task: IMU read failed[0m
+[1;31mE (8405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8423) Light Task: Light sensor read failed[0m
+[1;31mE (8423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8425) Stabilization Task: IMU read failed[0m
+[1;31mE (8425) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8445) Stabilization Task: IMU read failed[0m
+[1;31mE (8445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8465) Stabilization Task: IMU read failed[0m
+[1;31mE (8465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8485) Stabilization Task: IMU read failed[0m
+[1;31mE (8485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8505) Stabilization Task: IMU read failed[0m
+[1;31mE (8505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8525) Stabilization Task: IMU read failed[0m
+[1;31mE (8525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8545) Stabilization Task: IMU read failed[0m
+[1;31mE (8545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8565) Stabilization Task: IMU read failed[0m
+[1;31mE (8565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8585) Stabilization Task: IMU read failed[0m
+[1;31mE (8585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8605) Stabilization Task: IMU read failed[0m
+[1;31mE (8605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8625) Stabilization Task: IMU read failed[0m
+[1;31mE (8625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8645) Stabilization Task: IMU read failed[0m
+[1;31mE (8645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8665) Stabilization Task: IMU read failed[0m
+[1;31mE (8665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8685) Stabilization Task: IMU read failed[0m
+[1;31mE (8685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8705) Stabilization Task: IMU read failed[0m
+[1;31mE (8705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8725) Stabilization Task: IMU read failed[0m
+[1;31mE (8725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8745) Stabilization Task: IMU read failed[0m
+[1;31mE (8745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8765) Stabilization Task: IMU read failed[0m
+[1;31mE (8765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8785) Stabilization Task: IMU read failed[0m
+[1;31mE (8785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8805) Stabilization Task: IMU read failed[0m
+[1;31mE (8805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8825) Stabilization Task: IMU read failed[0m
+[1;31mE (8825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8845) Stabilization Task: IMU read failed[0m
+[1;31mE (8845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8865) Stabilization Task: IMU read failed[0m
+[1;31mE (8865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8885) Stabilization Task: IMU read failed[0m
+[1;31mE (8885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8905) Stabilization Task: IMU read failed[0m
+[1;31mE (8905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8923) Light Task: Light sensor read failed[0m
+[1;31mE (8923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8925) Stabilization Task: IMU read failed[0m
+[1;31mE (8925) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8945) Stabilization Task: IMU read failed[0m
+[1;31mE (8945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8965) Stabilization Task: IMU read failed[0m
+[1;31mE (8965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (8985) Stabilization Task: IMU read failed[0m
+[1;31mE (8985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9005) Stabilization Task: IMU read failed[0m
+[1;31mE (9005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9025) Stabilization Task: IMU read failed[0m
+[1;31mE (9025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9045) Stabilization Task: IMU read failed[0m
+[1;31mE (9045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9065) Stabilization Task: IMU read failed[0m
+[1;31mE (9065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9085) Stabilization Task: IMU read failed[0m
+[1;31mE (9085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9105) Stabilization Task: IMU read failed[0m
+[1;31mE (9105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9125) Stabilization Task: IMU read failed[0m
+[1;31mE (9125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9145) Stabilization Task: IMU read failed[0m
+[1;31mE (9145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9165) Stabilization Task: IMU read failed[0m
+[1;31mE (9165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9185) Stabilization Task: IMU read failed[0m
+[1;31mE (9185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9205) Stabilization Task: IMU read failed[0m
+[1;31mE (9205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9225) Stabilization Task: IMU read failed[0m
+[1;31mE (9225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9245) Stabilization Task: IMU read failed[0m
+[1;31mE (9245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9265) Stabilization Task: IMU read failed[0m
+[1;31mE (9265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9285) Stabilization Task: IMU read failed[0m
+[1;31mE (9285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9305) Stabilization Task: IMU read failed[0m
+[1;31mE (9305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9325) Stabilization Task: IMU read failed[0m
+[1;31mE (9325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9345) Stabilization Task: IMU read failed[0m
+[1;31mE (9345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9365) Stabilization Task: IMU read failed[0m
+[1;31mE (9365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9385) Stabilization Task: IMU read failed[0m
+[1;31mE (9385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9405) Stabilization Task: IMU read failed[0m
+[1;31mE (9405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9423) Light Task: Light sensor read failed[0m
+[1;31mE (9423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9425) Stabilization Task: IMU read failed[0m
+[1;31mE (9425) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9445) Stabilization Task: IMU read failed[0m
+[1;31mE (9445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9465) Stabilization Task: IMU read failed[0m
+[1;31mE (9465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9485) Stabilization Task: IMU read failed[0m
+[1;31mE (9485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9505) Stabilization Task: IMU read failed[0m
+[1;31mE (9505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9525) Stabilization Task: IMU read failed[0m
+[1;31mE (9525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9545) Stabilization Task: IMU read failed[0m
+[1;31mE (9545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9565) Stabilization Task: IMU read failed[0m
+[1;31mE (9565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9585) Stabilization Task: IMU read failed[0m
+[1;31mE (9585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9605) Stabilization Task: IMU read failed[0m
+[1;31mE (9605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9625) Stabilization Task: IMU read failed[0m
+[1;31mE (9625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9645) Stabilization Task: IMU read failed[0m
+[1;31mE (9645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9665) Stabilization Task: IMU read failed[0m
+[1;31mE (9665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9685) Stabilization Task: IMU read failed[0m
+[1;31mE (9685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9705) Stabilization Task: IMU read failed[0m
+[1;31mE (9705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9725) Stabilization Task: IMU read failed[0m
+[1;31mE (9725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9745) Stabilization Task: IMU read failed[0m
+[1;31mE (9745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9765) Stabilization Task: IMU read failed[0m
+[1;31mE (9765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9785) Stabilization Task: IMU read failed[0m
+[1;31mE (9785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9805) Stabilization Task: IMU read failed[0m
+[1;31mE (9805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9825) Stabilization Task: IMU read failed[0m
+[1;31mE (9825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9845) Stabilization Task: IMU read failed[0m
+[1;31mE (9845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9865) Stabilization Task: IMU read failed[0m
+[1;31mE (9865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9885) Stabilization Task: IMU read failed[0m
+[1;31mE (9885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9905) Stabilization Task: IMU read failed[0m
+[1;31mE (9905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9923) Light Task: Light sensor read failed[0m
+[1;31mE (9923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9925) Stabilization Task: IMU read failed[0m
+[1;31mE (9925) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9945) Stabilization Task: IMU read failed[0m
+[1;31mE (9945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9965) Stabilization Task: IMU read failed[0m
+[1;31mE (9965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (9985) Stabilization Task: IMU read failed[0m
+[1;31mE (9985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10005) Stabilization Task: IMU read failed[0m
+[1;31mE (10005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10025) Stabilization Task: IMU read failed[0m
+[1;31mE (10025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10045) Stabilization Task: IMU read failed[0m
+[1;31mE (10045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10065) Stabilization Task: IMU read failed[0m
+[1;31mE (10065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10085) Stabilization Task: IMU read failed[0m
+[1;31mE (10085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10105) Stabilization Task: IMU read failed[0m
+[1;31mE (10105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10125) Stabilization Task: IMU read failed[0m
+[1;31mE (10125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10145) Stabilization Task: IMU read failed[0m
+[1;31mE (10145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10165) Stabilization Task: IMU read failed[0m
+[1;31mE (10165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10185) Stabilization Task: IMU read failed[0m
+[1;31mE (10185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10205) Stabilization Task: IMU read failed[0m
+[1;31mE (10205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10225) Stabilization Task: IMU read failed[0m
+[1;31mE (10225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10245) Stabilization Task: IMU read failed[0m
+[1;31mE (10245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10265) Stabilization Task: IMU read failed[0m
+[1;31mE (10265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10285) Stabilization Task: IMU read failed[0m
+[1;31mE (10285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10305) Stabilization Task: IMU read failed[0m
+[1;31mE (10305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10325) Stabilization Task: IMU read failed[0m
+[1;31mE (10325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10345) Stabilization Task: IMU read failed[0m
+[1;31mE (10345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10365) Stabilization Task: IMU read failed[0m
+[1;31mE (10365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10385) Stabilization Task: IMU read failed[0m
+[1;31mE (10385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10405) Stabilization Task: IMU read failed[0m
+[1;31mE (10405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10423) Light Task: Light sensor read failed[0m
+[1;31mE (10423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10425) Stabilization Task: IMU read failed[0m
+[1;31mE (10426) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10445) Stabilization Task: IMU read failed[0m
+[1;31mE (10445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10465) Stabilization Task: IMU read failed[0m
+[1;31mE (10465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10485) Stabilization Task: IMU read failed[0m
+[1;31mE (10485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10505) Stabilization Task: IMU read failed[0m
+[1;31mE (10505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10525) Stabilization Task: IMU read failed[0m
+[1;31mE (10525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10545) Stabilization Task: IMU read failed[0m
+[1;31mE (10545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10565) Stabilization Task: IMU read failed[0m
+[1;31mE (10565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10585) Stabilization Task: IMU read failed[0m
+[1;31mE (10585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10605) Stabilization Task: IMU read failed[0m
+[1;31mE (10605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10625) Stabilization Task: IMU read failed[0m
+[1;31mE (10625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10645) Stabilization Task: IMU read failed[0m
+[1;31mE (10645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10665) Stabilization Task: IMU read failed[0m
+[1;31mE (10665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10685) Stabilization Task: IMU read failed[0m
+[1;31mE (10685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10705) Stabilization Task: IMU read failed[0m
+[1;31mE (10705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10725) Stabilization Task: IMU read failed[0m
+[1;31mE (10725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10745) Stabilization Task: IMU read failed[0m
+[1;31mE (10745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10765) Stabilization Task: IMU read failed[0m
+[1;31mE (10765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10785) Stabilization Task: IMU read failed[0m
+[1;31mE (10785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10805) Stabilization Task: IMU read failed[0m
+[1;31mE (10805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10825) Stabilization Task: IMU read failed[0m
+[1;31mE (10825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10845) Stabilization Task: IMU read failed[0m
+[1;31mE (10845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10865) Stabilization Task: IMU read failed[0m
+[1;31mE (10865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10885) Stabilization Task: IMU read failed[0m
+[1;31mE (10885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10905) Stabilization Task: IMU read failed[0m
+[1;31mE (10905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10923) Light Task: Light sensor read failed[0m
+[1;31mE (10923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10925) Stabilization Task: IMU read failed[0m
+[1;31mE (10926) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10945) Stabilization Task: IMU read failed[0m
+[1;31mE (10945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10965) Stabilization Task: IMU read failed[0m
+[1;31mE (10965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (10985) Stabilization Task: IMU read failed[0m
+[1;31mE (10985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11005) Stabilization Task: IMU read failed[0m
+[1;31mE (11005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11025) Stabilization Task: IMU read failed[0m
+[1;31mE (11025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11045) Stabilization Task: IMU read failed[0m
+[1;31mE (11045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11065) Stabilization Task: IMU read failed[0m
+[1;31mE (11065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11085) Stabilization Task: IMU read failed[0m
+[1;31mE (11085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11105) Stabilization Task: IMU read failed[0m
+[1;31mE (11105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11125) Stabilization Task: IMU read failed[0m
+[1;31mE (11125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11145) Stabilization Task: IMU read failed[0m
+[1;31mE (11145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11165) Stabilization Task: IMU read failed[0m
+[1;31mE (11165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11185) Stabilization Task: IMU read failed[0m
+[1;31mE (11185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11205) Stabilization Task: IMU read failed[0m
+[1;31mE (11205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11225) Stabilization Task: IMU read failed[0m
+[1;31mE (11225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11245) Stabilization Task: IMU read failed[0m
+[1;31mE (11245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11265) Stabilization Task: IMU read failed[0m
+[1;31mE (11265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11285) Stabilization Task: IMU read failed[0m
+[1;31mE (11285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11305) Stabilization Task: IMU read failed[0m
+[1;31mE (11305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11325) Stabilization Task: IMU read failed[0m
+[1;31mE (11325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11345) Stabilization Task: IMU read failed[0m
+[1;31mE (11345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11365) Stabilization Task: IMU read failed[0m
+[1;31mE (11365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11385) Stabilization Task: IMU read failed[0m
+[1;31mE (11385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11405) Stabilization Task: IMU read failed[0m
+[1;31mE (11405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11423) Light Task: Light sensor read failed[0m
+[1;31mE (11423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11425) Stabilization Task: IMU read failed[0m
+[1;31mE (11426) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11445) Stabilization Task: IMU read failed[0m
+[1;31mE (11445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11465) Stabilization Task: IMU read failed[0m
+[1;31mE (11465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11485) Stabilization Task: IMU read failed[0m
+[1;31mE (11485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11505) Stabilization Task: IMU read failed[0m
+[1;31mE (11505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11525) Stabilization Task: IMU read failed[0m
+[1;31mE (11525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11545) Stabilization Task: IMU read failed[0m
+[1;31mE (11545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11565) Stabilization Task: IMU read failed[0m
+[1;31mE (11565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11585) Stabilization Task: IMU read failed[0m
+[1;31mE (11585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11605) Stabilization Task: IMU read failed[0m
+[1;31mE (11605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11625) Stabilization Task: IMU read failed[0m
+[1;31mE (11625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11645) Stabilization Task: IMU read failed[0m
+[1;31mE (11645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11665) Stabilization Task: IMU read failed[0m
+[1;31mE (11665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11685) Stabilization Task: IMU read failed[0m
+[1;31mE (11685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11705) Stabilization Task: IMU read failed[0m
+[1;31mE (11705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11725) Stabilization Task: IMU read failed[0m
+[1;31mE (11725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11745) Stabilization Task: IMU read failed[0m
+[1;31mE (11745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11765) Stabilization Task: IMU read failed[0m
+[1;31mE (11765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11785) Stabilization Task: IMU read failed[0m
+[1;31mE (11785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11805) Stabilization Task: IMU read failed[0m
+[1;31mE (11805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11825) Stabilization Task: IMU read failed[0m
+[1;31mE (11825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11845) Stabilization Task: IMU read failed[0m
+[1;31mE (11845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11865) Stabilization Task: IMU read failed[0m
+[1;31mE (11865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11885) Stabilization Task: IMU read failed[0m
+[1;31mE (11885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11905) Stabilization Task: IMU read failed[0m
+[1;31mE (11905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11923) Light Task: Light sensor read failed[0m
+[1;31mE (11923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11925) Stabilization Task: IMU read failed[0m
+[1;31mE (11926) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11945) Stabilization Task: IMU read failed[0m
+[1;31mE (11945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11965) Stabilization Task: IMU read failed[0m
+[1;31mE (11965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (11985) Stabilization Task: IMU read failed[0m
+[1;31mE (11985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12005) Stabilization Task: IMU read failed[0m
+[1;31mE (12005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12025) Stabilization Task: IMU read failed[0m
+[1;31mE (12025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12045) Stabilization Task: IMU read failed[0m
+[1;31mE (12045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12065) Stabilization Task: IMU read failed[0m
+[1;31mE (12065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12085) Stabilization Task: IMU read failed[0m
+[1;31mE (12085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12105) Stabilization Task: IMU read failed[0m
+[1;31mE (12105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12125) Stabilization Task: IMU read failed[0m
+[1;31mE (12125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12145) Stabilization Task: IMU read failed[0m
+[1;31mE (12145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12165) Stabilization Task: IMU read failed[0m
+[1;31mE (12165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12185) Stabilization Task: IMU read failed[0m
+[1;31mE (12185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12205) Stabilization Task: IMU read failed[0m
+[1;31mE (12205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12225) Stabilization Task: IMU read failed[0m
+[1;31mE (12225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12245) Stabilization Task: IMU read failed[0m
+[1;31mE (12245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12265) Stabilization Task: IMU read failed[0m
+[1;31mE (12265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12285) Stabilization Task: IMU read failed[0m
+[1;31mE (12285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12305) Stabilization Task: IMU read failed[0m
+[1;31mE (12305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12325) Stabilization Task: IMU read failed[0m
+[1;31mE (12325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12345) Stabilization Task: IMU read failed[0m
+[1;31mE (12345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12365) Stabilization Task: IMU read failed[0m
+[1;31mE (12365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12385) Stabilization Task: IMU read failed[0m
+[1;31mE (12385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12405) Stabilization Task: IMU read failed[0m
+[1;31mE (12405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12423) Light Task: Light sensor read failed[0m
+[1;31mE (12423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12425) Stabilization Task: IMU read failed[0m
+[1;31mE (12426) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12445) Stabilization Task: IMU read failed[0m
+[1;31mE (12445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12465) Stabilization Task: IMU read failed[0m
+[1;31mE (12465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12485) Stabilization Task: IMU read failed[0m
+[1;31mE (12485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12505) Stabilization Task: IMU read failed[0m
+[1;31mE (12505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12525) Stabilization Task: IMU read failed[0m
+[1;31mE (12525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12545) Stabilization Task: IMU read failed[0m
+[1;31mE (12545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12565) Stabilization Task: IMU read failed[0m
+[1;31mE (12565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12585) Stabilization Task: IMU read failed[0m
+[1;31mE (12585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12605) Stabilization Task: IMU read failed[0m
+[1;31mE (12605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12625) Stabilization Task: IMU read failed[0m
+[1;31mE (12625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12645) Stabilization Task: IMU read failed[0m
+[1;31mE (12645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12665) Stabilization Task: IMU read failed[0m
+[1;31mE (12665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12685) Stabilization Task: IMU read failed[0m
+[1;31mE (12685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12705) Stabilization Task: IMU read failed[0m
+[1;31mE (12705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12725) Stabilization Task: IMU read failed[0m
+[1;31mE (12725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12745) Stabilization Task: IMU read failed[0m
+[1;31mE (12745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12765) Stabilization Task: IMU read failed[0m
+[1;31mE (12765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12785) Stabilization Task: IMU read failed[0m
+[1;31mE (12785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12805) Stabilization Task: IMU read failed[0m
+[1;31mE (12805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12825) Stabilization Task: IMU read failed[0m
+[1;31mE (12825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12845) Stabilization Task: IMU read failed[0m
+[1;31mE (12845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12865) Stabilization Task: IMU read failed[0m
+[1;31mE (12865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12885) Stabilization Task: IMU read failed[0m
+[1;31mE (12885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12905) Stabilization Task: IMU read failed[0m
+[1;31mE (12905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12923) Light Task: Light sensor read failed[0m
+[1;31mE (12923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12925) Stabilization Task: IMU read failed[0m
+[1;31mE (12926) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12945) Stabilization Task: IMU read failed[0m
+[1;31mE (12945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12965) Stabilization Task: IMU read failed[0m
+[1;31mE (12965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (12985) Stabilization Task: IMU read failed[0m
+[1;31mE (12985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13005) Stabilization Task: IMU read failed[0m
+[1;31mE (13005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13025) Stabilization Task: IMU read failed[0m
+[1;31mE (13025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13045) Stabilization Task: IMU read failed[0m
+[1;31mE (13045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13065) Stabilization Task: IMU read failed[0m
+[1;31mE (13065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13085) Stabilization Task: IMU read failed[0m
+[1;31mE (13085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13105) Stabilization Task: IMU read failed[0m
+[1;31mE (13105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13125) Stabilization Task: IMU read failed[0m
+[1;31mE (13125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13145) Stabilization Task: IMU read failed[0m
+[1;31mE (13145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13165) Stabilization Task: IMU read failed[0m
+[1;31mE (13165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13185) Stabilization Task: IMU read failed[0m
+[1;31mE (13185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13205) Stabilization Task: IMU read failed[0m
+[1;31mE (13205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13225) Stabilization Task: IMU read failed[0m
+[1;31mE (13225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13245) Stabilization Task: IMU read failed[0m
+[1;31mE (13245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13265) Stabilization Task: IMU read failed[0m
+[1;31mE (13265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13285) Stabilization Task: IMU read failed[0m
+[1;31mE (13285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13305) Stabilization Task: IMU read failed[0m
+[1;31mE (13305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13325) Stabilization Task: IMU read failed[0m
+[1;31mE (13325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13345) Stabilization Task: IMU read failed[0m
+[1;31mE (13345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13365) Stabilization Task: IMU read failed[0m
+[1;31mE (13365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13385) Stabilization Task: IMU read failed[0m
+[1;31mE (13385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13405) Stabilization Task: IMU read failed[0m
+[1;31mE (13405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13423) Light Task: Light sensor read failed[0m
+[1;31mE (13423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13425) Stabilization Task: IMU read failed[0m
+[1;31mE (13426) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13445) Stabilization Task: IMU read failed[0m
+[1;31mE (13445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13465) Stabilization Task: IMU read failed[0m
+[1;31mE (13465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13485) Stabilization Task: IMU read failed[0m
+[1;31mE (13485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13505) Stabilization Task: IMU read failed[0m
+[1;31mE (13505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13525) Stabilization Task: IMU read failed[0m
+[1;31mE (13525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13545) Stabilization Task: IMU read failed[0m
+[1;31mE (13545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13565) Stabilization Task: IMU read failed[0m
+[1;31mE (13565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13585) Stabilization Task: IMU read failed[0m
+[1;31mE (13585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13605) Stabilization Task: IMU read failed[0m
+[1;31mE (13605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13625) Stabilization Task: IMU read failed[0m
+[1;31mE (13625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13645) Stabilization Task: IMU read failed[0m
+[1;31mE (13645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13665) Stabilization Task: IMU read failed[0m
+[1;31mE (13665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13685) Stabilization Task: IMU read failed[0m
+[1;31mE (13685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13705) Stabilization Task: IMU read failed[0m
+[1;31mE (13705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13725) Stabilization Task: IMU read failed[0m
+[1;31mE (13725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13745) Stabilization Task: IMU read failed[0m
+[1;31mE (13745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13765) Stabilization Task: IMU read failed[0m
+[1;31mE (13765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13785) Stabilization Task: IMU read failed[0m
+[1;31mE (13785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13805) Stabilization Task: IMU read failed[0m
+[1;31mE (13805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13825) Stabilization Task: IMU read failed[0m
+[1;31mE (13825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13845) Stabilization Task: IMU read failed[0m
+[1;31mE (13845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13865) Stabilization Task: IMU read failed[0m
+[1;31mE (13865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13885) Stabilization Task: IMU read failed[0m
+[1;31mE (13885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13905) Stabilization Task: IMU read failed[0m
+[1;31mE (13905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13923) Light Task: Light sensor read failed[0m
+[1;31mE (13923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13925) Stabilization Task: IMU read failed[0m
+[1;31mE (13926) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13945) Stabilization Task: IMU read failed[0m
+[1;31mE (13945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13965) Stabilization Task: IMU read failed[0m
+[1;31mE (13965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (13985) Stabilization Task: IMU read failed[0m
+[1;31mE (13985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14005) Stabilization Task: IMU read failed[0m
+[1;31mE (14005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14025) Stabilization Task: IMU read failed[0m
+[1;31mE (14025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14045) Stabilization Task: IMU read failed[0m
+[1;31mE (14045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14065) Stabilization Task: IMU read failed[0m
+[1;31mE (14065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14085) Stabilization Task: IMU read failed[0m
+[1;31mE (14085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14105) Stabilization Task: IMU read failed[0m
+[1;31mE (14105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14125) Stabilization Task: IMU read failed[0m
+[1;31mE (14125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14145) Stabilization Task: IMU read failed[0m
+[1;31mE (14145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14165) Stabilization Task: IMU read failed[0m
+[1;31mE (14165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14185) Stabilization Task: IMU read failed[0m
+[1;31mE (14185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14205) Stabilization Task: IMU read failed[0m
+[1;31mE (14205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14225) Stabilization Task: IMU read failed[0m
+[1;31mE (14225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14245) Stabilization Task: IMU read failed[0m
+[1;31mE (14245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14265) Stabilization Task: IMU read failed[0m
+[1;31mE (14265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14285) Stabilization Task: IMU read failed[0m
+[1;31mE (14285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14305) Stabilization Task: IMU read failed[0m
+[1;31mE (14305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14325) Stabilization Task: IMU read failed[0m
+[1;31mE (14325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14345) Stabilization Task: IMU read failed[0m
+[1;31mE (14345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14365) Stabilization Task: IMU read failed[0m
+[1;31mE (14365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14385) Stabilization Task: IMU read failed[0m
+[1;31mE (14385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14405) Stabilization Task: IMU read failed[0m
+[1;31mE (14405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14423) Light Task: Light sensor read failed[0m
+[1;31mE (14423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14425) Stabilization Task: IMU read failed[0m
+[1;31mE (14426) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14445) Stabilization Task: IMU read failed[0m
+[1;31mE (14445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14465) Stabilization Task: IMU read failed[0m
+[1;31mE (14465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14485) Stabilization Task: IMU read failed[0m
+[1;31mE (14485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14505) Stabilization Task: IMU read failed[0m
+[1;31mE (14505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14525) Stabilization Task: IMU read failed[0m
+[1;31mE (14525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14545) Stabilization Task: IMU read failed[0m
+[1;31mE (14545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14565) Stabilization Task: IMU read failed[0m
+[1;31mE (14565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14585) Stabilization Task: IMU read failed[0m
+[1;31mE (14585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14605) Stabilization Task: IMU read failed[0m
+[1;31mE (14605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14625) Stabilization Task: IMU read failed[0m
+[1;31mE (14625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14645) Stabilization Task: IMU read failed[0m
+[1;31mE (14645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14665) Stabilization Task: IMU read failed[0m
+[1;31mE (14665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14685) Stabilization Task: IMU read failed[0m
+[1;31mE (14685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14705) Stabilization Task: IMU read failed[0m
+[1;31mE (14705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14725) Stabilization Task: IMU read failed[0m
+[1;31mE (14725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14745) Stabilization Task: IMU read failed[0m
+[1;31mE (14745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14765) Stabilization Task: IMU read failed[0m
+[1;31mE (14765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14785) Stabilization Task: IMU read failed[0m
+[1;31mE (14785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14805) Stabilization Task: IMU read failed[0m
+[1;31mE (14805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14825) Stabilization Task: IMU read failed[0m
+[1;31mE (14825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14845) Stabilization Task: IMU read failed[0m
+[1;31mE (14845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14865) Stabilization Task: IMU read failed[0m
+[1;31mE (14865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14885) Stabilization Task: IMU read failed[0m
+[1;31mE (14885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14905) Stabilization Task: IMU read failed[0m
+[1;31mE (14905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14923) Light Task: Light sensor read failed[0m
+[1;31mE (14923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14925) Stabilization Task: IMU read failed[0m
+[1;31mE (14926) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14945) Stabilization Task: IMU read failed[0m
+[1;31mE (14945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14965) Stabilization Task: IMU read failed[0m
+[1;31mE (14965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (14985) Stabilization Task: IMU read failed[0m
+[1;31mE (14985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15005) Stabilization Task: IMU read failed[0m
+[1;31mE (15005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15025) Stabilization Task: IMU read failed[0m
+[1;31mE (15025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15045) Stabilization Task: IMU read failed[0m
+[1;31mE (15045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15065) Stabilization Task: IMU read failed[0m
+[1;31mE (15065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15085) Stabilization Task: IMU read failed[0m
+[1;31mE (15085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15105) Stabilization Task: IMU read failed[0m
+[1;31mE (15105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15125) Stabilization Task: IMU read failed[0m
+[1;31mE (15125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15145) Stabilization Task: IMU read failed[0m
+[1;31mE (15145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15165) Stabilization Task: IMU read failed[0m
+[1;31mE (15165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15185) Stabilization Task: IMU read failed[0m
+[1;31mE (15185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15205) Stabilization Task: IMU read failed[0m
+[1;31mE (15205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15225) Stabilization Task: IMU read failed[0m
+[1;31mE (15225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15245) Stabilization Task: IMU read failed[0m
+[1;31mE (15245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15265) Stabilization Task: IMU read failed[0m
+[1;31mE (15265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15285) Stabilization Task: IMU read failed[0m
+[1;31mE (15285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15305) Stabilization Task: IMU read failed[0m
+[1;31mE (15305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15325) Stabilization Task: IMU read failed[0m
+[1;31mE (15325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15345) Stabilization Task: IMU read failed[0m
+[1;31mE (15345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15365) Stabilization Task: IMU read failed[0m
+[1;31mE (15365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15385) Stabilization Task: IMU read failed[0m
+[1;31mE (15385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15405) Stabilization Task: IMU read failed[0m
+[1;31mE (15405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15423) Light Task: Light sensor read failed[0m
+[1;31mE (15423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15425) Stabilization Task: IMU read failed[0m
+[1;31mE (15426) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15445) Stabilization Task: IMU read failed[0m
+[1;31mE (15445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15465) Stabilization Task: IMU read failed[0m
+[1;31mE (15465) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15485) Stabilization Task: IMU read failed[0m
+[1;31mE (15485) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15505) Stabilization Task: IMU read failed[0m
+[1;31mE (15505) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15525) Stabilization Task: IMU read failed[0m
+[1;31mE (15525) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15545) Stabilization Task: IMU read failed[0m
+[1;31mE (15545) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15565) Stabilization Task: IMU read failed[0m
+[1;31mE (15565) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15585) Stabilization Task: IMU read failed[0m
+[1;31mE (15585) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15605) Stabilization Task: IMU read failed[0m
+[1;31mE (15605) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15625) Stabilization Task: IMU read failed[0m
+[1;31mE (15625) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15645) Stabilization Task: IMU read failed[0m
+[1;31mE (15645) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15665) Stabilization Task: IMU read failed[0m
+[1;31mE (15665) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15685) Stabilization Task: IMU read failed[0m
+[1;31mE (15685) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15705) Stabilization Task: IMU read failed[0m
+[1;31mE (15705) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15725) Stabilization Task: IMU read failed[0m
+[1;31mE (15725) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15745) Stabilization Task: IMU read failed[0m
+[1;31mE (15745) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15765) Stabilization Task: IMU read failed[0m
+[1;31mE (15765) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15785) Stabilization Task: IMU read failed[0m
+[1;31mE (15785) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15805) Stabilization Task: IMU read failed[0m
+[1;31mE (15805) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15825) Stabilization Task: IMU read failed[0m
+[1;31mE (15825) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15845) Stabilization Task: IMU read failed[0m
+[1;31mE (15845) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15865) Stabilization Task: IMU read failed[0m
+[1;31mE (15865) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15885) Stabilization Task: IMU read failed[0m
+[1;31mE (15885) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15905) Stabilization Task: IMU read failed[0m
+[1;31mE (15905) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15923) Light Task: Light sensor read failed[0m
+[1;31mE (15923) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15925) Stabilization Task: IMU read failed[0m
+[1;31mE (15926) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15945) Stabilization Task: IMU read failed[0m
+[1;31mE (15945) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15965) Stabilization Task: IMU read failed[0m
+[1;31mE (15965) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (15985) Stabilization Task: IMU read failed[0m
+[1;31mE (15985) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16005) Stabilization Task: IMU read failed[0m
+[1;31mE (16005) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16025) Stabilization Task: IMU read failed[0m
+[1;31mE (16025) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16045) Stabilization Task: IMU read failed[0m
+[1;31mE (16045) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16065) Stabilization Task: IMU read failed[0m
+[1;31mE (16065) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16085) Stabilization Task: IMU read failed[0m
+[1;31mE (16085) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16105) Stabilization Task: IMU read failed[0m
+[1;31mE (16105) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16125) Stabilization Task: IMU read failed[0m
+[1;31mE (16125) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16145) Stabilization Task: IMU read failed[0m
+[1;31mE (16145) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16165) Stabilization Task: IMU read failed[0m
+[1;31mE (16165) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16185) Stabilization Task: IMU read failed[0m
+[1;31mE (16185) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16205) Stabilization Task: IMU read failed[0m
+[1;31mE (16205) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16225) Stabilization Task: IMU read failed[0m
+[1;31mE (16225) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16245) Stabilization Task: IMU read failed[0m
+[1;31mE (16245) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16265) Stabilization Task: IMU read failed[0m
+[1;31mE (16265) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16285) Stabilization Task: IMU read failed[0m
+[1;31mE (16285) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16305) Stabilization Task: IMU read failed[0m
+[1;31mE (16305) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16325) Stabilization Task: IMU read failed[0m
+[1;31mE (16325) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16345) Stabilization Task: IMU read failed[0m
+[1;31mE (16345) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16365) Stabilization Task: IMU read failed[0m
+[1;31mE (16365) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16385) Stabilization Task: IMU read failed[0m
+[1;31mE (16385) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16405) Stabilization Task: IMU read failed[0m
+[1;31mE (16405) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16423) Light Task: Light sensor read failed[0m
+[1;31mE (16423) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16425) Stabilization Task: IMU read failed[0m
+[1;31mE (16426) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (16445) Stabilization Task: IMU read failed[0m
+[1;31mE (16445) Main: Stabilization task failed: ESP_ERR_INVALID_STATE[0m
+

@@ -1,0 +1,308 @@
+Command: /home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python /home/rudy/esp/esp-idf/tools/idf_monitor.py -p /dev/ttyACM1 -b 115200 --toolchain-prefix xtensa-esp32s3-elf- --target esp32s3 --revision 0 /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/ESP_SolarYou.elf /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.elf -m '/home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python' '/home/rudy/esp/esp-idf/tools/idf.py' '-p' '/dev/ttyACM1'
+[0;32mI (114) esp_image: segment 3: paddr=00030020 vaddr=42000020 sizeESP-ROM:esp32s3-20210327[0m
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x9 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x42008073
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2eec
+entry 0x403c8924
+[0;32mI (24) boot: ESP-IDF v5.5.5 2nd stage bootloader[0m
+[0;32mI (24) boot: compile time Oct 10 2026 22:57:59[0m
+[0;32mI (25) boot: Multicore bootloader[0m
+[0;32mI (26) boot: chip revision: v0.2[0m
+[0;32mI (27) boot: efuse block revision: v1.4[0m
+[0;32mI (31) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (35) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32s3: SPI Flash Size : 16MB[0m
+[0;32mI (43) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (50) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (76) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3c040020 size=1286ch ( 75884) map[0m
+[0;32mI (100) esp_image: segment 1: paddr=00022894 vaddr=3fc96f00 size=0367ch ( 13948) load[0m
+[0;32mI (104) esp_image: segment 2: paddr=00025f18 vaddr=40374000 size=0a100h ( 41216) load[0m
+[0;32mI (114) esp_image: segment 3: paddr=00030020 vaddr=42000020 size=33370h (209776) map[0m
+[0;32mI (153) esp_image: segment 4: paddr=00063398 vaddr=4037e100 size=08d2ch ( 36140) load[0m
+[0;32mI (161) esp_image: segment 5: paddr=0006c0cc vaddr=50000000 size=00020h (    32) load[0m
+[0;32mI (169) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (169) boot: Disabling RNG early entropy source...[0m
+[0;32mI (179) esp_psram: Found 2MB PSRAM device[0m
+[0;32mI (180) esp_psram: Speed: 40MHz[0m
+[0;32mI (180) cpu_start: Multicore app[0m
+[0;32mI (600) esp_psram: SPI SRAM memory test OK[0m
+[0;32mI (608) cpu_start: GPIO 44 and 43 are used as console UART I/O pins[0m
+[0;32mI (609) cpu_start: Pro cpu start user code[0m
+[0;32mI (609) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (610) app_init: Application information:[0m
+[0;32mI (614) app_init: Project name:     ESP_SolarYou[0m
+[0;32mI (618) app_init: App version:      aa09d63-dirty[0m
+[0;32mI (623) app_init: Compile time:     Oct 12 2026 18:13:26[0m
+[0;32mI (628) app_init: ELF file SHA256:  1dd5d1ba1...[0m
+[0;32mI (632) app_init: ESP-IDF:          v5.5.5[0m
+[0;32mI (636) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (640) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (644) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (648) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (654) heap_init: At 3FC9C9F0 len 0004CD20 (307 KiB): RAM[0m
+[0;32mI (659) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (664) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (669) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM[0m
+[0;32mI (675) esp_psram: Adding pool of 2048K of PSRAM memory to heap allocator[0m
+[0;32mI (682) spi_flash: detected chip: boya[0m
+[0;32mI (685) spi_flash: flash io: dio[0m
+[0;32mI (688) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (694) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (701) main_task: Started on CPU0[0m
+[0;32mI (704) esp_psram: Reserving pool of 32K of internal memory for DMA/internal allocations[0m
+[0;32mI (712) main_task: Calling app_main()[0m
+[0;32mI (2824) LIGHT: Calibrated: neutral pitch 0.547 roll -0.767[0m
+[0;32mI (2825) Stabilization Task: Initialization Successul[0m
+[0;33mW (25334) Light Task: Light sensor read failed[0m
+[1;31mE (25335) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (25835) Light Task: Light sensor read failed[0m
+[1;31mE (25836) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (26336) Light Task: Light sensor read failed[0m
+[1;31mE (26337) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (27839) Light Task: Light sensor read failed[0m
+[1;31mE (27840) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (29842) Light Task: Light sensor read failed[0m
+[1;31mE (29843) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (30343) Light Task: Light sensor read failed[0m
+[1;31mE (30344) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (30845) Light Task: Light sensor read failed[0m
+[1;31mE (30846) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (31345) Light Task: Light sensor read failed[0m
+[1;31mE (31346) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (31847) Light Task: Light sensor read failed[0m
+[1;31mE (31848) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (32348) Light Task: Light sensor read failed[0m
+[1;31mE (32349) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (32848) Light Task: Light sensor read failed[0m
+[1;31mE (32849) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (33349) Light Task: Light sensor read failed[0m
+[1;31mE (33350) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (33850) Light Task: Light sensor read failed[0m
+[1;31mE (33851) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (34351) Light Task: Light sensor read failed[0m
+[1;31mE (34352) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (34852) Light Task: Light sensor read failed[0m
+[1;31mE (34853) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (35353) Light Task: Light sensor read failed[0m
+[1;31mE (35354) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (35853) Light Task: Light sensor read failed[0m
+[1;31mE (35854) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (36355) Light Task: Light sensor read failed[0m
+[1;31mE (36356) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (36855) Light Task: Light sensor read failed[0m
+[1;31mE (36856) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (37357) Light Task: Light sensor read failed[0m
+[1;31mE (37358) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (37857) Light Task: Light sensor read failed[0m
+[1;31mE (37858) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (38358) Light Task: Light sensor read failed[0m
+[1;31mE (38359) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (38859) Light Task: Light sensor read failed[0m
+[1;31mE (38860) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (39360) Light Task: Light sensor read failed[0m
+[1;31mE (39361) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (39862) Light Task: Light sensor read failed[0m
+[1;31mE (39863) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (40362) Light Task: Light sensor read failed[0m
+[1;31mE (40363) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (40862) Light Task: Light sensor read failed[0m
+[1;31mE (40863) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (41363) Light Task: Light sensor read failed[0m
+[1;31mE (41364) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (41865) Light Task: Light sensor read failed[0m
+[1;31mE (41866) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (42365) Light Task: Light sensor read failed[0m
+[1;31mE (42366) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (42867) Light Task: Light sensor read failed[0m
+[1;31mE (42868) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (43368) Light Task: Light sensor read failed[0m
+[1;31mE (43369) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (43868) Light Task: Light sensor read failed[0m
+[1;31mE (43869) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (44369) Light Task: Light sensor read failed[0m
+[1;31mE (44370) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (44870) Light Task: Light sensor read failed[0m
+[1;31mE (44871) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (45372) Light Task: Light sensor read failed[0m
+[1;31mE (45373) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (45872) Light Task: Light sensor read failed[0m
+[1;31mE (45873) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (46373) Light Task: Light sensor read failed[0m
+[1;31mE (46374) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (46874) Light Task: Light sensor read failed[0m
+[1;31mE (46875) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (47374) Light Task: Light sensor read failed[0m
+[1;31mE (47375) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (47875) Light Task: Light sensor read failed[0m
+[1;31mE (47876) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (48377) Light Task: Light sensor read failed[0m
+[1;31mE (48378) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (48878) Light Task: Light sensor read failed[0m
+[1;31mE (48879) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (49379) Light Task: Light sensor read failed[0m
+[1;31mE (49380) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (49880) Light Task: Light sensor read failed[0m
+[1;31mE (49881) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (50380) Light Task: Light sensor read failed[0m
+[1;31mE (50381) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (50882) Light Task: Light sensor read failed[0m
+[1;31mE (50883) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (51382) Light Task: Light sensor read failed[0m
+[1;31mE (51383) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (51883) Light Task: Light sensor read failed[0m
+[1;31mE (51884) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (52384) Light Task: Light sensor read failed[0m
+[1;31mE (52385) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (52886) Light Task: Light sensor read failed[0m
+[1;31mE (52887) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (53386) Light Task: Light sensor read failed[0m
+[1;31mE (53387) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (53887) Light Task: Light sensor read failed[0m
+[1;31mE (53888) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (54388) Light Task: Light sensor read failed[0m
+[1;31mE (54389) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (54889) Light Task: Light sensor read failed[0m
+[1;31mE (54890) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (55390) Light Task: Light sensor read failed[0m
+[1;31mE (55391) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (55890) Light Task: Light sensor read failed[0m
+[1;31mE (55891) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (56391) Light Task: Light sensor read failed[0m
+[1;31mE (56392) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (56892) Light Task: Light sensor read failed[0m
+[1;31mE (56893) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (57393) Light Task: Light sensor read failed[0m
+[1;31mE (57394) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (57894) Light Task: Light sensor read failed[0m
+[1;31mE (57895) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (58395) Light Task: Light sensor read failed[0m
+[1;31mE (58396) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (58896) Light Task: Light sensor read failed[0m
+[1;31mE (58897) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (59397) Light Task: Light sensor read failed[0m
+[1;31mE (59398) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (59898) Light Task: Light sensor read failed[0m
+[1;31mE (59899) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (60399) Light Task: Light sensor read failed[0m
+[1;31mE (60400) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (60899) Light Task: Light sensor read failed[0m
+[1;31mE (60900) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (61400) Light Task: Light sensor read failed[0m
+[1;31mE (61401) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (61901) Light Task: Light sensor read failed[0m
+[1;31mE (61902) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (62402) Light Task: Light sensor read failed[0m
+[1;31mE (62403) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (62903) Light Task: Light sensor read failed[0m
+[1;31mE (62904) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (63405) Light Task: Light sensor read failed[0m
+[1;31mE (63406) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (63907) Light Task: Light sensor read failed[0m
+[1;31mE (63908) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (64407) Light Task: Light sensor read failed[0m
+[1;31mE (64408) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (64908) Light Task: Light sensor read failed[0m
+[1;31mE (64909) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (65409) Light Task: Light sensor read failed[0m
+[1;31mE (65410) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (65910) Light Task: Light sensor read failed[0m
+[1;31mE (65911) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (66411) Light Task: Light sensor read failed[0m
+[1;31mE (66412) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (66911) Light Task: Light sensor read failed[0m
+[1;31mE (66912) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (67412) Light Task: Light sensor read failed[0m
+[1;31mE (67413) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+
+[0;33mW (67912) Light Task: Light sensor read failed[0m
+[1;31mE (67913) Main: Light task failed: ESP_ERR_INVALID_STATE[0m
+

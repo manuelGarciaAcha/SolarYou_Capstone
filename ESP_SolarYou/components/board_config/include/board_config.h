@@ -21,7 +21,7 @@
 
 // Heltec WiFi LoRa 32 V4 (ESP32-S3R2). Verify against Heltec V4 pinout.
 // GPIO26-32 are reserved for flash/PSRAM on ESP32-S3 and must not be used.
-#define SERVO_CH0_PIN       41   // temp
+#define SERVO_CH0_PIN       33   // temp
 #define SERVO_CH1_PIN       42   // temp
 
 #define LIGHT_TOP_LEFT_GPIO      3

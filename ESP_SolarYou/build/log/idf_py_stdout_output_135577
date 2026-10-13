@@ -1,0 +1,55 @@
+Command: ninja flash
+[1/5] cd /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/esp-idf/esptool_py && /home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python /home/rudy/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/partition_table/partition-table.bin /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/ESP_SolarYou.bin
+ESP_SolarYou.bin binary size 0x5c110 bytes. Smallest app partition is 0x100000 bytes. 0xa3ef0 bytes (64%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cd /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/esp-idf/esptool_py && /home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python /home/rudy/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.bin
+Bootloader binary size 0x5160 bytes. 0x2ea0 bytes (36%) free.
+[3/5] No install step for 'bootloader'
+[4/5] Completed 'bootloader'
+[4/5] cd /home/rudy/esp/esp-idf/components/esptool_py && /usr/bin/cmake -D IDF_PATH=/home/rudy/esp/esp-idf -D "SERIAL_TOOL=/home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python;;/home/rudy/esp/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32s3" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build -P /home/rudy/esp/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32s3 -p /dev/ttyACM1 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 16MB 0x0 bootloader/bootloader.bin 0x10000 ESP_SolarYou.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.12.0
+Serial port /dev/ttyACM1
+Connecting....
+Chip is ESP32-S3 (QFN56) (revision v0.2)
+Features: WiFi, BLE, Embedded PSRAM 2MB (AP_3v3)
+Crystal is 40MHz
+USB mode: USB-Serial/JTAG
+MAC: f8:5b:1b:a1:fa:1c
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00005fff...
+Flash will be erased from 0x00010000 to 0x0006cfff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 20832 bytes to 13350...
+Writing at 0x00000000... (100 %)
+Wrote 20832 bytes (13350 compressed) at 0x00000000 in 0.3 seconds (effective 521.4 kbit/s)...
+Hash of data verified.
+Compressed 377104 bytes to 203285...
+Writing at 0x00010000... (7 %)
+Writing at 0x0001d6ed... (15 %)
+Writing at 0x00027f53... (23 %)
+Writing at 0x0002dd93... (30 %)
+Writing at 0x00033c60... (38 %)
+Writing at 0x00039f8c... (46 %)
+Writing at 0x00040631... (53 %)
+Writing at 0x00046bbe... (61 %)
+Writing at 0x0004d1f5... (69 %)
+Writing at 0x00053435... (76 %)
+Writing at 0x0005c4d4... (84 %)
+Writing at 0x00062b8c... (92 %)
+Writing at 0x00069323... (100 %)
+Wrote 377104 bytes (203285 compressed) at 0x00010000 in 2.6 seconds (effective 1157.9 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 103...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.0 seconds (effective 701.9 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...

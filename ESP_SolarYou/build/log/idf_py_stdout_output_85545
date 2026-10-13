@@ -1,0 +1,107 @@
+Command: /home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python /home/rudy/esp/esp-idf/tools/idf_monitor.py -p /dev/ttyACM1 -b 115200 --toolchain-prefix xtensa-esp32s3-elf- --target esp32s3 --revision 0 /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/ESP_SolarYou.elf /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.elf -m '/home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python' '/home/rudy/esp/esp-idf/tools/idf.py' '-p' '/dev/ttyACM1'
+[0;32mI (114) esp_image: segment 3: paddr=00030020 vaddr=42000020 sizeESP-ROM:esp32s3-20210327[0m
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x9 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x42008073
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xd24
+load:0x403cb700,len:0x2eec
+entry 0x403c8924
+[0;32mI (24) boot: ESP-IDF v5.5.5 2nd stage bootloader[0m
+[0;32mI (24) boot: compile time Oct 10 2026 22:57:59[0m
+[0;32mI (25) boot: Multicore bootloader[0m
+[0;32mI (26) boot: chip revision: v0.2[0m
+[0;32mI (27) boot: efuse block revision: v1.4[0m
+[0;32mI (31) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (35) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32s3: SPI Flash Size : 16MB[0m
+[0;32mI (43) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (50) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (76) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3c040020 size=1286ch ( 75884) map[0m
+[0;32mI (100) esp_image: segment 1: paddr=00022894 vaddr=3fc96f00 size=0367ch ( 13948) load[0m
+[0;32mI (104) esp_image: segment 2: paddr=00025f18 vaddr=40374000 size=0a100h ( 41216) load[0m
+[0;32mI (114) esp_image: segment 3: paddr=00030020 vaddr=42000020 size=33370h (209776) map[0m
+[0;32mI (153) esp_image: segment 4: paddr=00063398 vaddr=4037e100 size=08d2ch ( 36140) load[0m
+[0;32mI (161) esp_image: segment 5: paddr=0006c0cc vaddr=50000000 size=00020h (    32) load[0m
+[0;32mI (169) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (169) boot: Disabling RNG early entropy source...[0m
+[0;32mI (179) esp_psram: Found 2MB PSRAM device[0m
+[0;32mI (180) esp_psram: Speed: 40MHz[0m
+[0;32mI (180) cpu_start: Multicore app[0m
+[0;32mI (600) esp_psram: SPI SRAM memory test OK[0m
+[0;32mI (608) cpu_start: GPIO 44 and 43 are used as console UART I/O pins[0m
+[0;32mI (609) cpu_start: Pro cpu start user code[0m
+[0;32mI (609) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (610) app_init: Application information:[0m
+[0;32mI (614) app_init: Project name:     ESP_SolarYou[0m
+[0;32mI (618) app_init: App version:      aa09d63-dirty[0m
+[0;32mI (623) app_init: Compile time:     Oct 12 2026 18:13:26[0m
+[0;32mI (628) app_init: ELF file SHA256:  1dd5d1ba1...[0m
+[0;32mI (632) app_init: ESP-IDF:          v5.5.5[0m
+[0;32mI (636) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (640) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (644) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (648) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (654) heap_init: At 3FC9C9F0 len 0004CD20 (307 KiB): RAM[0m
+[0;32mI (659) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (664) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (669) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM[0m
+[0;32mI (675) esp_psram: Adding pool of 2048K of PSRAM memory to heap allocator[0m
+[0;32mI (682) spi_flash: detected chip: boya[0m
+[0;32mI (685) spi_flash: flash io: dio[0m
+[0;32mI (688) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (694) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (701) main_task: Started on CPU0[0m
+[0;32mI (704) esp_psram: Reserving pool of 32K of internal memory for DMA/internal allocations[0m
+[0;32mI (712) main_task: Calling app_main()[0m
+[1;31mE (2176) LIGHT: Fault 0x40 at sample 0: TL=56 TR=93 BL=39 BR=87[0m
+[1;31mE (2177) Main: Light Sensor Calibration Error[0m
+[0;32mI (2177) main_task: Returned from app_main()[0m
+Executing action: flash
+Running ninja in directory /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build
+Executing "ninja flash"...
+[1/5] cd /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/esp-idf/esptool_py && /home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python /home/rudy/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/partition_table/partition-table.bin /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/ESP_SolarYou.bin
+ESP_SolarYou.bin binary size 0x5c110 bytes. Smallest app partition is 0x100000 bytes. 0xa3ef0 bytes (64%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cd /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/esp-idf/esptool_py && /home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python /home/rudy/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build/bootloader/bootloader.bin
+Bootloader binary size 0x5160 bytes. 0x2ea0 bytes (36%) free.
+[3/5] No install step for 'bootloader'
+[4/5] Completed 'bootloader'
+[4/5] cd /home/rudy/esp/esp-idf/components/esptool_py && /usr/bin/cmake -D IDF_PATH=/home/rudy/esp/esp-idf -D "SERIAL_TOOL=/home/rudy/.espressif/python_env/idf5.5_py3.14_env/bin/python;;/home/rudy/esp/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32s3" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/rudy/Documents/Github/SolarYou_Capstone/ESP_SolarYou/build -P /home/rudy/esp/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32s3 -p /dev/ttyACM1 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 16MB 0x0 bootloader/bootloader.bin 0x10000 ESP_SolarYou.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.12.0
+Serial port /dev/ttyACM1
+Connecting....
+Chip is ESP32-S3 (QFN56) (revision v0.2)
+Features: WiFi, BLE, Embedded PSRAM 2MB (AP_3v3)
+Crystal is 40MHz
+USB mode: USB-Serial/JTAG
+MAC: f8:5b:1b:a1:fa:1c
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00005fff...
+Flash will be erased from 0x00010000 to 0x0006cfff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 20832 bytes to 13350...
+Writing at 0x00000000... (100 %)
+Wrote 20832 bytes (13350 compressed) at 0x00000000 in 0.3 seconds (effective 508.0 kbit/s)...
+Hash of data verified.
+Compressed 377104 bytes to 203285...
+Writing at 0x00010000... (7 %)
+Writing at 0x0001d6ed... (15 %)
+Writing at 0x00027f53... (23 %)
+Writing at 0x0002dd93... (30 %)
+Writing at 0x00033c60... (38 %)
+ninja: build stopped: interrupted by user.
