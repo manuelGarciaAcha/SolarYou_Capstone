@@ -48,7 +48,19 @@ typedef struct {
     sensor_power_sample_t power;
 } sensor_snapshot_t;
 
+typedef struct {
+    bool imu_enabled;
+    bool imu_initialized;
+    bool light_enabled;
+    bool light_initialized;
+    bool power_enabled;
+    bool power_initialized;
+} sensor_init_status_t;
+
 bool sensor_adapter_init(void);
+
+/* Reports each sensor path separately after sensor_adapter_init(). */
+bool sensor_adapter_get_init_status(sensor_init_status_t *status);
 
 /* These are separate so an IMU reset does not also change the saved light balance. */
 bool sensor_adapter_capture_imu_neutral(void);

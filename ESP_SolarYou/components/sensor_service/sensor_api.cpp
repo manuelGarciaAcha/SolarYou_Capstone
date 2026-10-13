@@ -55,6 +55,26 @@ bool sensor_adapter_init(void)
     return ready;
 }
 
+bool sensor_adapter_get_init_status(sensor_init_status_t *status)
+{
+    if (status == nullptr) return false;
+    memset(status, 0, sizeof(*status));
+
+#if CONFIG_SOLARYOU_VALIDATION_ALL || CONFIG_SOLARYOU_VALIDATION_IMU_ONLY
+    status->imu_enabled = true;
+    status->imu_initialized = imuInitialized;
+#endif
+#if CONFIG_SOLARYOU_VALIDATION_ALL || CONFIG_SOLARYOU_VALIDATION_LIGHT_ONLY
+    status->light_enabled = true;
+    status->light_initialized = lightInitialized;
+#endif
+#if CONFIG_SOLARYOU_VALIDATION_ALL || CONFIG_SOLARYOU_VALIDATION_POWER_ONLY
+    status->power_enabled = true;
+    status->power_initialized = powerInitialized;
+#endif
+    return true;
+}
+
 bool sensor_adapter_capture_imu_neutral(void)
 {
 #if CONFIG_SOLARYOU_VALIDATION_ALL || CONFIG_SOLARYOU_VALIDATION_IMU_ONLY

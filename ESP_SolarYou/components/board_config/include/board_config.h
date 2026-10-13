@@ -19,9 +19,9 @@
 #define SENSOR_I2C_SDA_GPIO 47
 #define SENSOR_I2C_SCL_GPIO 48
 
-// may require changes based on board type
-#define SERVO_CH0_PIN       33   // temp
-#define SERVO_CH1_PIN       32   // temp
+// Servo pins used by Rudy's Heltec WiFi LoRa 32 V4 build.
+#define SERVO_CH0_PIN       41
+#define SERVO_CH1_PIN       42
 
 #define LIGHT_TOP_LEFT_GPIO      3
 #define LIGHT_TOP_RIGHT_GPIO     4
