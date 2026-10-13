@@ -42,16 +42,16 @@ esp_err_t command_motor_angle(float roll_angle, float pitch_angle)
         return ESP_ERR_INVALID_ARG;
     }
     
-    if (roll_angle < MIN_SERVO_ANGLE){
-        roll_angle = MIN_SERVO_ANGLE;
-    }else if (roll_angle > MAX_SERVO_ANGLE){
-        roll_angle = MAX_SERVO_ANGLE;
+    if (roll_angle < MIN_SERVO_ANGLE_ROLL){
+        roll_angle = MIN_SERVO_ANGLE_ROLL;
+    }else if (roll_angle > MAX_SERVO_ANGLE_ROLL){
+        roll_angle = MAX_SERVO_ANGLE_ROLL;
     }
 
-    if (pitch_angle < MIN_SERVO_ANGLE){
-        pitch_angle = MIN_SERVO_ANGLE;
-    }else if (pitch_angle > MAX_SERVO_ANGLE){
-        pitch_angle = MAX_SERVO_ANGLE;
+    if (pitch_angle < MIN_SERVO_ANGLE_PITCH){
+        pitch_angle = MIN_SERVO_ANGLE_PITCH;
+    }else if (pitch_angle > MAX_SERVO_ANGLE_PITCH){
+        pitch_angle = MAX_SERVO_ANGLE_PITCH;
     }
 
 // might need review since it bails on roll fail (is that bad given next iter?)
