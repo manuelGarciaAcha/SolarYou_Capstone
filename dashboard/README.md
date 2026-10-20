@@ -33,8 +33,7 @@ flowchart LR
    ```
    pip install -r requirements.txt
    ```
-   This is only the five packages the dashboard uses. TensorFlow is not
-   needed here (the ML packages live in `requirements-ml.txt`).
+   This is only the five packages the dashboard uses. 
 
 4. Optional: create your own local config (gitignored, each person's
    values differ):
@@ -175,7 +174,6 @@ dashboard/
   config.example.json        <- template, copy to config.json
   config.json                <- your own local settings, gitignored
   requirements.txt           <- just what the dashboard needs
-  requirements-ml.txt        <- full package list incl. TensorFlow (later)
   tools/
     fake_esp32_ws.py          <- stand-in ESP32 WebSocket server for testing
   tests/

@@ -1,13 +1,13 @@
 // Live dashboard. Listens for "sensor_update" and "connection_status" events
-// pushed by the Flask server and draws everything on the page from the same
-// three values: pitch, roll, and power.
+// from the Flask server and draws the whole page from three values: pitch,
+// roll, and power.
 //
 // The firmware may also send pitch_target and roll_target (the sun angle the
-// controller is steering toward). While those are arriving, the tiles, the
-// level, and the attitude outline measure error from the target. Without
-// them, the target is level (0, 0), so older firmware looks the same as before.
+// controller is steering toward). While those arrive, the level card and the
+// attitude outline measure error from the target. Without them the target
+// is level (0, 0), so older firmware gets the same page as before.
 //
-// Each sensor_update carries only some of {pitch, roll, power}:
+// A sensor_update doesn't have to carry every field. For each one:
 //   a number  -> show it
 //   null      -> the sensor reported itself invalid, show "--" right away
 //   missing   -> this message didn't mention it, keep showing the last
@@ -21,7 +21,7 @@
 
 const CHART_WINDOW_MS = 30000;      // pitch/roll chart history
 const CHART_MIN_GAP_MS = 50;        // at most 20 chart points per second per line
-const STATS_WINDOW_MS = 30000;      // window for RMS tilt and the "within" tile
+const STATS_WINDOW_MS = 30000;      // window for RMS tilt and the "within" stat
 const BAND_DEG = 2;                 // "within N degrees of level" (placeholder, agree as a team)
 const POWER_AVG_WINDOW_MS = 60000;  // average power window
 const POWER_CHART_MS = 60000;       // power chart history
@@ -47,7 +47,6 @@ function readColors() {
     return {
         pitch: get("--pitch"), roll: get("--roll"), power: get("--power"),
         ink2: get("--ink-2"), ink3: get("--ink-3"), grid: get("--grid"), axis: get("--axis"),
-        card: get("--card"),
     };
 }
 
@@ -66,7 +65,7 @@ for (const key of KEYS) latest[key] = { value: null, at: 0 };
 // {x: time ms, y: degrees}, one list per chart line
 const chartPoints = { pitch: [], roll: [], pitch_target: [], roll_target: [] };
 const lastChartPointAt = { pitch: 0, roll: 0, pitch_target: 0, roll_target: 0 };
-const tiltSamples = [];      // [time, degrees off target], for the tiles
+const tiltSamples = [];      // [time, degrees off target], for the level card stats
 const trail = [];            // [time, roll error, pitch error], for the bubble level
 const powerSamples = [];     // [time, watts], for the average
 const powerPoints = [];      // {x, y}, the power chart
@@ -399,7 +398,7 @@ function renderMode(now) {
     el("attitudeNote").innerText = tracking ? "outline = target" : "outline = level";
 }
 
-function renderTiles(now) {
+function renderStats(now) {
     const error = currentError(now);
     el("tiltNow").innerText = error ? formatDegrees(Math.hypot(error.pitch, error.roll), 1) : "--";
 
@@ -464,9 +463,9 @@ function renderCharts(now) {
     powerChart.update("none");
 }
 
-// Connection badge. The server reports whether the link to the ESP32 is up;
-// this page adds whether data is actually arriving, because a link can be
-// up with nothing coming through it.
+// Connection badge. The server reports whether the link to the ESP32 is up.
+// This page adds whether data is arriving, because a link can be up with
+// nothing coming through it.
 const STATUS_TEXT = {
     connecting: "Connecting...",
     connected: "Connected",
@@ -501,7 +500,7 @@ function render(now) {
     pruneAll(now);
     renderMode(now);
     renderReadouts(now);
-    renderTiles(now);
+    renderStats(now);
     renderLevel(now);
     renderAttitude(now);
     renderCharts(now);
@@ -579,8 +578,8 @@ function newRun() {
     lastRenderAt = 0;
 }
 
-// Dark (default) or light. Remembered in this browser only; if storage is
-// blocked the switch still works, it just isn't remembered.
+// Dark (default) or light, remembered in this browser only. If storage is
+// blocked, the switch still works but the choice is forgotten on reload.
 function saveLook() {
     const root = document.documentElement;
     try {
@@ -627,7 +626,7 @@ socket.on("disconnect", () => {
 
 scheduleFrame();
 
-// Handles for the tests in tests/ (and handy from the browser console).
+// For checking the page from the browser console or a headless browser test.
 window.__dashboard = {
     handleReading, render, newRun, csvFromRows, computeStats, formatEnergy,
     state: () => ({

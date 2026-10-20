@@ -1,5 +1,5 @@
 {
-  "serial_port": "/dev/tty.usbmodemXXXX",
+  "serial_port": "auto",
   "serial_baud": 115200,
 
   "wifi_url": "ws://192.168.4.1/ws",
