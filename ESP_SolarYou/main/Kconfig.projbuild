@@ -1,0 +1,28 @@
+menu "SolarYou application"
+
+choice SOLARYOU_RUNTIME_MODE
+    prompt "Runtime mode"
+    default SOLARYOU_RUNTIME_SENSOR_DASHBOARD_TEST
+    help
+        Choose whether this build is only reading the real sensors and sending
+        dashboard telemetry, or whether it may also command the two servos.
+
+config SOLARYOU_RUNTIME_SENSOR_DASHBOARD_TEST
+    bool "Sensor/dashboard test (motor outputs disabled)"
+    help
+        This is a safe test mode for checking the UART connection. The BNO085
+        provides the pitch and roll readings. It also checks the light sensors,
+        but a problem with them will not stop the IMU data from being sent.
+        The INA219 is optional for now because power data is not connected
+        yet. The servos stay off in this mode.
+
+config SOLARYOU_RUNTIME_FULL_CONTROL
+    bool "Full integration (motor outputs enabled)"
+    help
+        Initializes the servos and runs the full light-tracking and PID motor
+        control path. This mode should be selected once all hardware
+        connections and GPIO assignments have been verified.
+
+endchoice
+
+endmenu

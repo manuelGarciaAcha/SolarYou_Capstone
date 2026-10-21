@@ -1,0 +1,16 @@
+# VS code junk
+.vscode/
+
+build/
+managed_components/
+
+# esp configs
+sdkconfig
+sdkconfig.old
+eim_config.toml
+
+# test files
+__test*.c
+
+# arduino dependencies
+ESP_SolarYou/.downloads/
