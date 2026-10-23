@@ -113,6 +113,7 @@ The authoritative GPIO map is `components/board_config/include/board_config.h`. 
 
 > The current ESP32-S3 pin assignments are not a validated universal pinout: certain GPIOs may be reserved by the selected module or unsuitable for connected hardware. Check the precise module and development board before wiring.
 
+
 ## Dependencies and building
 
 - **ESP-IDF:** `5.5.5`
@@ -122,8 +123,27 @@ The authoritative GPIO map is `components/board_config/include/board_config.h`. 
 - **Adafruit INA219:** `1.2.3`
 - **Adafruit BusIO:** `1.17.4`
 - **Adafruit Unified Sensor:** `1.1.15`
+- **idf.py esp
 
-Install/activate ESP-IDF 5.5.5 first. If the Adafruit `components/adafruit_*/vendor/` directories are missing, run the repository's fetch script (it verifies pinned versions and will not overwrite a mismatched existing vendor directory):
+Install/activate ESP-IDF 5.5.5 first. 
+
+```bash
+sudo pacman -S --needed gcc git make flex bison gperf python cmake ninja ccache dfu-util libusb
+mkdir -p ~/esp && cd ~/esp
+git clone -b v5.5.5 --recursive https://github.com/espressif/esp-idf.git
+cd esp-idf
+./install.sh esp32s3
+```
+
+Then activate it in fish and confirm:
+
+```bash
+. ~/esp/esp-idf/export.fish
+idf.py --version
+```
+
+If the Adafruit `components/adafruit_*/vendor/` directories are missing, run the repository's fetch script (it verifies pinned versions and will not overwrite a mismatched existing vendor directory):
+
 
 ```bash
 bash scripts/fetch_arduino_libs.sh
@@ -137,10 +157,67 @@ idf.py set-target esp32      # Classic ESP32-WROOM board
 idf.py build
 ```
 
+Find the correct usb interface with lsusb, below is dev version:
+```bash
+lsusb | grep 303a
+
+```
+
+You should see the device like `ID 303a:1001 Espressif USB JTAG/serial debug unit`. Then find which serial port it created:
+
+```bash
+ls -l /dev/serial/by-id/
+```
+
+You can check the chip_id and flash_id like so:
+```bash
+esptool.py --port /dev/ttyACM# chip_id
+esptool.py --port /dev/ttyACM# flash_id
+```
+
+You might not have permissions setup to access the port, if so do the below:
+
+First, confirm which group owns the port `ls -l /dev/ttyACM1`
+
+It should show uucp as the group (something like crw-rw---- 1 root uucp ...). Then add yourself to that group `sudo usermod -aG uucp $USER`
+
+Log out of your desktop session and log back in (or reboot). Group changes don’t apply to sessions that are already open, so just opening a new terminal won’t be enough.
+
+After logging back in, check it worked with `groups`, Alternatively run `newgrp uucp` to start a fresh shell session.
+
+uucp should appear in the list. Then activate ESP-IDF again and retry:
+```bash
+get_idf
+esptool.py --port /dev/ttyACM1 chip_id
+```
+
+get_idf shortcut might not be set by fish. In those cases do the below
+```bash
+alias get_idf '. $HOME/esp/esp-idf/export.fish'
+funcsave get_idf
+```
+
+Before flashing make sure to confirm the flash size, look for `Detected flash size: 16MB` and run the menuconfig to set settings:
+```bash
+esptool.py --port /dev/ttyACM1 flash_id
+idf.py menuconfig
+```
+
+We want a couple of settings set:
+- Serial flasher config → Flash size → 16 MB
+- Component config → ESP PSRAM → Support for external, SPI-connected RAM → enabled, mode Quad
+Save with S, then quit with Q. Then rebuild the and we're ready to flash and monitor.
+```bash
+idf.py build
+idf.py -p /dev/ttyACM1 flash monitor
+```
+
 To flash and view logs, with the appropriate USB serial port and connected hardware:
 
 ```bash
 idf.py -p /dev/ttyUSB0 flash monitor
+# or 
+idf.py -p /dev/ttyACM1 monitor
 ```
 
 The serial-port path is only an example. `idf.py set-target` changes the local target configuration and resets the build directory; it is not required every time you compile. Preserve meaningful custom menuconfig settings in `sdkconfig.defaults` when preparing a reproducible team configuration. The project uses its own `app_main()` rather than Arduino `setup()`/`loop()`; Arduino initialization happens within `sensor_adapter_init()`.
