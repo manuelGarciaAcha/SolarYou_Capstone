@@ -35,6 +35,10 @@ esp_err_t light_update(system_state_t *state, const stab_config_t *config)
              (double)light.roll_error, (double)light.pitch_error,
              (double)state->roll_light, (double)state->pitch_light);
 
+        ESP_LOGW(TAG, "Light invalid: faults=0x%lx TL=%u TR=%u BL=%u BR=%u",
+                 (unsigned long)light.health.active_faults,
+                 light.top_left_raw, light.top_right_raw,
+                 light.bottom_left_raw, light.bottom_right_raw);
 
     return ESP_OK;
 }

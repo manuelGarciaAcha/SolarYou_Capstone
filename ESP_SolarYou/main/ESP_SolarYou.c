@@ -15,6 +15,12 @@
 
 static const char *TAG  = "Main";
 
+/* 1 = servos follow the light setpoint directly (servo = center + light target).
+ *     The IMU is still read and logged so its sign can be checked, but the PID
+ *     is bypassed. Use this to confirm the panel turns toward the light.
+ * 0 = normal closed loop: PID holds the IMU angle at the light target. */
+#define LIGHT_TRACK_ONLY 1
+
 system_state_t curr_state;
 
 pid_controller_t roll_ctlr;
@@ -41,7 +47,7 @@ float read_power_placeholder(void){
 }
 
 void power_telemetry_update(system_state_t *state)
-{   
+{
     float power = read_power_placeholder();
     state->power = power;
     state->power_samples ++;
@@ -66,7 +72,8 @@ static void log_sensor_init_result(const char *name, bool enabled,
     }
 }
 
-#if !defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) || !CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
+#if !defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) || !CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL || LIGHT_TRACK_ONLY
+// Reads the IMU into the system state without commanding anything.
 static esp_err_t sensor_dashboard_update_imu(system_state_t *state)
 {
     if (state == NULL) {
@@ -133,6 +140,33 @@ void app_main(void)
     }
 #endif
 
+    esp_err_t err = ESP_OK;
+
+#if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
+    // Full integration mode can command the physical servos.
+    err = stabilization_init(&roll_ctlr, &pitch_ctlr, &stab_config);
+    if (err != ESP_OK){
+        curr_state.mode = SYSTEM_ERROR;
+        ESP_LOGE(TAG, "Stabilization Initialization failed: %s", esp_err_to_name(err));
+        return;
+    }
+    ESP_LOGW(TAG, "FULL CONTROL MODE: motor outputs are enabled%s",
+             LIGHT_TRACK_ONLY ? " (LIGHT_TRACK_ONLY: PID bypassed)" : "");
+
+    // Put the panel at a known position before capturing either neutral, so
+    // "IMU zero" and "light balanced" both mean "panel at servo center".
+    err = command_motor_angle(stab_config.roll_servo_center, stab_config.pitch_servo_center);
+    if (err != ESP_OK){
+        curr_state.mode = SYSTEM_ERROR;
+        ESP_LOGE(TAG, "Could not center servos: %s", esp_err_to_name(err));
+        return;
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000));
+#else
+    // Sensor/dashboard mode deliberately skips motor and PID initialization.
+    ESP_LOGI(TAG, "SENSOR/DASHBOARD TEST MODE: motor outputs are disabled");
+#endif
+
     // calibrate IMU (50 samples in sensor_service/include/component_config.h)
     if(!sensor_adapter_capture_imu_neutral()){
         curr_state.mode = SYSTEM_ERROR;
@@ -143,15 +177,16 @@ void app_main(void)
 
     // Full integration requires the light array. Sensor/dashboard mode reports
     // its status but keeps pitch/roll UART running if it is unavailable.
+    bool light_ready = false;
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
     if(!sensor_adapter_capture_light_neutral()){
         curr_state.mode = SYSTEM_ERROR;
         ESP_LOGE(TAG, "Light Sensor Calibration Error");
         return;
     }
+    light_ready = true;
     ESP_LOGI(TAG, "Four-light array calibration: PASS");
 #else
-    bool light_ready = false;
     if (sensor_status.light_enabled && sensor_status.light_initialized) {
         light_ready = sensor_adapter_capture_light_neutral();
         if (light_ready) {
@@ -162,22 +197,6 @@ void app_main(void)
     } else {
         ESP_LOGW(TAG, "Four-light array calibration: SKIPPED (optional in this mode)");
     }
-#endif
-
-    esp_err_t err = ESP_OK;
-
-#if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
-    // Full integration mode can command the physical servos.
-    err = stabilization_init(&roll_ctlr, &pitch_ctlr, &stab_config);
-    if (err != ESP_OK){
-        curr_state.mode = SYSTEM_ERROR;
-        ESP_LOGE(TAG, "Stabilization Initialization failed: %s\n", esp_err_to_name(err));
-        return;
-    }
-    ESP_LOGW(TAG, "FULL CONTROL MODE: motor outputs are enabled");
-#else
-    // Sensor/dashboard mode deliberately skips motor and PID initialization.
-    ESP_LOGI(TAG, "SENSOR/DASHBOARD TEST MODE: motor outputs are disabled");
 #endif
 
     curr_state.mode = SYSTEM_BASIC_CONTROL;
@@ -194,50 +213,63 @@ void app_main(void)
             last_stabilize_time = curr_time;
 
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
+#if LIGHT_TRACK_ONLY
+            // Servos follow the light setpoint directly. The IMU is read only
+            // for logging (to verify IMU_*_SIGN against servo direction).
+            (void)sensor_dashboard_update_imu(&curr_state);
+            err = command_motor_angle(stab_config.roll_servo_center + curr_state.roll_light,
+                                      stab_config.pitch_servo_center + curr_state.pitch_light);
+            if (err != ESP_OK){
+                curr_state.mode = SYSTEM_ERROR;
+                ESP_LOGE(TAG, "Servo command failed: %s", esp_err_to_name(err));
+            }
+#else
             stab_output_t stab_output = {0};
-            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt, curr_state.roll_light, curr_state.pitch_light);
-
-            //err = command_motor_angle(60, 20);
-            //vTaskDelay(5000);
-            //err = command_motor_angle(60, 90);
-            //vTaskDelay(5000);
+            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt,
+                                       curr_state.roll_light, curr_state.pitch_light);
 
             if (err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
-                ESP_LOGE(TAG, "Stabilization task failed: %s\n", esp_err_to_name(err));
-
+                ESP_LOGE(TAG, "Stabilization task failed: %s", esp_err_to_name(err));
             } else {
                 curr_state.roll_imu = stab_output.roll_imu;
                 curr_state.pitch_imu = stab_output.pitch_imu;
                 curr_state.roll_cmd = stab_output.roll_cmd;
                 curr_state.pitch_cmd = stab_output.pitch_cmd;
-
             }
+#endif
 #else
             // Read the real IMU for UART telemetry without issuing servo commands.
             err = sensor_dashboard_update_imu(&curr_state);
             if (err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
-                ESP_LOGE(TAG, "IMU telemetry update failed: %s\n", esp_err_to_name(err));
+                ESP_LOGE(TAG, "IMU telemetry update failed: %s", esp_err_to_name(err));
             }
 #endif
 
             curr_time = esp_timer_get_time();
         }
 
-        if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
+        if(light_ready && curr_time - last_light_time >= LIGHT_TASK_DT_US){
             last_light_time = curr_time;
 
             err = light_update(&curr_state, &stab_config);
-            if(err != ESP_OK){
+            if (err == ESP_ERR_INVALID_STATE) {
+                // Reading invalid (too dark, saturated, ...). light_update already
+                // logged it; the setpoint simply holds until light is valid again.
+            } else if (err != ESP_OK) {
                 curr_state.mode = SYSTEM_ERROR;
-                ESP_LOGE(TAG, "Light task failed: %s\n", esp_err_to_name(err));
+                ESP_LOGE(TAG, "Light task failed: %s", esp_err_to_name(err));
             }
 
-          ESP_LOGI(TAG, "roll: target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
-         (double)curr_state.roll_light, (double)curr_state.roll_imu,
-         (double)curr_state.roll_cmd,
-         (double)(curr_state.roll_cmd + curr_state.roll_light + stab_config.roll_servo_center));
+            ESP_LOGI(TAG, "roll:  target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
+                     (double)curr_state.roll_light, (double)curr_state.roll_imu,
+                     (double)curr_state.roll_cmd,
+                     (double)(curr_state.roll_cmd + curr_state.roll_light + stab_config.roll_servo_center));
+            ESP_LOGI(TAG, "pitch: target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
+                     (double)curr_state.pitch_light, (double)curr_state.pitch_imu,
+                     (double)curr_state.pitch_cmd,
+                     (double)(curr_state.pitch_cmd + curr_state.pitch_light + stab_config.pitch_servo_center));
             curr_time = esp_timer_get_time();
         }
 
@@ -248,7 +280,7 @@ void app_main(void)
             // Power remains null until the INA219 value is connected to curr_state.
             //uart_telemetry_send(&curr_state);
         }
-    
+
         vTaskDelay(1);
     }
 }
