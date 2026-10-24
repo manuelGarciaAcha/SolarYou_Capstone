@@ -21,12 +21,12 @@ pid_controller_t roll_ctlr;
 pid_controller_t pitch_ctlr;
 
 static const stab_config_t stab_config = {
-    .roll_Kp = 0.5f,
-    .roll_Ki = 0.5f,
-    .roll_Kd = 0.5f,
-    .pitch_Kp = 0.5f,
-    .pitch_Ki = 0.5f,
-    .pitch_Kd = 0.5f,
+    .roll_Kp = 0.2f,
+    .roll_Ki = 0.0f,
+    .roll_Kd = 0.0f,
+    .pitch_Kp = 0.2f,
+    .pitch_Ki = 0.0f,
+    .pitch_Kd = 0.0f,
     .deriv_time_const = 0.05f,
     .roll_servo_center = 100.0f,
     .pitch_servo_center = 60.0f,

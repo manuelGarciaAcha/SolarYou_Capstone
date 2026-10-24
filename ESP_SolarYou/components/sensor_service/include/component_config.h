@@ -18,8 +18,8 @@
 #define IMU_CAL_MAX_SPREAD_DEG 0.75f
 #define IMU_PITCH_DEADBAND_DEG 0.25f
 #define IMU_ROLL_DEADBAND_DEG 0.25f
-#define IMU_PITCH_SIGN 1.0f
-#define IMU_ROLL_SIGN 1.0f
+#define IMU_PITCH_SIGN -1.0f
+#define IMU_ROLL_SIGN -1.0f
 
 /* GPIO3 affects esp startup, so I still need to coldboot test with the sensor dark, bright, and disconnected. GPIO4/5/6 are the other available ADC1
   choices on this board. If GPIO3 is what's causing the issues I'm currently having, maybe using an external ADC could help. */
