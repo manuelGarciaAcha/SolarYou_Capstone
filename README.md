@@ -157,6 +157,14 @@ idf.py set-target esp32      # Classic ESP32-WROOM board
 idf.py build
 ```
 
+There is a chance that there will be a confliction with what is currently in the folder, in those cases reset :
+```bash
+rm -rf managed_components build
+idf.py set-target esp32s3
+idf.py build
+```
+
+
 Find the correct usb interface with lsusb, below is dev version:
 ```bash
 lsusb | grep 303a

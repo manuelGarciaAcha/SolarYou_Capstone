@@ -2,10 +2,12 @@
 #include "stabilization_task.h"
 #include "sensor_api.h"
 #include "light_task.h"
+#include <math.h>
 
 
 static const char *TAG = "Light Task";
 
+#define LIGHT_SETPOINT_LIMIT_DEG 45.0f
 
 esp_err_t light_update(system_state_t *state, const stab_config_t *config)
 {
@@ -23,6 +25,15 @@ esp_err_t light_update(system_state_t *state, const stab_config_t *config)
     // Save to system state, converted to target adjustment
     state->roll_light += config->track_k * light.roll_error;
     state->pitch_light += config->track_k * light.pitch_error;
+
+    state->roll_light  = fmaxf(-LIGHT_SETPOINT_LIMIT_DEG,
+                               fminf(LIGHT_SETPOINT_LIMIT_DEG, state->roll_light));
+    state->pitch_light = fmaxf(-LIGHT_SETPOINT_LIMIT_DEG,
+                               fminf(LIGHT_SETPOINT_LIMIT_DEG, state->pitch_light));
+
+    ESP_LOGI("Light_INPUTS", "error roll=%.3f pitch=%.3f | setpoint roll=%.2f pitch=%.2f",
+             (double)light.roll_error, (double)light.pitch_error,
+             (double)state->roll_light, (double)state->pitch_light);
 
 
     return ESP_OK;
