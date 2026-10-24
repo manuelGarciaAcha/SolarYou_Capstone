@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "motor_control.h"
 #include "system_state.h"
 #include "PID_stabilization.h"
 #include "stabilization_task.h"
@@ -20,12 +21,12 @@ pid_controller_t roll_ctlr;
 pid_controller_t pitch_ctlr;
 
 static const stab_config_t stab_config = {
-    .roll_Kp = 0.5f,
-    .roll_Ki = 0.5f,
-    .roll_Kd = 0.5f,
-    .pitch_Kp = 0.5f,
-    .pitch_Ki = 0.5f,
-    .pitch_Kd = 0.5f,
+    .roll_Kp = 0.2f,
+    .roll_Ki = 0.0f,
+    .roll_Kd = 0.0f,
+    .pitch_Kp = 0.2f,
+    .pitch_Ki = 0.0f,
+    .pitch_Kd = 0.0f,
     .deriv_time_const = 0.05f,
     .roll_servo_center = 100.0f,
     .pitch_servo_center = 60.0f,
@@ -44,7 +45,7 @@ void power_telemetry_update(system_state_t *state)
     float power = read_power_placeholder();
     state->power = power;
     state->power_samples ++;
-    state->avg_power += (power - state->avg_power) / state->power_samples;
+    state->avg_power += (power - state->avg_power) / (float) state->power_samples;
 }
 
 static void log_sensor_init_result(const char *name, bool enabled,
@@ -196,6 +197,11 @@ void app_main(void)
             stab_output_t stab_output = {0};
             err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt, curr_state.roll_light, curr_state.pitch_light);
 
+            //err = command_motor_angle(60, 20);
+            //vTaskDelay(5000);
+            //err = command_motor_angle(60, 90);
+            //vTaskDelay(5000);
+
             if (err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
                 ESP_LOGE(TAG, "Stabilization task failed: %s\n", esp_err_to_name(err));
@@ -222,22 +228,16 @@ void app_main(void)
         if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
             last_light_time = curr_time;
 
-#if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
             err = light_update(&curr_state, &stab_config);
             if(err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
                 ESP_LOGE(TAG, "Light task failed: %s\n", esp_err_to_name(err));
             }
-#else
-            if (light_ready) {
-                err = light_update(&curr_state, &stab_config);
-                if (err != ESP_OK) {
-                    light_ready = false;
-                    ESP_LOGW(TAG, "Four-light array read failed; continuing IMU UART testing");
-                }
-            }
-#endif
 
+          ESP_LOGI(TAG, "roll: target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
+         (double)curr_state.roll_light, (double)curr_state.roll_imu,
+         (double)curr_state.roll_cmd,
+         (double)(curr_state.roll_cmd + curr_state.roll_light + stab_config.roll_servo_center));
             curr_time = esp_timer_get_time();
         }
 
@@ -246,7 +246,7 @@ void app_main(void)
 
             // Send one newline-terminated JSON object for Zack's dashboard.
             // Power remains null until the INA219 value is connected to curr_state.
-            uart_telemetry_send(&curr_state);
+            //uart_telemetry_send(&curr_state);
         }
     
         vTaskDelay(1);

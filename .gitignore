@@ -14,3 +14,4 @@ __test*.c
 
 # arduino dependencies
 ESP_SolarYou/.downloads/
+ESP_SolarYou/.cache/
