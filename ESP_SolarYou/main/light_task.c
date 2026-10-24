@@ -18,7 +18,10 @@ esp_err_t light_update(system_state_t *state, const stab_config_t *config)
     // grab light intensity reading
     sensor_light_sample_t light = {0};
     if(!sensor_adapter_read_light(&light) || !light.valid){
-        ESP_LOGW(TAG, "Light sensor read failed");
+        ESP_LOGW(TAG, "Light invalid: faults=0x%lx TL=%u TR=%u BL=%u BR=%u",
+                 (unsigned long)light.health.active_faults,
+                 light.top_left_raw, light.top_right_raw,
+                 light.bottom_left_raw, light.bottom_right_raw);
         return ESP_ERR_INVALID_STATE;
     }
 
@@ -34,11 +37,9 @@ esp_err_t light_update(system_state_t *state, const stab_config_t *config)
     ESP_LOGI("Light_INPUTS", "error roll=%.3f pitch=%.3f | setpoint roll=%.2f pitch=%.2f",
              (double)light.roll_error, (double)light.pitch_error,
              (double)state->roll_light, (double)state->pitch_light);
-
-        ESP_LOGW(TAG, "Light invalid: faults=0x%lx TL=%u TR=%u BL=%u BR=%u",
-                 (unsigned long)light.health.active_faults,
-                 light.top_left_raw, light.top_right_raw,
-                 light.bottom_left_raw, light.bottom_right_raw);
+    ESP_LOGI("Light_RAW", "TL=%u TR=%u BL=%u BR=%u",
+             light.top_left_raw, light.top_right_raw,
+             light.bottom_left_raw, light.bottom_right_raw);
 
     return ESP_OK;
 }
