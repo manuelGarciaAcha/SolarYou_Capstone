@@ -19,7 +19,7 @@ static const char *TAG  = "Main";
  *     The IMU is still read and logged so its sign can be checked, but the PID
  *     is bypassed. Use this to confirm the panel turns toward the light.
  * 0 = normal closed loop: PID holds the IMU angle at the light target. */
-#define LIGHT_TRACK_ONLY 1
+#define LIGHT_TRACK_ONLY 0
 
 system_state_t curr_state;
 
@@ -29,10 +29,10 @@ pid_controller_t pitch_ctlr;
 static const stab_config_t stab_config = {
     .roll_Kp = 0.2f,
     .roll_Ki = 0.0f,
-    .roll_Kd = 0.0f,
+    .roll_Kd = 0.00f,
     .pitch_Kp = 0.2f,
     .pitch_Ki = 0.0f,
-    .pitch_Kd = 0.0f,
+    .pitch_Kd = 0.00f,
     .deriv_time_const = 0.05f,
     .roll_servo_center = 100.0f,
     .pitch_servo_center = 60.0f,
@@ -216,6 +216,7 @@ void app_main(void)
 #if LIGHT_TRACK_ONLY
             // Servos follow the light setpoint directly. The IMU is read only
             // for logging (to verify IMU_*_SIGN against servo direction).
+            
             (void)sensor_dashboard_update_imu(&curr_state);
             err = command_motor_angle(stab_config.roll_servo_center + curr_state.roll_light,
                                       stab_config.pitch_servo_center + curr_state.pitch_light);
@@ -253,14 +254,14 @@ void app_main(void)
         if(light_ready && curr_time - last_light_time >= LIGHT_TASK_DT_US){
             last_light_time = curr_time;
 
-            err = light_update(&curr_state, &stab_config);
-            if (err == ESP_ERR_INVALID_STATE) {
-                // Reading invalid (too dark, saturated, ...). light_update already
-                // logged it; the setpoint simply holds until light is valid again.
-            } else if (err != ESP_OK) {
-                curr_state.mode = SYSTEM_ERROR;
-                ESP_LOGE(TAG, "Light task failed: %s", esp_err_to_name(err));
-            }
+            //err = light_update(&curr_state, &stab_config);
+            //if (err == ESP_ERR_INVALID_STATE) {
+            //    // Reading invalid (too dark, saturated, ...). light_update already
+            //    // logged it; the setpoint simply holds until light is valid again.
+            //} else if (err != ESP_OK) {
+            //    curr_state.mode = SYSTEM_ERROR;
+            //    ESP_LOGE(TAG, "Light task failed: %s", esp_err_to_name(err));
+            //}
 
             ESP_LOGI(TAG, "roll:  target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
                      (double)curr_state.roll_light, (double)curr_state.roll_imu,
