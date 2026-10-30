@@ -124,6 +124,25 @@ header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
 .actions button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 #csvCount { font-weight: 400; color: var(--ink-3); }
 
+/* BLE send-rate control: label, selector, and a short status line */
+.rate-control { display: flex; align-items: center; gap: 0.4rem; margin-right: 0.25rem; }
+.rate-control[hidden] { display: none; }
+.rate-control label { font-size: 0.85rem; color: var(--ink-2); }
+.rate-control select {
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--button);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 0.35rem 0.5rem;
+}
+.rate-control select:disabled { opacity: 0.6; }
+.rate-control select:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+#telemetryRateStatus { font-size: 0.75rem; color: var(--ink-3); max-width: 14rem; }
+#telemetryRateStatus[data-state="confirmed"] { color: var(--ok-ink); }
+#telemetryRateStatus[data-state="error"] { color: var(--bad-ink); }
+
 .icon-button { padding: 0.35rem !important; line-height: 0; }
 .icon-button svg { width: 20px; height: 20px; }
 .theme-icon-sun { fill: none; stroke: currentColor; stroke-width: 1.8; }
@@ -263,4 +282,5 @@ main {
     .stat-value { font-size: 1.6rem; }
     .stat-unit { font-size: 0.95rem; }
     .chart-box { min-height: 240px; }
+    .rate-control { flex-basis: 100%; }
 }

@@ -153,8 +153,10 @@ function formatEnergy(wh) {
 
 function formatDegrees(value, digits) {
     if (value === null) return "--";
+    let text = value.toFixed(digits);
+    if (Number(text) === 0) text = (0).toFixed(digits); // no "-0.0" for tiny negatives
     // a real minus sign: the hyphen looks detached in the big tabular numbers
-    return value.toFixed(digits).replace("-", "\u2212") + "°";
+    return text.replace("-", "\u2212") + "°";
 }
 
 // ---- incoming data ----

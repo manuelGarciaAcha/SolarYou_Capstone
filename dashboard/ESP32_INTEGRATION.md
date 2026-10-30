@@ -207,8 +207,8 @@ Notes:
 | ESP32 role | prints lines | WebSocket server | GATT server |
 | Dashboard role | reads the port | WebSocket client | BLE central |
 | Config | `serial_port` | `wifi_url` | `ble_name`, `ble_characteristic` |
-| Size limit | none that matters | none that matters | roughly 20 bytes by default, 512 at the very most |
-| Full message fits | yes | yes | **no (about 940 bytes)** |
+| Size limit | none that matters | none that matters | roughly 20 bytes by default, 512 at the very most per notification |
+| Full message fits | yes | yes | only split across notifications (see BLE below) |
 | Recovers by itself | yes | yes | yes |
 
 ### Serial
@@ -313,6 +313,7 @@ Firmware needs:
    |---|---|---|
    | Service | `47e8841f-04c9-4ae2-af68-a7b6f4eb293d` | `0x3d, 0x29, 0xeb, 0xf4, 0xb6, 0xa7, 0x68, 0xaf, 0xe2, 0x4a, 0xc9, 0x04, 0x1f, 0x84, 0xe8, 0x47` |
    | Characteristic | `f2d2680c-66bc-4e24-8eac-d8013a99320b` | `0x0b, 0x32, 0x99, 0x3a, 0x01, 0xd8, 0xac, 0x8e, 0x24, 0x4e, 0xbc, 0x66, 0x0c, 0x68, 0xd2, 0xf2` |
+   | Rate setting (optional) | `f2d2680c-66bc-4e24-8eac-d8013a99320c` | `0x0c, 0x32, 0x99, 0x3a, 0x01, 0xd8, 0xac, 0x8e, 0x24, 0x4e, 0xbc, 0x66, 0x0c, 0x68, 0xd2, 0xf2` |
 
    NimBLE wants the bytes in reverse order compared to the written
    string, which is easy to get wrong. The bytes above are already
@@ -327,10 +328,27 @@ Message size:
   preferred MTU on the ESP32 (look for `ble_att_set_preferred_mtu` or
   `CONFIG_BT_NIMBLE_ATT_PREFERRED_MTU`) so the dashboard side can
   negotiate up.
-- Even at the maximum, a notification tops out around 512 bytes, and a
-  Mac will usually negotiate less. Jennifer's full message is about 940
-  bytes, so over BLE send the flat message (rounded, about 40 bytes). The
-  dashboard accepts it as is.
+- A message that fits goes in one notification. One that doesn't is
+  split into numbered pieces with a 6-byte header, and the dashboard
+  joins them back together before using the reading. The exact format
+  is in `BLE_PROTOCOL.md`. Sending the flat message (under 100 bytes)
+  keeps every update in a single notification once the MTU is raised.
+
+Send rate (Jennifer's BLE firmware):
+
+- The rate characteristic above can be read and written. Writing
+  `{"set_rate_hz":5}` asks for 5 updates per second; reading it back
+  returns the rate actually in use, like `{"rate_hz":5}`. Allowed rates
+  are 1, 2, 5, and 10. This changes how often readings are sent, not
+  the 50 Hz control loop.
+- The selector appears in the dashboard header only with
+  `--source ble`. It shows a rate as confirmed only after reading it
+  back from the board, and asks for the same rate again after a
+  reconnect.
+- Don't add a `rate_hz` field to regular telemetry. The dashboard
+  treats any notification with `rate_hz` as a rate reply, not a reading.
+- Firmware without the rate characteristic still works. The selector
+  just says the firmware has no rate control.
 
 Other notes:
 
@@ -356,6 +374,7 @@ Reference: https://github.com/espressif/esp-idf/blob/master/examples/bluetooth/n
 | `wifi_idle_timeout` | wifi | 10 | seconds of silence before reconnecting |
 | `ble_name` | ble | none | advertised device name |
 | `ble_characteristic` | ble | none | UUID string, as written above |
+| `ble_rate_characteristic` | ble | `…320c` | rate setting UUID; only needed if the firmware uses a different one |
 
 Command line:
 

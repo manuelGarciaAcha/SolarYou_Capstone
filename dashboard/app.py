@@ -72,15 +72,24 @@ def load_config():
 # ---- shared data-source handling ----
 
 connection_state = {"status": "connecting"}
+
+# BLE send-rate control (ble_transport.py). Only the BLE source can change
+# the rate, so these stay unused for mock, serial, and WiFi.
 rate_state = {"available": False, "state": "disconnected"}
 _ble_link = None
 
 
 def set_rate_status(state):
+    """Save the rate state, send it to every open page, and note results in the terminal."""
     global rate_state
     rate_state = dict(state)
     if rate_state.get("state") == "confirmed":
         rate_state["confirmed_at"] = time.time()
+        print(f"BLE send rate: {rate_state.get('rate_hz')} updates per second", flush=True)
+    elif rate_state.get("state") == "error":
+        print(f"[WARN] BLE rate: {rate_state.get('error')}", flush=True)
+    elif rate_state.get("state") == "unsupported":
+        print("BLE: this firmware has no rate setting", flush=True)
     socketio.emit("telemetry_rate", rate_state)
 
 
@@ -623,17 +632,30 @@ def websocket_data_loop(config):
 # working the same way on macOS and Windows.
 
 def ble_data_loop(config):
-    """Use Zack's established telemetry UUID with bounded small-MTU reassembly."""
+    """Subscribe to the ESP32's BLE notifications, rescanning when the link drops."""
     import asyncio
     from bleak import BleakScanner, BleakClient
     global _ble_link
+
     def status(state, reason):
         if state == "warning":
             warn_dropped(reason, "BLE notification")
-        else:
-            set_connection_status(state, reason)
+            return
+        if state == "connecting":
+            print(f"Scanning for BLE device '{config.get('ble_name')}'...", flush=True)
+        elif state == "connected":
+            print("BLE connected", flush=True)
+        elif state == "reconnecting":
+            if reason and "was not found" in reason:
+                reason += (" Check ble_characteristic against the firmware "
+                           "(NimBLE writes UUID bytes in reverse order)")
+            print(f"BLE connection lost/failed: {reason}", flush=True)
+            print(f"Retrying in {RETRY_SECONDS} seconds...", flush=True)
+        set_connection_status(state, reason)
+
     _ble_link = BleLink(config, process_reading, status, set_rate_status, RETRY_SECONDS)
     asyncio.run(_ble_link.run(BleakScanner, BleakClient))
+
 
 DATA_SOURCES = {
     "mock": mock_data_loop,
@@ -645,7 +667,8 @@ DATA_SOURCES = {
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # The page only shows the send-rate selector when the BLE source is running.
+    return render_template("index.html", data_source=app.config.get("DATA_SOURCE", "mock"))
 
 
 def port_is_free(port):
@@ -725,6 +748,7 @@ if __name__ == "__main__":
     if not port_is_free(args.port):
         sys.exit(f"Port {args.port} is already in use. Is another copy of the dashboard "
                  f"still running? Close it, or start this one with --port {args.port + 1}.")
+    app.config["DATA_SOURCE"] = args.source
     print(f"Data source: {args.source}")
     print(f"Dashboard: http://localhost:{args.port}")
     ip = lan_address()

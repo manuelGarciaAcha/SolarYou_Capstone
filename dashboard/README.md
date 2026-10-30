@@ -77,7 +77,7 @@ flowchart LR
 | mock | none |
 | serial | nothing (finds the board), or serial_port to pick one |
 | wifi | wifi_url |
-| ble | ble_name, ble_characteristic |
+| ble | ble_name, ble_characteristic (ble_rate_characteristic is optional) |
 
 A missing field shows up clearly in the terminal and on the status badge,
 not as a silent failure. Optional extras (`serial_baud`,
@@ -97,6 +97,7 @@ not as a silent failure. Optional extras (`serial_baud`,
 | New run | clears the stability stats and energy total and starts a new run number |
 | Export CSV | downloads every reading this page received since it was opened, with a run column. Times are UTC. |
 | Sun/moon button | switches between the dark theme (default) and a light one. The browser remembers the choice. |
+| Send rate | BLE only. Sets how many readings per second the board sends (1, 2, 5, or 10) and shows the rate the board confirms. Hidden for the other sources. |
 
 If the firmware sends `pitch_target` and `roll_target` (the sun angle the
 controller is steering toward), the page switches on its own: the level
@@ -170,6 +171,8 @@ connection, including over BLE with no WiFi at all.
 dashboard/
   .gitignore                 <- keeps config.json and Python caches out of git
   app.py                     <- Flask server + all four data sources
+  ble_transport.py           <- BLE receiver: split messages, reconnects, send rate (Jennifer)
+  BLE_PROTOCOL.md            <- BLE message and rate-setting format (Jennifer)
   ESP32_INTEGRATION.md       <- message format and firmware guide
   config.example.json        <- template, copy to config.json
   config.json                <- your own local settings, gitignored
@@ -179,11 +182,13 @@ dashboard/
   tests/
     test_messages.py          <- checks for the message handling
     test_serial.py            <- checks for port picking and line splitting
+    test_ble_hooks.py         <- checks for the BLE status messages and rate control visibility
   templates/
     index.html                <- page structure
   static/
     js/
       dashboard.js             <- receives readings, draws the page
+      telemetry-rate.js        <- send-rate selector for BLE (Jennifer)
       vendor/
         chart.umd.js            <- Chart.js, bundled locally
         socket.io.min.js        <- Socket.IO client, bundled locally
