@@ -576,6 +576,7 @@ function newRun() {
     trail.length = 0;
     el("runNumber").innerText = runNumber;
     el("energySub").innerText = "since run " + runNumber + " started";
+    socket.emit("new_run", { run: runNumber }); // the server starts a new log file
     dirty = true;
     lastRenderAt = 0;
 }

@@ -384,6 +384,8 @@ Command line:
 | `--port` | web page port, default 5001 |
 | `--serial-port` | serial port to use, overrides `config.json` |
 | `--mock-tracking` | with `--source mock`, also send a moving sun target |
+| `--log` | save readings to `logs/` in mock mode too (the other sources save by default) |
+| `--no-log` | don't save readings to `logs/` |
 | `--list-ports` | list the serial ports this computer sees and which one auto-detect would pick, then exit |
 | `--debug` | Flask debug mode. Off by default because it exposes the debugger page to everyone on the network. |
 
@@ -506,6 +508,5 @@ real connection to turn something up.
 
 ## 9. Not built yet
 
-- Saving raw readings to disk (history, TinyML training data)
 - Showing the health and fault information
 - Displaying light, voltage, and current values

@@ -18,6 +18,8 @@ What a message needs to look like is documented in ESP32_INTEGRATION.md.
 """
 
 import argparse
+import atexit
+import datetime
 import json
 import math
 import os
@@ -46,6 +48,10 @@ MAX_MESSAGE_BYTES = 65536   # anything bigger is garbage, not a sensor reading
 MAX_BATCH_SIZE = 500        # readings accepted from one message if it's a JSON array
 MAX_SERIAL_LINE = 8192
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
+LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
+LOG_MAX_BYTES = 50 * 1024 * 1024           # start a new file past this size
+LOG_FOLDER_WARN_BYTES = 500 * 1024 * 1024  # warn at startup past this total
+LOG_FLUSH_SECONDS = 1.0
 
 
 def load_config():
@@ -251,6 +257,153 @@ def emit_reading(reading, raw):
         print("[INFO] First reading received", flush=True)
         _first_reading_logged = True
     socketio.emit("sensor_update", flat)
+    if reading_log is not None:
+        reading_log.write(flat)
+
+
+# ---- saving readings to a file ----
+
+LOG_FIELDS = ("pitch", "roll", "power", "pitch_target", "roll_target")
+LOG_HEADER = "time_iso,elapsed_s,run,pitch_deg,roll_deg,power_w,pitch_target_deg,roll_target_deg\n"
+
+
+class ReadingLog:
+    """
+    Writes every reading to a CSV file in logs/, with the same columns as
+    the page's Export CSV. Unlike the page's copy, it survives a reload or
+    a closed tab, so a test run or TinyML training data isn't lost.
+
+    The file is created at the first reading, so a session with no data
+    leaves nothing behind. A new file starts when New run is pressed on the
+    page, or when the current file passes max_bytes. If a write fails (disk
+    full, folder not writable), logging stops with one warning and the
+    dashboard keeps showing live data.
+    """
+
+    def __init__(self, folder=LOG_DIR, max_bytes=LOG_MAX_BYTES):
+        self.folder = folder
+        self.max_bytes = max_bytes
+        self.file = None
+        self.path = None
+        self.run = 1
+        self.part = 1
+        self.started_at = None
+        self.last_flush = 0.0
+        self.enabled = True
+        self.lock = threading.Lock()  # new_run() arrives on a different thread than write()
+
+    def write(self, reading):
+        with self.lock:
+            if not self.enabled:
+                return
+            try:
+                now = time.time()
+                if self.file is None:
+                    self._open(now)
+                elif self.file.tell() >= self.max_bytes:
+                    self._close()
+                    self.part += 1
+                    self._open(now)
+                self.file.write(self._row(now, reading))
+                if now - self.last_flush >= LOG_FLUSH_SECONDS:
+                    self.file.flush()
+                    self.last_flush = now
+            except OSError as exc:
+                self._stop(exc)
+
+    def new_run(self, run=None):
+        """Close the current file. The next reading opens a new one for this run."""
+        with self.lock:
+            self._close()
+            if isinstance(run, int) and not isinstance(run, bool) and run > 0:
+                self.run = run
+            else:
+                self.run += 1
+            self.part = 1
+
+    def flush(self):
+        """Write out buffered rows. Called every second so a quiet stream isn't left in memory."""
+        with self.lock:
+            if self.file is not None:
+                try:
+                    self.file.flush()
+                    self.last_flush = time.time()
+                except OSError as exc:
+                    self._stop(exc)
+
+    def close(self):
+        with self.lock:
+            self._close()
+
+    def _open(self, now):
+        os.makedirs(self.folder, exist_ok=True)
+        name = "solaryou_" + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime(now))
+        if self.run > 1:
+            name += f"_run{self.run}"
+        if self.part > 1:
+            name += f"_part{self.part}"
+        path = os.path.join(self.folder, name + ".csv")
+        count = 2
+        while os.path.exists(path):  # two files started in the same second
+            path = os.path.join(self.folder, f"{name}_{count}.csv")
+            count += 1
+        self.file = open(path, "w", encoding="utf-8", newline="")
+        self.path = path
+        self.started_at = now
+        self.last_flush = now
+        self.file.write(LOG_HEADER)
+        print(f"Logging readings to {os.path.relpath(path)}", flush=True)
+
+    def _row(self, now, reading):
+        stamp = datetime.datetime.fromtimestamp(now, datetime.timezone.utc)
+        cells = [stamp.isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+                 f"{now - self.started_at:.3f}", str(self.run)]
+        for key in LOG_FIELDS:
+            value = reading.get(key)
+            cells.append("" if value is None else str(value))
+        return ",".join(cells) + "\n"
+
+    def _close(self):
+        if self.file is not None:
+            try:
+                self.file.close()
+            except OSError:
+                pass
+        self.file = None
+
+    def _stop(self, exc):
+        self.enabled = False
+        self._close()
+        print(f"[WARN] Stopped saving readings to a file ({exc}). "
+              "The dashboard keeps running.", flush=True)
+
+
+def folder_size(folder):
+    total = 0
+    try:
+        for entry in os.scandir(folder):
+            if entry.is_file():
+                total += entry.stat().st_size
+    except OSError:
+        pass
+    return total
+
+
+reading_log = None
+
+
+def flush_log_forever():
+    while True:
+        time.sleep(LOG_FLUSH_SECONDS)
+        if reading_log is not None:
+            reading_log.flush()
+
+
+@socketio.on("new_run")
+def browser_new_run(data):
+    """New run on the page starts a new log file, so each test run is its own file."""
+    if reading_log is not None:
+        reading_log.new_run(data.get("run") if isinstance(data, dict) else None)
 
 
 def process_reading(message):
@@ -717,6 +870,15 @@ if __name__ == "__main__":
         "--mock-tracking", action="store_true",
         help="With --source mock: send a moving sun target too, like the real firmware",
     )
+    log_choice = parser.add_mutually_exclusive_group()
+    log_choice.add_argument(
+        "--log", action="store_true",
+        help="Save readings to logs/ in mock mode too (other sources save by default)",
+    )
+    log_choice.add_argument(
+        "--no-log", action="store_true",
+        help="Don't save readings to logs/",
+    )
     parser.add_argument(
         "--list-ports", action="store_true",
         help="List the serial ports this computer can see, then exit",
@@ -754,6 +916,16 @@ if __name__ == "__main__":
     ip = lan_address()
     if ip:
         print(f"From another device on the same network: http://{ip}:{args.port}")
+
+    # Saved by default for real data. Mock data is made up, so only on request.
+    if not args.no_log and (args.source != "mock" or args.log):
+        reading_log = ReadingLog()
+        atexit.register(reading_log.close)
+        threading.Thread(target=flush_log_forever, daemon=True).start()
+        print(f"Saving readings to {os.path.relpath(LOG_DIR)}/ (turn off with --no-log)")
+        if folder_size(LOG_DIR) > LOG_FOLDER_WARN_BYTES:
+            print(f"[WARN] {os.path.relpath(LOG_DIR)}/ is over "
+                  f"{LOG_FOLDER_WARN_BYTES // (1024 * 1024)} MB. Move or delete old logs you no longer need.")
 
     socketio.start_background_task(run_data_source, DATA_SOURCES[args.source], config)
 

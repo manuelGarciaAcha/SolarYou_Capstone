@@ -12,5 +12,6 @@ venv/
 # macOS Finder files
 .DS_Store
 
-# CSV exports saved next to the code by accident
+# saved readings (python app.py writes these) and CSV exports
+logs/
 solaryou_*.csv

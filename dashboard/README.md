@@ -139,6 +139,27 @@ Things to keep in mind when presenting these:
 - For a stabilized vs. fixed comparison, use New run between the two and
   split the CSV by the run column.
 
+## Saved readings
+
+With serial, WiFi, or BLE, every reading is also saved to a CSV file in
+`dashboard/logs/`, with the same columns as Export CSV. The page's own
+copy is lost on reload; this one isn't, so use it for test runs and
+TinyML training data.
+
+- One file per session, named by start time. Pressing New run starts a
+  new file (`..._run2.csv`), so a stabilized run and a fixed-panel run
+  end up in separate files.
+- A file that passes 50 MB continues in a new one (`..._part2.csv`).
+- About 1 MB per hour at 5 readings a second. Nothing is deleted on its
+  own; the terminal warns at startup if `logs/` passes 500 MB.
+- Mock data isn't saved unless you add `--log`. `--no-log` turns saving
+  off for any source.
+- `logs/` is in `.gitignore`. Copy a run out of it to keep or share it.
+- If saving fails (disk full, folder not writable), the terminal says so
+  once and the dashboard keeps running.
+- Pressing New run in any open browser starts the new file, so with
+  several viewers, agree on who presses it.
+
 ## Viewing from another device (phone, another laptop)
 
 The server is already bound to your machine's network address (not just
@@ -176,6 +197,7 @@ dashboard/
   ESP32_INTEGRATION.md       <- message format and firmware guide
   config.example.json        <- template, copy to config.json
   config.json                <- your own local settings, gitignored
+  logs/                      <- saved readings, one CSV per run, gitignored
   requirements.txt           <- just what the dashboard needs
   tools/
     fake_esp32_ws.py          <- stand-in ESP32 WebSocket server for testing
@@ -183,6 +205,7 @@ dashboard/
     test_messages.py          <- checks for the message handling
     test_serial.py            <- checks for port picking and line splitting
     test_ble_hooks.py         <- checks for the BLE status messages and rate control visibility
+    test_logging.py           <- checks for saving readings to logs/
   templates/
     index.html                <- page structure
   static/
