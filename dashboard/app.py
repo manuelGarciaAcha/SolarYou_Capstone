@@ -30,6 +30,7 @@ import time
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
+from ble_transport import BleLink, valid_rate
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "dev"
@@ -71,6 +72,30 @@ def load_config():
 # ---- shared data-source handling ----
 
 connection_state = {"status": "connecting"}
+rate_state = {"available": False, "state": "disconnected"}
+_ble_link = None
+
+
+def set_rate_status(state):
+    global rate_state
+    rate_state = dict(state)
+    if rate_state.get("state") == "confirmed":
+        rate_state["confirmed_at"] = time.time()
+    socketio.emit("telemetry_rate", rate_state)
+
+
+@socketio.on("set_telemetry_rate")
+def set_telemetry_rate(data):
+    rate = data.get("rate_hz") if isinstance(data, dict) else None
+    try:
+        if not valid_rate(rate):
+            raise ValueError("Choose 1, 2, 5, or 10 updates per second")
+        if _ble_link is None:
+            raise RuntimeError("The rate control requires the BLE source")
+        _ble_link.request_rate(rate)
+    except (ValueError, RuntimeError) as exc:
+        emit("telemetry_rate", {"available": bool(rate_state.get("available")),
+                                "state": "error", "error": str(exc)})
 
 
 def set_connection_status(status, message=None):
@@ -91,6 +116,7 @@ def set_connection_status(status, message=None):
 def browser_connected():
     """Catch up the browser that just connected with the current state."""
     emit("connection_status", connection_state)
+    emit("telemetry_rate", rate_state)
 
 
 def run_data_source(fn, config):
@@ -597,60 +623,17 @@ def websocket_data_loop(config):
 # working the same way on macOS and Windows.
 
 def ble_data_loop(config):
-    """Subscribe to the ESP32's BLE notifications, rescanning when the link drops."""
+    """Use Zack's established telemetry UUID with bounded small-MTU reassembly."""
     import asyncio
     from bleak import BleakScanner, BleakClient
-    try:
-        from bleak.exc import BleakCharacteristicNotFoundError
-    except ImportError:  # very old bleak
-        BleakCharacteristicNotFoundError = ()
-
-    device_name = config.get("ble_name")
-    characteristic_uuid = config.get("ble_characteristic")
-    if not device_name or not characteristic_uuid:
-        raise ValueError('config.json is missing "ble_name" or "ble_characteristic"')
-
-    async def handle_notify(_, data):
-        process_reading(data)
-
-    async def run():
-        while True:
-            try:
-                print(f"Scanning for BLE device '{device_name}'...")
-                device = await BleakScanner.find_device_by_name(device_name, timeout=10.0)
-                if device is None:
-                    raise RuntimeError(f"Could not find BLE device '{device_name}'")
-
-                # The disconnect callback sets this event, which gives the
-                # code below something to wait on. Sleeping in a loop
-                # would never notice the link dropping.
-                disconnected = asyncio.Event()
-
-                def on_disconnect(_client):
-                    disconnected.set()
-
-                async with BleakClient(device, disconnected_callback=on_disconnect) as client:
-                    await client.start_notify(characteristic_uuid, handle_notify)
-                    print("BLE connected")
-                    set_connection_status("connected")
-                    await disconnected.wait()
-                    print("BLE disconnected")
-                    reason = "device disconnected"
-
-            except BleakCharacteristicNotFoundError:
-                reason = (f"connected, but characteristic {characteristic_uuid} was not found. "
-                          "Check ble_characteristic against the firmware "
-                          "(NimBLE writes UUID bytes in reverse order)")
-            except Exception as exc:
-                reason = str(exc) or type(exc).__name__
-
-            print(f"BLE connection lost/failed: {reason}")
-            set_connection_status("reconnecting", reason)
-            print(f"Retrying in {RETRY_SECONDS} seconds...")
-            await asyncio.sleep(RETRY_SECONDS)
-
-    asyncio.run(run())
-
+    global _ble_link
+    def status(state, reason):
+        if state == "warning":
+            warn_dropped(reason, "BLE notification")
+        else:
+            set_connection_status(state, reason)
+    _ble_link = BleLink(config, process_reading, status, set_rate_status, RETRY_SECONDS)
+    asyncio.run(_ble_link.run(BleakScanner, BleakClient))
 
 DATA_SOURCES = {
     "mock": mock_data_loop,

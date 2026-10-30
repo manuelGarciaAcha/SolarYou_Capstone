@@ -38,6 +38,15 @@
             </p>
         </div>
         <div class="actions">
+            <label for="telemetryRate">Send rate</label>
+            <select id="telemetryRate" disabled aria-describedby="telemetryRateStatus">
+                <option value="" disabled>Choose a rate</option>
+                <option value="1">1 update/s</option>
+                <option value="2">2 updates/s</option>
+                <option value="5" selected>5 updates/s</option>
+                <option value="10">10 updates/s</option>
+            </select>
+            <span id="telemetryRateStatus" role="status">Connect BLE to change rate</span>
             <span class="run-label">Run <span id="runNumber">1</span></span>
             <button id="newRun" type="button"
                     title="Clears the stability stats and energy total and starts a new run number in the CSV">New run</button>
@@ -164,5 +173,6 @@
     <script src="{{ url_for('static', filename='js/vendor/socket.io.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/chart.umd.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/telemetry-rate.js') }}"></script>
 </body>
 </html>
