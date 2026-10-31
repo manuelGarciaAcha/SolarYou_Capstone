@@ -26,13 +26,14 @@ static const stab_config_t stab_config = {
     .pitch_Kp = 0.5f,
     .pitch_Ki = 0.5f,
     .pitch_Kd = 0.5f,
-    .deriv_time_const = 0.05f,
+    .deriv_time_const = 0.1f,
     .roll_servo_center = 100.0f,
     .pitch_servo_center = 60.0f,
     .pid_cmd_min = -50.0f,
     .pid_cmd_max = 50.0f,
     .task_dt = STAB_TASK_DT_US / 1000000.0f,
-    .track_k = 2.0f,
+    .track_k = 2.0f,  
+    .imu_age_ms = 100U,                          //might need mod considering dt introduction to LDR position calc
 };
 
 float read_power_placeholder(void){
@@ -190,11 +191,12 @@ void app_main(void)
         curr_time = esp_timer_get_time();
 
         if(curr_time - last_stabilize_time >= STAB_TASK_DT_US){
+            float dt = (curr_time - last_light_time) / 1000000.0f;
             last_stabilize_time = curr_time;
 
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
             stab_output_t stab_output = {0};
-            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt, curr_state.roll_light, curr_state.pitch_light);
+            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_config, &stab_output, dt, curr_state.roll_light, curr_state.pitch_light);
 
             if (err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
@@ -220,17 +222,18 @@ void app_main(void)
         }
 
         if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
+            float dt = (curr_time - last_light_time) / 1000000.0f;
             last_light_time = curr_time;
 
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
-            err = light_update(&curr_state, &stab_config);
+            err = light_update(&curr_state, &stab_config, dt);
             if(err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
                 ESP_LOGE(TAG, "Light task failed: %s\n", esp_err_to_name(err));
             }
 #else
             if (light_ready) {
-                err = light_update(&curr_state, &stab_config);
+                err = light_update(&curr_state, &stab_config, dt);
                 if (err != ESP_OK) {
                     light_ready = false;
                     ESP_LOGW(TAG, "Four-light array read failed; continuing IMU UART testing");
