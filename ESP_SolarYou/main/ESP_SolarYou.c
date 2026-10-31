@@ -234,7 +234,7 @@ void app_main(void)
             }
 #else
             if (light_ready) {
-                err = light_update(&curr_state, &stab_config);
+                err = light_update(&curr_state, &stab_config, dt);
                 if (err != ESP_OK) {
                     light_ready = false;
                     ESP_LOGW(TAG, "Four-light array read failed; continuing IMU UART testing");
