@@ -1,0 +1,867 @@
+--- /dev/null
++++ b/ESP_SolarYou/sdkconfig.ble.defaults
+@@ -0,0 +1,6 @@
++CONFIG_BT_ENABLED=y
++CONFIG_BT_NIMBLE_ENABLED=y
++CONFIG_BT_NIMBLE_ROLE_CENTRAL=n
++CONFIG_BT_NIMBLE_ROLE_OBSERVER=n
++CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
++CONFIG_BT_NIMBLE_ATT_PREFERRED_MTU=185
+--- a/ESP_SolarYou/components/adafruit_ina219/vendor/Adafruit_INA219.cpp
++++ b/ESP_SolarYou/components/adafruit_ina219/vendor/Adafruit_INA219.cpp
+@@ -35,6 +35,7 @@
+  *  @param addr the I2C address the device can be found on. Default is 0x40
+  */
+ Adafruit_INA219::Adafruit_INA219(uint8_t addr) {
++  _success = false;
+   ina219_i2caddr = addr;
+   ina219_currentDivider_mA = 0;
+   ina219_powerMultiplier_mW = 0.0f;
+@@ -55,11 +56,12 @@
+     i2c_dev = new Adafruit_I2CDevice(ina219_i2caddr, theWire);
+   }
+ 
+-  if (!i2c_dev->begin()) {
++  _success = i2c_dev->begin();
++  if (!_success) {
+     return false;
+   }
+   init();
+-  return true;
++  return _success;
+ }
+ 
+ /*!
+@@ -75,7 +77,7 @@
+  *  @return the raw bus voltage reading
+  */
+ int16_t Adafruit_INA219::getBusVoltage_raw() {
+-  uint16_t value;
++  uint16_t value = 0;
+ 
+   Adafruit_BusIO_Register bus_voltage_reg =
+       Adafruit_BusIO_Register(i2c_dev, INA219_REG_BUSVOLTAGE, 2, MSBFIRST);
+@@ -90,7 +92,7 @@
+  *  @return the raw shunt voltage reading
+  */
+ int16_t Adafruit_INA219::getShuntVoltage_raw() {
+-  uint16_t value;
++  uint16_t value = 0;
+   Adafruit_BusIO_Register shunt_voltage_reg =
+       Adafruit_BusIO_Register(i2c_dev, INA219_REG_SHUNTVOLTAGE, 2, MSBFIRST);
+   _success = shunt_voltage_reg.read(&value);
+@@ -102,7 +104,7 @@
+  *  @return the raw current reading
+  */
+ int16_t Adafruit_INA219::getCurrent_raw() {
+-  uint16_t value;
++  uint16_t value = 0;
+ 
+   // Sometimes a sharp load will reset the INA219, which will
+   // reset the cal register, meaning CURRENT and POWER will
+@@ -110,7 +112,10 @@
+   // value even if it's an unfortunate extra step
+   Adafruit_BusIO_Register calibration_reg =
+       Adafruit_BusIO_Register(i2c_dev, INA219_REG_CALIBRATION, 2, MSBFIRST);
+-  calibration_reg.write(ina219_calValue, 2);
++  _success = calibration_reg.write(ina219_calValue, 2);
++  if (!_success) {
++    return 0;
++  }
+ 
+   // Now we can safely read the CURRENT register!
+   Adafruit_BusIO_Register current_reg =
+@@ -124,7 +129,7 @@
+  *  @return raw power reading
+  */
+ int16_t Adafruit_INA219::getPower_raw() {
+-  uint16_t value;
++  uint16_t value = 0;
+ 
+   // Sometimes a sharp load will reset the INA219, which will
+   // reset the cal register, meaning CURRENT and POWER will
+@@ -132,7 +137,10 @@
+   // value even if it's an unfortunate extra step
+   Adafruit_BusIO_Register calibration_reg =
+       Adafruit_BusIO_Register(i2c_dev, INA219_REG_CALIBRATION, 2, MSBFIRST);
+-  calibration_reg.write(ina219_calValue, 2);
++  _success = calibration_reg.write(ina219_calValue, 2);
++  if (!_success) {
++    return 0;
++  }
+ 
+   // Now we can safely read the POWER register!
+   Adafruit_BusIO_Register power_reg =
+@@ -260,7 +268,10 @@
+   // Set Calibration register to 'Cal' calculated above
+   Adafruit_BusIO_Register calibration_reg =
+       Adafruit_BusIO_Register(i2c_dev, INA219_REG_CALIBRATION, 2, MSBFIRST);
+-  calibration_reg.write(ina219_calValue, 2);
++  _success = calibration_reg.write(ina219_calValue, 2);
++  if (!_success) {
++    return;
++  }
+ 
+   // Set Config register to take into account the settings above
+   uint16_t config = INA219_CONFIG_BVOLTAGERANGE_32V |
+@@ -371,7 +382,10 @@
+   // Set Calibration register to 'Cal' calculated above
+   Adafruit_BusIO_Register calibration_reg =
+       Adafruit_BusIO_Register(i2c_dev, INA219_REG_CALIBRATION, 2, MSBFIRST);
+-  calibration_reg.write(ina219_calValue, 2);
++  _success = calibration_reg.write(ina219_calValue, 2);
++  if (!_success) {
++    return;
++  }
+ 
+   // Set Config register to take into account the settings above
+   uint16_t config = INA219_CONFIG_BVOLTAGERANGE_32V |
+@@ -463,7 +477,10 @@
+   // Set Calibration register to 'Cal' calculated above
+   Adafruit_BusIO_Register calibration_reg =
+       Adafruit_BusIO_Register(i2c_dev, INA219_REG_CALIBRATION, 2, MSBFIRST);
+-  calibration_reg.write(ina219_calValue, 2);
++  _success = calibration_reg.write(ina219_calValue, 2);
++  if (!_success) {
++    return;
++  }
+   // Set Config register to take into account the settings above
+   uint16_t config = INA219_CONFIG_BVOLTAGERANGE_16V |
+                     INA219_CONFIG_GAIN_1_40MV | INA219_CONFIG_BADCRES_12BIT |
+@@ -479,8 +496,7 @@
+  *  @brief  Provides the the underlying return value from the last operation
+  *          called on the device.
+  *  @return true: Last operation was successful false: Last operation failed
+- *  @note   For function calls that have intermediary device operations,
+- *          e.g. calibration before read/write, only the final operation's
+- *          result is stored.
++ *  @note   Calls with intermediary operations stop at the first failure,
++ *          e.g. a failed calibration write prevents the following read.
+  */
+ bool Adafruit_INA219::success() { return _success; }
+--- a/ESP_SolarYou/components/sensor_service/power_sensor.cpp
++++ b/ESP_SolarYou/components/sensor_service/power_sensor.cpp
+@@ -14,12 +14,35 @@
+ static bool initialized = false;
+ static sensor_health_t health;
+ 
++namespace {
++// Power reads share Wire with the IMU in the main loop. Restore its timeout
++// after each read so the shorter INA transaction wait stays local to power.
++class ScopedPowerWireTimeout {
++public:
++    ScopedPowerWireTimeout() : previousTimeoutMs(Wire.getTimeOut())
++    {
++        Wire.setTimeOut(2U);
++    }
++
++    ~ScopedPowerWireTimeout()
++    {
++        Wire.setTimeOut(previousTimeoutMs);
++    }
++
++private:
++    const uint16_t previousTimeoutMs;
++};
++}
++
+ bool powerSensorBegin()
+ {
+     sensorHealthInitialize(&health, SENSOR_STATE_INITIALIZING);
+     initialized = sensorBusBegin() && ina219.begin(&Wire);
+     if (initialized) {
+         ina219.setCalibration_32V_2A();
++        initialized = ina219.success();
++    }
++    if (initialized) {
+         sensorHealthSetState(&health, SENSOR_STATE_VALID);
+     } else {
+         sensorHealthRaiseFaults(&health, SENSOR_FAULT_COMMUNICATION_ERROR);
+@@ -36,15 +59,20 @@
+         sensorHealthSetState(&health, SENSOR_STATE_FAULT);
+         return false;
+     }
++    const ScopedPowerWireTimeout timeout;
+     reading.busVoltageV = ina219.getBusVoltage_V();
+-    const bool busOk = ina219.success();
+-    reading.shuntVoltageMv = ina219.getShuntVoltage_mV();
+-    const bool shuntOk = ina219.success();
+-    reading.currentA = ina219.getCurrent_mA() / 1000.0f;
+-    const bool currentOk = ina219.success();
++    bool communicationOk = ina219.success();
++    if (communicationOk) {
++        reading.shuntVoltageMv = ina219.getShuntVoltage_mV();
++        communicationOk = ina219.success();
++    }
++    if (communicationOk) {
++        reading.currentA = ina219.getCurrent_mA() / 1000.0f;
++        communicationOk = ina219.success();
++    }
+ 
+     sensor_fault_flags_t faults = SENSOR_FAULT_NONE;
+-    if (!(busOk && shuntOk && currentOk)) faults |= SENSOR_FAULT_COMMUNICATION_ERROR;
++    if (!communicationOk) faults |= SENSOR_FAULT_COMMUNICATION_ERROR;
+     if (!std::isfinite(reading.busVoltageV) ||
+         !std::isfinite(reading.shuntVoltageMv) ||
+         !std::isfinite(reading.currentA)) faults |= SENSOR_FAULT_NONFINITE_DATA;
+--- /dev/null
++++ b/ESP_SolarYou/main/ble_app.c
+@@ -0,0 +1,75 @@
++#include "ble_app.h"
++#include "ble_telemetry.h"
++#include "sensor_api.h"
++#include "sdkconfig.h"
++#include "esp_log.h"
++#include "esp_timer.h"
++#include <math.h>
++
++/* Keep the latest snapshot fresh enough for the 10 Hz maximum send setting.
++ * All I2C reads stay on the existing application loop, never BLE callbacks. */
++#define BLE_CAPTURE_INTERVAL_US 100000
++#define BLE_POWER_INTERVAL_US 100000
++#define BLE_POWER_RETRY_US 1000000
++#define BLE_READING_MAX_AGE_US 1000000
++static sy_telemetry_sample_t snapshot;
++static int64_t last_capture_us;
++static int64_t next_power_read_us;
++static int64_t last_imu_update_us;
++static int64_t last_targets_update_us;
++static bool started;
++
++void ble_app_start(void)
++{
++    esp_err_t result = ble_telemetry_init();
++    if (result != ESP_OK) {
++        ESP_LOGE("BLE", "BLE unavailable: %s", esp_err_to_name(result));
++        return;
++    }
++    started = true;
++    snapshot.captured_ms = (uint32_t)(esp_timer_get_time() / 1000);
++    ble_telemetry_publish(&snapshot);
++}
++
++void ble_app_update_imu(float pitch, float roll, bool valid)
++{
++    snapshot.pitch = pitch;
++    snapshot.roll = roll;
++    snapshot.imu_valid = valid && isfinite(pitch) && isfinite(roll);
++    last_imu_update_us = esp_timer_get_time();
++}
++
++void ble_app_update_targets(float pitch, float roll, bool valid)
++{
++#if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
++    /* These are the same setpoints already passed to the existing controller. */
++    sy_telemetry_set_targets(&snapshot, pitch, roll, valid);
++#else
++    (void)pitch; (void)roll; (void)valid;
++    snapshot.targets_valid = false;
++#endif
++    last_targets_update_us = esp_timer_get_time();
++}
++
++void ble_app_poll(void)
++{
++    if (!started) return;
++    int64_t now = esp_timer_get_time();
++    if (now - last_capture_us < BLE_CAPTURE_INTERVAL_US) return;
++    if (now >= next_power_read_us) {
++        sensor_power_sample_t power = {0};
++        snapshot.power_valid = sensor_adapter_read_power(&power) &&
++            power.valid && isfinite(power.power_w);
++        snapshot.power = power.power_w;
++        int64_t completed_us = esp_timer_get_time();
++        next_power_read_us = completed_us +
++            (snapshot.power_valid ? BLE_POWER_INTERVAL_US : BLE_POWER_RETRY_US);
++    }
++    /* Power retries must not pause IMU/target delivery or refresh old values. */
++    now = esp_timer_get_time();
++    if (now - last_imu_update_us > BLE_READING_MAX_AGE_US) snapshot.imu_valid = false;
++    if (now - last_targets_update_us > BLE_READING_MAX_AGE_US) snapshot.targets_valid = false;
++    last_capture_us = now;
++    snapshot.captured_ms = (uint32_t)(now / 1000);
++    ble_telemetry_publish(&snapshot);
++}
+--- /dev/null
++++ b/ESP_SolarYou/main/ble_app.h
+@@ -0,0 +1,10 @@
++#ifndef SOLARYOU_BLE_APP_H
++#define SOLARYOU_BLE_APP_H
++#include <stdbool.h>
++
++/* Hooks for the existing single sensor-owner loop. No motor/USB changes. */
++void ble_app_start(void);
++void ble_app_update_imu(float pitch, float roll, bool valid);
++void ble_app_update_targets(float pitch, float roll, bool valid);
++void ble_app_poll(void);
++#endif
+--- /dev/null
++++ b/ESP_SolarYou/main/ble_protocol.c
+@@ -0,0 +1,149 @@
++#include "ble_protocol.h"
++
++#include <math.h>
++#include <stdio.h>
++#include <string.h>
++
++static void number(char *out, size_t capacity, float value, bool valid)
++{
++    /* Bound the representation as well as excluding nan/inf. This limit is far
++       outside the physical sensor range, and prevents a corrupt float from
++       expanding a bounded message into hundreds of characters. */
++    if (valid && isfinite(value) && fabsf(value) <= 1000000.0f) {
++        (void)snprintf(out, capacity, "%.2f", (double)value);
++    } else {
++        (void)snprintf(out, capacity, "null");
++    }
++}
++
++void sy_telemetry_set_targets(sy_telemetry_sample_t *sample, float pitch,
++                              float roll, bool available)
++{
++    if (sample == NULL) return;
++    sample->pitch_target = pitch;
++    sample->roll_target = roll;
++    sample->targets_valid = available && isfinite(pitch) && isfinite(roll) &&
++        fabsf(pitch) <= 1000000.0f && fabsf(roll) <= 1000000.0f;
++}
++
++size_t sy_telemetry_format(char *out, size_t capacity, const sy_telemetry_sample_t *s)
++{
++    if (out == NULL || capacity == 0U || s == NULL) return 0U;
++    char pitch[24], roll[24], power[24], pt[24], rt[24];
++    number(pitch, sizeof(pitch), s->pitch, s->imu_valid);
++    number(roll, sizeof(roll), s->roll, s->imu_valid);
++    number(power, sizeof(power), s->power, s->power_valid);
++    number(pt, sizeof(pt), s->pitch_target, s->targets_valid);
++    number(rt, sizeof(rt), s->roll_target, s->targets_valid);
++    int count = snprintf(out, capacity,
++        "{\"pitch\":%s,\"roll\":%s,\"power\":%s,\"pitch_target\":%s,\"roll_target\":%s}",
++        pitch, roll, power, pt, rt);
++    if (count < 0 || (size_t)count >= capacity) { out[0] = '\0'; return 0U; }
++    return (size_t)count;
++}
++
++bool sy_ble_rate_allowed(unsigned hz)
++{
++    return hz == 1U || hz == 2U || hz == 5U || hz == 10U;
++}
++
++static void skip_space(const uint8_t *data, size_t length, size_t *i)
++{
++    while (*i < length && (data[*i] == ' ' || data[*i] == '\r' ||
++           data[*i] == '\n' || data[*i] == '\t')) ++*i;
++}
++
++bool sy_ble_parse_rate_command(const uint8_t *data, size_t length, unsigned *hz)
++{
++    if (data == NULL || hz == NULL || length == 0U || length > 32U) return false;
++    size_t i = 0U;
++    skip_space(data, length, &i);
++    if (i >= length || data[i++] != '{') return false;
++    skip_space(data, length, &i);
++    static const char key[] = "\"set_rate_hz\"";
++    size_t key_len = sizeof(key) - 1U;
++    if (length - i < key_len || memcmp(data + i, key, key_len) != 0) return false;
++    i += key_len;
++    skip_space(data, length, &i);
++    if (i >= length || data[i++] != ':') return false;
++    skip_space(data, length, &i);
++    if (i >= length || data[i] < '1' || data[i] > '9') return false;
++    unsigned value = (unsigned)(data[i++] - '0');
++    if (i < length && data[i] >= '0' && data[i] <= '9') value = value * 10U + (unsigned)(data[i++] - '0');
++    skip_space(data, length, &i);
++    if (i >= length || data[i++] != '}') return false;
++    skip_space(data, length, &i);
++    if (i != length || !sy_ble_rate_allowed(value)) return false;
++    *hz = value;
++    return true;
++}
++
++size_t sy_ble_rate_reply(char *out, size_t capacity, unsigned hz)
++{
++    if (out == NULL || capacity == 0U || !sy_ble_rate_allowed(hz)) return 0U;
++    int n = snprintf(out, capacity, "{\"rate_hz\":%u}", hz);
++    if (n < 0 || (size_t)n >= capacity) { out[0] = '\0'; return 0U; }
++    return (size_t)n;
++}
++
++size_t sy_ble_fragment_count(size_t length, size_t limit)
++{
++    if (length == 0U || length >= SY_BLE_JSON_CAPACITY || limit == 0U) return 0U;
++    if (length <= limit) return 1U;
++    if (limit <= SY_BLE_FRAGMENT_HEADER) return 0U;
++    size_t count = (length + limit - SY_BLE_FRAGMENT_HEADER - 1U) / (limit - SY_BLE_FRAGMENT_HEADER);
++    return count <= 255U ? count : 0U;
++}
++
++size_t sy_ble_fragment(const uint8_t *json, size_t length, uint16_t sequence,
++                       size_t limit, size_t index, uint8_t *out, size_t capacity)
++{
++    size_t count = sy_ble_fragment_count(length, limit);
++    if (json == NULL || out == NULL || count == 0U || index >= count) return 0U;
++    if (count == 1U) {
++        if (capacity < length) return 0U;
++        memcpy(out, json, length);
++        return length;
++    }
++    size_t chunk_capacity = limit - SY_BLE_FRAGMENT_HEADER;
++    size_t offset = index * chunk_capacity;
++    size_t chunk = length - offset;
++    if (chunk > chunk_capacity) chunk = chunk_capacity;
++    if (capacity < chunk + SY_BLE_FRAGMENT_HEADER) return 0U;
++    out[0] = SY_BLE_FRAGMENT_MAGIC;
++    out[1] = SY_BLE_FRAGMENT_VERSION;
++    out[2] = (uint8_t)(sequence & 0xffU);
++    out[3] = (uint8_t)(sequence >> 8U);
++    out[4] = (uint8_t)index;
++    out[5] = (uint8_t)count;
++    memcpy(out + SY_BLE_FRAGMENT_HEADER, json + offset, chunk);
++    return chunk + SY_BLE_FRAGMENT_HEADER;
++}
++
++void sy_ble_session_init(sy_ble_session_t *s)
++{
++    memset(s, 0, sizeof(*s)); s->mtu = 23U; s->rate_hz = 5U;
++}
++void sy_ble_session_connect(sy_ble_session_t *s)
++{
++    s->connected = true; s->subscribed = false; s->mtu = 23U; ++s->generation;
++}
++void sy_ble_session_disconnect(sy_ble_session_t *s)
++{
++    s->connected = false; s->subscribed = false; s->mtu = 23U; ++s->generation;
++}
++void sy_ble_session_subscribe(sy_ble_session_t *s, bool enabled, uint32_t now)
++{
++    s->subscribed = s->connected && enabled; s->next_due_ms = now;
++}
++bool sy_ble_session_set_rate(sy_ble_session_t *s, unsigned hz, uint32_t now)
++{
++    if (!sy_ble_rate_allowed(hz)) return false;
++    s->rate_hz = hz; s->next_due_ms = now; return true;
++}
++bool sy_ble_session_due(sy_ble_session_t *s, uint32_t now)
++{
++    if (!s->connected || !s->subscribed || (int32_t)(now - s->next_due_ms) < 0) return false;
++    s->next_due_ms = now + 1000U / s->rate_hz;
++    return true;
++}
+--- /dev/null
++++ b/ESP_SolarYou/main/ble_protocol.h
+@@ -0,0 +1,57 @@
++#ifndef SOLARYOU_BLE_PROTOCOL_H
++#define SOLARYOU_BLE_PROTOCOL_H
++
++#include <stdbool.h>
++#include <stddef.h>
++#include <stdint.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#define SY_BLE_DEVICE_NAME "SolarYou-ASSTP"
++#define SY_BLE_SERVICE_UUID "47e8841f-04c9-4ae2-af68-a7b6f4eb293d"
++#define SY_BLE_TELEMETRY_UUID "f2d2680c-66bc-4e24-8eac-d8013a99320b"
++#define SY_BLE_RATE_UUID "f2d2680c-66bc-4e24-8eac-d8013a99320c"
++#define SY_BLE_JSON_CAPACITY 256U
++#define SY_BLE_FRAGMENT_HEADER 6U
++#define SY_BLE_FRAGMENT_MAGIC 0x1eU
++#define SY_BLE_FRAGMENT_VERSION 1U
++
++typedef struct {
++    float pitch, roll, power, pitch_target, roll_target;
++    bool imu_valid, power_valid, targets_valid;
++    uint32_t captured_ms; /* Internal freshness timestamp; never sent on wire. */
++} sy_telemetry_sample_t;
++
++/* Copy real controller setpoints only when the caller has valid targets.
++ * Zero is a valid target; unavailable/nonfinite pairs remain null on the wire. */
++void sy_telemetry_set_targets(sy_telemetry_sample_t *sample, float pitch,
++                              float roll, bool available);
++/* Returns bytes written, or zero on truncation/invalid arguments. */
++size_t sy_telemetry_format(char *out, size_t capacity, const sy_telemetry_sample_t *sample);
++bool sy_ble_rate_allowed(unsigned rate_hz);
++bool sy_ble_parse_rate_command(const uint8_t *data, size_t length, unsigned *rate_hz);
++size_t sy_ble_rate_reply(char *out, size_t capacity, unsigned rate_hz);
++size_t sy_ble_fragment_count(size_t json_length, size_t payload_limit);
++size_t sy_ble_fragment(const uint8_t *json, size_t json_length, uint16_t sequence,
++                       size_t payload_limit, size_t index, uint8_t *out, size_t capacity);
++
++/* Single-owner model. The ESP adapter protects calls with a short critical section. */
++typedef struct {
++    bool connected, subscribed;
++    uint16_t mtu;
++    unsigned rate_hz;
++    uint32_t generation, next_due_ms;
++} sy_ble_session_t;
++void sy_ble_session_init(sy_ble_session_t *session);
++void sy_ble_session_connect(sy_ble_session_t *session);
++void sy_ble_session_disconnect(sy_ble_session_t *session);
++void sy_ble_session_subscribe(sy_ble_session_t *session, bool enabled, uint32_t now_ms);
++bool sy_ble_session_set_rate(sy_ble_session_t *session, unsigned hz, uint32_t now_ms);
++bool sy_ble_session_due(sy_ble_session_t *session, uint32_t now_ms);
++
++#ifdef __cplusplus
++}
++#endif
++#endif
+--- /dev/null
++++ b/ESP_SolarYou/main/ble_telemetry.c
+@@ -0,0 +1,263 @@
++#include "ble_telemetry.h"
++#include "sdkconfig.h"
++#include "esp_log.h"
++#include "esp_timer.h"
++#include "freertos/FreeRTOS.h"
++#include "freertos/task.h"
++#include "freertos/queue.h"
++#include <string.h>
++
++static QueueHandle_t latest_queue;
++
++#include "nvs_flash.h"
++#include "nimble/nimble_port.h"
++#include "nimble/nimble_port_freertos.h"
++#include "host/ble_hs.h"
++#include "host/util/util.h"
++#include "services/gap/ble_svc_gap.h"
++#include "services/gatt/ble_svc_gatt.h"
++
++static const char *TAG = "BLE";
++static portMUX_TYPE session_lock = portMUX_INITIALIZER_UNLOCKED;
++static sy_ble_session_t session;
++static QueueHandle_t reply_queue;
++static uint16_t connection = BLE_HS_CONN_HANDLE_NONE;
++static uint16_t telemetry_handle;
++static uint8_t own_address_type;
++
++static const ble_uuid128_t service_uuid = BLE_UUID128_INIT(
++    0x3d,0x29,0xeb,0xf4,0xb6,0xa7,0x68,0xaf,0xe2,0x4a,0xc9,0x04,0x1f,0x84,0xe8,0x47);
++static const ble_uuid128_t telemetry_uuid = BLE_UUID128_INIT(
++    0x0b,0x32,0x99,0x3a,0x01,0xd8,0xac,0x8e,0x24,0x4e,0xbc,0x66,0x0c,0x68,0xd2,0xf2);
++/* New rate-setting characteristic; the established telemetry UUID is unchanged. */
++static const ble_uuid128_t rate_uuid = BLE_UUID128_INIT(
++    0x0c,0x32,0x99,0x3a,0x01,0xd8,0xac,0x8e,0x24,0x4e,0xbc,0x66,0x0c,0x68,0xd2,0xf2);
++
++static uint32_t now_ms(void) { return (uint32_t)(esp_timer_get_time() / 1000); }
++
++static int access_telemetry(uint16_t conn, uint16_t attr,
++                           struct ble_gatt_access_ctxt *context, void *arg)
++{
++    (void)conn; (void)attr; (void)arg;
++    /* NimBLE requires a callback even for a notify-only characteristic. */
++    return context->op == BLE_GATT_ACCESS_OP_READ_CHR
++        ? BLE_ATT_ERR_READ_NOT_PERMITTED : BLE_ATT_ERR_WRITE_NOT_PERMITTED;
++}
++
++static int access_rate(uint16_t conn, uint16_t attr,
++                       struct ble_gatt_access_ctxt *context, void *arg)
++{
++    (void)conn; (void)attr; (void)arg;
++    if (context->op == BLE_GATT_ACCESS_OP_READ_CHR) {
++        char reply[24];
++        portENTER_CRITICAL(&session_lock);
++        unsigned hz = session.rate_hz;
++        portEXIT_CRITICAL(&session_lock);
++        size_t length = sy_ble_rate_reply(reply, sizeof(reply), hz);
++        return os_mbuf_append(context->om, reply, (uint16_t)length) == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
++    }
++    if (context->op != BLE_GATT_ACCESS_OP_WRITE_CHR) return BLE_ATT_ERR_WRITE_NOT_PERMITTED;
++    uint8_t command[32]; uint16_t length = 0U; unsigned hz = 0U;
++    if (OS_MBUF_PKTLEN(context->om) > sizeof(command) ||
++        ble_hs_mbuf_to_flat(context->om, command, sizeof(command), &length) != 0 ||
++        !sy_ble_parse_rate_command(command, length, &hz)) return BLE_ATT_ERR_VALUE_NOT_ALLOWED;
++    uint32_t now = now_ms();
++    portENTER_CRITICAL(&session_lock);
++    (void)sy_ble_session_set_rate(&session, hz, now);
++    portEXIT_CRITICAL(&session_lock);
++    /* The readable characteristic is authoritative even if a notification is lost. */
++    (void)xQueueOverwrite(reply_queue, &hz);
++    ESP_LOGI(TAG, "Outgoing telemetry rate applied: %u Hz", hz);
++    return 0;
++}
++
++static const struct ble_gatt_svc_def services[] = {
++    { .type = BLE_GATT_SVC_TYPE_PRIMARY, .uuid = &service_uuid.u,
++      .characteristics = (struct ble_gatt_chr_def[]) {
++          { .uuid = &telemetry_uuid.u, .access_cb = access_telemetry,
++            .flags = BLE_GATT_CHR_F_NOTIFY, .val_handle = &telemetry_handle },
++          { .uuid = &rate_uuid.u, .access_cb = access_rate,
++            .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE },
++          {0}
++      } },
++    {0}
++};
++
++static int gap_event(struct ble_gap_event *event, void *arg);
++static void advertise(void)
++{
++    struct ble_hs_adv_fields fields = {0};
++    fields.flags = BLE_HS_ADV_F_DISC_GEN | BLE_HS_ADV_F_BREDR_UNSUP;
++    fields.uuids128 = (ble_uuid128_t *)&service_uuid;
++    fields.num_uuids128 = 1;
++    fields.uuids128_is_complete = 1;
++    int rc = ble_gap_adv_set_fields(&fields);
++    if (rc != 0) { ESP_LOGE(TAG, "Advertising fields failed: %d", rc); return; }
++    struct ble_hs_adv_fields response = {0};
++    response.name = (const uint8_t *)SY_BLE_DEVICE_NAME;
++    response.name_len = (uint8_t)strlen(SY_BLE_DEVICE_NAME);
++    response.name_is_complete = 1;
++    rc = ble_gap_adv_rsp_set_fields(&response);
++    if (rc != 0) { ESP_LOGE(TAG, "Scan response failed: %d", rc); return; }
++    struct ble_gap_adv_params params = {0};
++    params.conn_mode = BLE_GAP_CONN_MODE_UND;
++    params.disc_mode = BLE_GAP_DISC_MODE_GEN;
++    rc = ble_gap_adv_start(own_address_type, NULL, BLE_HS_FOREVER, &params, gap_event, NULL);
++    if (rc != 0) ESP_LOGE(TAG, "Advertising start failed: %d", rc);
++    else ESP_LOGI(TAG, "Advertising as %s", SY_BLE_DEVICE_NAME);
++}
++
++static int gap_event(struct ble_gap_event *event, void *arg)
++{
++    (void)arg;
++    uint32_t now = now_ms();
++    switch (event->type) {
++    case BLE_GAP_EVENT_CONNECT:
++        if (event->connect.status != 0) { advertise(); break; }
++        portENTER_CRITICAL(&session_lock);
++        connection = event->connect.conn_handle;
++        sy_ble_session_connect(&session);
++        portEXIT_CRITICAL(&session_lock);
++        (void)xQueueReset(reply_queue);
++        ESP_LOGI(TAG, "Connected; waiting for notification subscription");
++        break;
++    case BLE_GAP_EVENT_DISCONNECT:
++        portENTER_CRITICAL(&session_lock);
++        connection = BLE_HS_CONN_HANDLE_NONE;
++        sy_ble_session_disconnect(&session);
++        portEXIT_CRITICAL(&session_lock);
++        (void)xQueueReset(reply_queue);
++        ESP_LOGI(TAG, "Disconnected; restarting advertising");
++        advertise();
++        break;
++    case BLE_GAP_EVENT_SUBSCRIBE:
++        if (event->subscribe.attr_handle == telemetry_handle) {
++            portENTER_CRITICAL(&session_lock);
++            sy_ble_session_subscribe(&session, event->subscribe.cur_notify != 0, now);
++            unsigned hz = session.rate_hz;
++            portEXIT_CRITICAL(&session_lock);
++            (void)xQueueOverwrite(reply_queue, &hz);
++        }
++        break;
++    case BLE_GAP_EVENT_MTU:
++        portENTER_CRITICAL(&session_lock);
++        session.mtu = event->mtu.value;
++        portEXIT_CRITICAL(&session_lock);
++        ESP_LOGI(TAG, "Negotiated MTU %u", (unsigned)event->mtu.value);
++        break;
++    case BLE_GAP_EVENT_ADV_COMPLETE:
++        advertise();
++        break;
++    default: break;
++    }
++    return 0;
++}
++
++static void host_reset(int reason)
++{
++    portENTER_CRITICAL(&session_lock);
++    connection = BLE_HS_CONN_HANDLE_NONE;
++    sy_ble_session_disconnect(&session);
++    portEXIT_CRITICAL(&session_lock);
++    ESP_LOGW(TAG, "BLE host reset: %d", reason);
++}
++static void host_sync(void)
++{
++    int rc = ble_hs_util_ensure_addr(0);
++    if (rc == 0) rc = ble_hs_id_infer_auto(0, &own_address_type);
++    if (rc != 0) { ESP_LOGE(TAG, "BLE identity failed: %d", rc); return; }
++    advertise();
++}
++static void host_task(void *arg)
++{
++    (void)arg; nimble_port_run(); nimble_port_freertos_deinit();
++}
++
++static bool send_json(const char *json, size_t length, const sy_ble_session_t *s,
++                       uint16_t conn, uint16_t sequence)
++{
++    size_t limit = s->mtu > 3U ? (size_t)s->mtu - 3U : 0U;
++    if (limit > 512U) limit = 512U;
++    size_t count = sy_ble_fragment_count(length, limit);
++    for (size_t i = 0U; i < count; ++i) {
++        portENTER_CRITICAL(&session_lock);
++        bool current = session.connected && session.subscribed && session.generation == s->generation && connection == conn;
++        portEXIT_CRITICAL(&session_lock);
++        if (!current) return false;
++        uint8_t packet[512];
++        size_t bytes = sy_ble_fragment((const uint8_t *)json, length, sequence, limit, i, packet, sizeof(packet));
++        if (bytes == 0U) return false;
++        struct os_mbuf *buffer = ble_hs_mbuf_from_flat(packet, (uint16_t)bytes);
++        if (buffer == NULL) return false;
++        /* NimBLE owns the mbuf after this call, including on error. */
++        int rc = ble_gatts_notify_custom(conn, telemetry_handle, buffer);
++        if (rc != 0) { ESP_LOGD(TAG, "Notification dropped: %d", rc); return false; }
++    }
++    return count != 0U;
++}
++
++static void sender_task(void *arg)
++{
++    (void)arg; uint16_t message_sequence = 0U;
++    for (;;) {
++        uint32_t now = now_ms();
++        portENTER_CRITICAL(&session_lock);
++        bool due = sy_ble_session_due(&session, now);
++        sy_ble_session_t state = session;
++        uint16_t conn = connection;
++        portEXIT_CRITICAL(&session_lock);
++        if (state.connected && state.subscribed) {
++            unsigned hz;
++            if (xQueueReceive(reply_queue, &hz, 0) == pdTRUE) {
++                char reply[24]; size_t n = sy_ble_rate_reply(reply, sizeof(reply), hz);
++                (void)send_json(reply, n, &state, conn, message_sequence++);
++            }
++            if (due) {
++                sy_telemetry_sample_t sample;
++                if (xQueuePeek(latest_queue, &sample, 0) == pdTRUE) {
++                    /* The application can publish on the other core after the
++                     * scheduler timestamp above. Read time after copying the
++                     * sample so a newer sample cannot underflow its age. */
++                    uint32_t sample_now = now_ms();
++                    if ((uint32_t)(sample_now - sample.captured_ms) > 1000U) {
++                        sample.imu_valid = false; sample.power_valid = false; sample.targets_valid = false;
++                    }
++                    char json[SY_BLE_JSON_CAPACITY];
++                    size_t n = sy_telemetry_format(json, sizeof(json), &sample);
++                    if (n > 0U) (void)send_json(json, n, &state, conn, message_sequence++);
++                }
++            }
++        }
++        vTaskDelay(pdMS_TO_TICKS(10));
++    }
++}
++
++esp_err_t ble_telemetry_init(void)
++{
++    latest_queue = xQueueCreate(1, sizeof(sy_telemetry_sample_t));
++    if (latest_queue == NULL) return ESP_ERR_NO_MEM;
++    if (strlen(SY_BLE_DEVICE_NAME) == 0U || strlen(SY_BLE_DEVICE_NAME) > 29U) return ESP_ERR_INVALID_ARG;
++    reply_queue = xQueueCreate(1, sizeof(unsigned));
++    if (reply_queue == NULL) return ESP_ERR_NO_MEM;
++    sy_ble_session_init(&session);
++    esp_err_t err = nvs_flash_init();
++    if (err != ESP_OK) { ESP_LOGE(TAG, "NVS init failed; existing data was not erased"); return err; }
++    err = nimble_port_init();
++    if (err != ESP_OK) return err;
++    ble_svc_gap_init(); ble_svc_gatt_init();
++    int rc = ble_svc_gap_device_name_set(SY_BLE_DEVICE_NAME);
++    if (rc == 0) rc = ble_gatts_count_cfg(services);
++    if (rc == 0) rc = ble_gatts_add_svcs(services);
++    if (rc == 0) rc = ble_att_set_preferred_mtu(185);
++    if (rc != 0) return ESP_FAIL;
++    ble_hs_cfg.reset_cb = host_reset;
++    ble_hs_cfg.sync_cb = host_sync;
++    if (xTaskCreate(sender_task, "ble_send", 4096, NULL, 2, NULL) != pdPASS) return ESP_ERR_NO_MEM;
++    nimble_port_freertos_init(host_task);
++    return ESP_OK;
++}
++
++void ble_telemetry_publish(const sy_telemetry_sample_t *sample)
++{
++    if (sample != NULL && latest_queue != NULL) (void)xQueueOverwrite(latest_queue, sample);
++}
+--- /dev/null
++++ b/ESP_SolarYou/main/ble_telemetry.h
+@@ -0,0 +1,9 @@
++#ifndef SOLARYOU_BLE_TELEMETRY_H
++#define SOLARYOU_BLE_TELEMETRY_H
++#include "ble_protocol.h"
++#include "esp_err.h"
++
++esp_err_t ble_telemetry_init(void);
++/* Copies into a one-element latest-value mailbox. Never waits for Bluetooth. */
++void ble_telemetry_publish(const sy_telemetry_sample_t *sample);
++#endif
+--- a/ESP_SolarYou/main/CMakeLists.txt
++++ b/ESP_SolarYou/main/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-idf_component_register(SRCS "ESP_SolarYou.c" "stabilization_task.c" "light_task.c" "uart_telemetry.c"
++idf_component_register(SRCS "ESP_SolarYou.c" "stabilization_task.c" "light_task.c" "uart_telemetry.c" "ble_protocol.c" "ble_telemetry.c" "ble_app.c"
+                     INCLUDE_DIRS "."
+                     REQUIRES
+                         esp_timer
+@@ -7,6 +7,8 @@
+                         motor_control
+                         system_state
+                         board_config
++                        bt
++                        nvs_flash
+                     )
+ 
+ target_compile_options(
+--- a/ESP_SolarYou/main/ESP_SolarYou.c
++++ b/ESP_SolarYou/main/ESP_SolarYou.c
+@@ -12,6 +12,7 @@
+ #include "light_task.h"
+ #include "uart_telemetry.h"
+ #include "sdkconfig.h"
++#include "ble_app.h"
+ 
+ static const char *TAG  = "Main";
+ 
+@@ -91,6 +92,7 @@
+ 
+     // Set system state
+     sys_state_reset(&curr_state);
++    ble_app_start();
+ 
+     // Initialize every configured sensor and report each result separately.
+     const bool all_selected_sensors_ready = sensor_adapter_init();
+@@ -107,14 +109,16 @@
+     log_sensor_init_result("Four-light array", sensor_status.light_enabled,
+                            sensor_status.light_initialized, true);
+     log_sensor_init_result("INA219 power sensor", sensor_status.power_enabled,
+-                           sensor_status.power_initialized,
+-                           sensor_status.power_enabled);
+-    if (!all_selected_sensors_ready || !sensor_status.imu_enabled ||
++                           sensor_status.power_initialized, false);
++    if (!sensor_status.imu_enabled ||
+         !sensor_status.imu_initialized || !sensor_status.light_enabled ||
+         !sensor_status.light_initialized) {
+         curr_state.mode = SYSTEM_ERROR;
+         ESP_LOGE(TAG, "Required sensor initialization failed; see the report above");
+         return;
++    }
++    if (!all_selected_sensors_ready) {
++        ESP_LOGW(TAG, "INA219 power sensor unavailable; continuing full control with power:null");
+     }
+ #else
+     log_sensor_init_result("BNO085 IMU", sensor_status.imu_enabled,
+@@ -222,6 +226,8 @@
+             }
+ #endif
+ 
++            ble_app_update_imu(curr_state.pitch_imu, curr_state.roll_imu, err == ESP_OK);
++
+             curr_time = esp_timer_get_time();
+         }
+ 
+@@ -229,6 +235,7 @@
+             last_light_time = curr_time;
+ 
+             err = light_update(&curr_state, &stab_config);
++            ble_app_update_targets(curr_state.pitch_light, curr_state.roll_light, err == ESP_OK);
+             if(err != ESP_OK){
+                 curr_state.mode = SYSTEM_ERROR;
+                 ESP_LOGE(TAG, "Light task failed: %s\n", esp_err_to_name(err));
+@@ -249,6 +256,7 @@
+             //uart_telemetry_send(&curr_state);
+         }
+     
++        ble_app_poll();
+         vTaskDelay(1);
+     }
+ }
