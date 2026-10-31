@@ -10,8 +10,9 @@
 #include "freertos/task.h"
 #include "sensor_api.h"
 #include "light_task.h"
-#include "uart_telemetry.h"
+#include "power_n_telemetry.h"
 #include "sdkconfig.h"
+#include "esp_log.h"
 
 static const char *TAG  = "Main";
 
@@ -36,18 +37,6 @@ static const stab_config_t stab_config = {
     .track_k = 2.0f,  
     .imu_age_ms = 100U,                          //might need mod considering dt introduction to LDR position calc
 };
-
-float read_power_placeholder(void){
-    return 0;
-}
-
-void power_telemetry_update(system_state_t *state)
-{   
-    float power = read_power_placeholder();
-    state->power = power;
-    state->power_samples ++;
-    state->avg_power += (power - state->avg_power) / (float) state->power_samples;
-}
 
 static void log_sensor_init_result(const char *name, bool enabled,
                                    bool initialized, bool required)
@@ -253,9 +242,11 @@ void app_main(void)
         if(curr_time - last_telem_time >= TELEM_TASK_DT_US){
             last_telem_time = curr_time;
 
-            // Send one newline-terminated JSON object for Zack's dashboard.
-            // Power remains null until the INA219 value is connected to curr_state.
-            //uart_telemetry_send(&curr_state);
+            err = power_update(&curr_state);
+            if(err != ESP_OK){
+                ESP_LOGW(TAG, "Power Update failed: %s", esp_err_to_name(err));
+            }
+            uart_telemetry_send(&curr_state);
         }
     
         vTaskDelay(1);
