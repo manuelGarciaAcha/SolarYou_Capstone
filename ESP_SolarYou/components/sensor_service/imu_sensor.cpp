@@ -107,40 +107,52 @@ bool imuSensorBegin()
     return true;
 }
 
-bool imuSensorCaptureNeutral(size_t sampleCount)
-{
-    if (!initialized || sampleCount == 0U) {
-        sensorHealthRaiseFaults(&health, SENSOR_FAULT_CALIBRATION_REQUIRED);
-        return false;
-    }
-    sensorHealthSetState(&health, SENSOR_STATE_CALIBRATING);
-    float pitchSum = 0.0f, rollSum = 0.0f;
-    float pitchMin = INFINITY, pitchMax = -INFINITY;
-    float rollMin = INFINITY, rollMax = -INFINITY;
-    for (size_t i = 0; i < sampleCount; ++i) {
-        ImuRawReading raw;
-        if (!readRaw(raw)) return false;
-        pitchSum += raw.pitch_deg;
-        rollSum += raw.roll_deg;
-        pitchMin = std::fmin(pitchMin, raw.pitch_deg);
-        pitchMax = std::fmax(pitchMax, raw.pitch_deg);
-        rollMin = std::fmin(rollMin, raw.roll_deg);
-        rollMax = std::fmax(rollMax, raw.roll_deg);
+bool imuSensorCaptureNeutral(size_t sampleCount) {
+  if (!initialized || sampleCount == 0U) {
+    sensorHealthRaiseFaults(&health, SENSOR_FAULT_CALIBRATION_REQUIRED);
+    return false;
+  }
+  sensorHealthSetState(&health, SENSOR_STATE_CALIBRATING);
+  float pitchSum = 0.0f, rollSum = 0.0f;
+  float pitchMin = INFINITY, pitchMax = -INFINITY;
+  float rollMin = INFINITY, rollMax = -INFINITY;
+  for (size_t i = 0; i < sampleCount; ++i) {
+    ImuRawReading raw;
+    bool got = false;
+    for (int attempt = 0; attempt < 20 && !got;
+         ++attempt) { // up to ~100 ms per sample
+      got = readRaw(raw);
+      if (!got)
         delay(5);
     }
-    if ((pitchMax - pitchMin) > IMU_CAL_MAX_SPREAD_DEG ||
-        (rollMax - rollMin) > IMU_CAL_MAX_SPREAD_DEG) {
-        sensorHealthRaiseFaults(&health, SENSOR_FAULT_CALIBRATION_UNSTABLE);
-        return false;
+    if (!got) {
+      ESP_LOGE("IMU", "No IMU data at sample %u", (unsigned)i);
+      return false;
     }
-    neutralPitchDeg = pitchSum / sampleCount;
-    neutralRollDeg = rollSum / sampleCount;
-    neutralValid = true;
-    sensorHealthClearFaults(&health, SENSOR_FAULT_CALIBRATION_REQUIRED |
-                                     SENSOR_FAULT_CALIBRATION_UNSTABLE |
-                                     SENSOR_FAULT_SENSOR_RESET);
-    sensorHealthSetState(&health, SENSOR_STATE_VALID);
-    return true;
+    pitchSum += raw.pitch_deg;
+    rollSum += raw.roll_deg;
+    pitchMin = std::fmin(pitchMin, raw.pitch_deg);
+    pitchMax = std::fmax(pitchMax, raw.pitch_deg);
+    rollMin = std::fmin(rollMin, raw.roll_deg);
+    rollMax = std::fmax(rollMax, raw.roll_deg);
+    delay(5);
+  }
+  if ((pitchMax - pitchMin) > IMU_CAL_MAX_SPREAD_DEG ||
+      (rollMax - rollMin) > IMU_CAL_MAX_SPREAD_DEG) {
+    ESP_LOGE(
+        "IMU", "Unstable: pitch spread %.2f, roll spread %.2f (limit %.2f)",
+        pitchMax - pitchMin, rollMax - rollMin, (double)IMU_CAL_MAX_SPREAD_DEG);
+    sensorHealthRaiseFaults(&health, SENSOR_FAULT_CALIBRATION_UNSTABLE);
+    return false;
+  }
+  neutralPitchDeg = pitchSum / sampleCount;
+  neutralRollDeg = rollSum / sampleCount;
+  neutralValid = true;
+  sensorHealthClearFaults(&health, SENSOR_FAULT_CALIBRATION_REQUIRED |
+                                       SENSOR_FAULT_CALIBRATION_UNSTABLE |
+                                       SENSOR_FAULT_SENSOR_RESET);
+  sensorHealthSetState(&health, SENSOR_STATE_VALID);
+  return true;
 }
 
 bool imuSensorReadCentered(AxisReading &reading)
