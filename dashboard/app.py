@@ -159,6 +159,9 @@ FIELDS = (
     ("pitch", "pitch", "imu", "pitch_deg"),
     ("roll", "roll", "imu", "roll_deg"),
     ("power", "power", "power", "power_w"),
+    ("voltage", "voltage", None, None),
+    ("current", "current", None, None),
+    ("avg_power", "avg_power", None, None),
     # Optional. The angle the controller is steering toward (the sun target).
     # When these arrive, the page measures error from the target instead of
     # tilt from level. Firmware that never sends them gets the level view.
