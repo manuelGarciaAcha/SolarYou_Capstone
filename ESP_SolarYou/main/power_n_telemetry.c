@@ -16,7 +16,7 @@ void uart_telemetry_send(const system_state_t *state)
 
     if(state->power_valid){
         printf(
-        "{\"pitch\":%.2f,\"roll\":%.2f,\"voltage\":%.3f,\"current\":%.3f,\"power\":%.3f,\"avg power\":%.3f,}\n",
+        "{\"pitch\":%.2f,\"roll\":%.2f,\"voltage\":%.3f,\"current\":%.3f,\"power\":%.3f,\"avg power\":%.3f}\n",
         (double)state->pitch_imu,
         (double)state->roll_imu,
         (double)state->voltage,
@@ -27,7 +27,7 @@ void uart_telemetry_send(const system_state_t *state)
     
     }else{
         printf(
-        "{\"pitch\":%.2f,\"roll\":%.2f,\"voltage\":null,\"current\":null,\"power\":null,\"avg power\":null,}\n",
+        "{\"pitch\":%.2f,\"roll\":%.2f,\"voltage\":null,\"current\":null,\"power\":null,\"avg power\":null}\n",
         (double)state->pitch_imu,
         (double)state->roll_imu
         );
