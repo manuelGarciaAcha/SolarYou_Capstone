@@ -52,14 +52,14 @@ esp_err_t stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch)
     return ESP_OK;
 }
 
-esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config, stab_output_t *output, const float *dt, float roll_light_angle, float pitch_light_angle)
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config, stab_output_t *output, float dt, float roll_light_angle, float pitch_light_angle)
 {
     // argument validation
-    if(roll == NULL || pitch == NULL || output == NULL || dt == NULL){
+    if(roll == NULL || pitch == NULL || output == NULL){
         return ESP_ERR_INVALID_ARG;
     }
 
-    if(!isfinite(roll_light_angle) || !isfinite(pitch_light_angle)){
+    if(!isfinite(roll_light_angle) || !isfinite(pitch_light_angle) || !isfinite(dt)){
         return ESP_ERR_INVALID_ARG;
     }
 

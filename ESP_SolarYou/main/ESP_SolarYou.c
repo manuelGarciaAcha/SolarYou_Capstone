@@ -181,12 +181,12 @@ void app_main(void)
         curr_time = esp_timer_get_time();
 
         if(curr_time - last_stabilize_time >= STAB_TASK_DT_US){
-            float dt = (curr_time - last_stabilize_time) / 1000000.0f;
+            float dt = (float)(curr_time - last_stabilize_time) / 1000000.0f;
             last_stabilize_time = curr_time;
 
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
             stab_output_t stab_output = {0};
-            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, dt, curr_state.roll_light, curr_state.pitch_light);
+            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_config, &stab_output, dt, curr_state.roll_light, curr_state.pitch_light);
 
             if (err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
@@ -212,7 +212,7 @@ void app_main(void)
         }
 
         if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
-            float dt = (curr_time - last_light_time) / 1000000.0f;
+            float dt = (float)(curr_time - last_light_time) / 1000000.0f;
             last_light_time = curr_time;
 
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
