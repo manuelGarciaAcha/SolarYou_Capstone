@@ -13,6 +13,7 @@ void sys_state_reset (system_state_t *state)
     state->power = 0;
     state->avg_power = 0;
     state->power_samples = 0;
+    state->power_valid = false;
     state->mode = SYSTEM_RESET;
     // state->task = TASK_NONE;
 }

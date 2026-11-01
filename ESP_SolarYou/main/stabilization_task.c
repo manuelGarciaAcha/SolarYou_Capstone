@@ -52,8 +52,9 @@ esp_err_t stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch)
     return ESP_OK;
 }
 
-esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, stab_output_t *output, const float *dt, float roll_light_angle, float pitch_light_angle)
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config, stab_output_t *output, const float *dt, float roll_light_angle, float pitch_light_angle)
 {
+    // argument validation
     if(roll == NULL || pitch == NULL || output == NULL || dt == NULL){
         return ESP_ERR_INVALID_ARG;
     }
@@ -64,10 +65,23 @@ esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, 
 
     sensor_imu_sample_t imu = {0};
 
+    // imu validation
     if(!sensor_adapter_read_imu(&imu) || !imu.valid){
-        ESP_LOGW(TAG, "IMU read failed");
+        ESP_LOGW(TAG, "IMU read failed - Sensor");
         return ESP_ERR_INVALID_STATE;
     }
+
+    if(!isfinite(imu.roll_deg) || !isfinite(imu.pitch_deg)){
+        ESP_LOGE(TAG, "Invalid IMU angles - Sensor");
+        return ESP_ERR_INVALID_STATE;        
+    }
+    
+    if(!imu.health.has_sample || imu.health.age_ms > config->imu_age_ms){
+        ESP_LOGW(TAG, "STALE IMU data: %u ms", imu.health.age_ms);
+        return ESP_ERR_INVALID_STATE;
+    }
+
+
     float roll_cmd;
     float pitch_cmd;
 
