@@ -1,220 +1,161 @@
-# Dashboard (Debug View)
+# Dashboard
 
-Live sensor dashboard for the stabilization platform. Supports four data
-sources, picked at startup with --source. Mock (the default) is what
-everyone should run until the ESP32 side has real data.
+Live sensor dashboard for the SolarYou stabilization platform. It reads
+telemetry from the ESP32 over serial, WiFi, or BLE and shows it in a
+browser. Mock mode makes up data so you can run it without a board.
 
-Working on the ESP32 firmware? Read `ESP32_INTEGRATION.md`. It starts with
-a serial quickstart for Demo 1 and covers the message format, what each
-connection type needs, and how to debug it.
-
-## How it works
+Working on the firmware side? See `ESP32_INTEGRATION.md` for the message
+format, what each connection needs, and troubleshooting. The BLE message
+format is in `BLE_PROTOCOL.md`.
 
 ```mermaid
 flowchart LR
-    A[mock / serial / wifi / ble] --> B[process_reading]
-    B --> C[normalize_reading]
-    C -->|socketio.emit sensor_update| D[Flask-SocketIO Server]
-    D -->|pushed to browser| E[socket.on sensor_update]
-    E --> F[Chart.js + readout]
+    A[ESP32 or mock data] -->|serial / WiFi / BLE| B[app.py: parse and check]
+    B -->|Socket.IO| C[browser page]
+    B --> D[logs/ CSV]
 ```
 
 ## Setup
 
-1. Make sure you have Python 3.9 or newer installed (`python3 --version` to check).
+Needs Python 3.9 or newer (`python3 --version`).
 
-2. From this `dashboard/` folder, create and activate a virtual environment:
-   ```
-   python3 -m venv env
-   source env/bin/activate        # Windows: env\Scripts\activate
-   ```
+From this `dashboard/` folder:
 
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-   This is only the five packages the dashboard uses. 
+```
+python3 -m venv env
+source env/bin/activate        # Windows: env\Scripts\activate
+pip install -r requirements.txt
+cp config.example.json config.json    # only needed for WiFi, BLE, or a fixed serial port
+```
 
-4. Optional: create your own local config (gitignored, each person's
-   values differ):
-   ```
-   cp config.example.json config.json
-   ```
-   Mock and serial work without it. You only need it for WiFi, BLE, or to
-   pin a specific serial port.
+`config.json` is gitignored, so each person keeps their own.
 
-5. Run the server:
-   ```
-   python app.py                  # mock (default)
-   python app.py --mock-tracking  # mock that follows a moving sun target
-   python app.py --source serial
-   python app.py --source wifi
-   python app.py --source ble
-   ```
-   Serial finds the board on its own. `python app.py --list-ports` shows
-   what it sees, and `--serial-port COM5` (or `/dev/cu.usbmodem1101`)
-   picks one by hand.
+## Running
 
-   Optional: `--port 5002` if 5001 is taken. `--debug` turns on Flask's
-   debug mode, which exposes a debugger page to everyone on the network,
-   so leave it off for demos.
+```
+python app.py                  # mock data (default)
+python app.py --mock-tracking  # mock data that follows a moving sun target
+python app.py --source serial
+python app.py --source wifi
+python app.py --source ble
+```
 
-6. Open a browser to:
-   ```
-   http://localhost:5001
-   ```
-   You should see the dashboard with a connection status badge in the
-   header and everything updating. Mock mode sends 5 readings a second
-   and repeats a tilt-then-settle cycle every 40 seconds. The badge turns
-   green once data is arriving. If it says
-   "Connected, waiting for data", the link is up but nothing usable has
-   come through yet, so check the terminal for warnings.
+Then open http://localhost:5001. The badge in the header turns green once
+data is arriving. If it says "Connected, waiting for data", the link is up
+but nothing usable has come through, so check the terminal.
 
-## What each source needs in config.json
+- Serial finds the board on its own. `--list-ports` shows what it sees and
+  `--serial-port COM5` (or `/dev/cu.usbmodem1101`) picks one by hand.
+- `--port 5002` if 5001 is taken.
+- `--debug` turns on Flask's debugger, which anyone on the network can
+  reach. Leave it off for demos.
 
-| Source | Required fields |
+Every flag and setting is listed in `ESP32_INTEGRATION.md`, section 3.
+
+| Source | Needs in config.json |
 |---|---|
-| mock | none |
-| serial | nothing (finds the board), or serial_port to pick one |
-| wifi | wifi_url |
-| ble | ble_name, ble_characteristic (ble_rate_characteristic is optional) |
+| mock | nothing |
+| serial | nothing, or `serial_port` to pick one |
+| wifi | `wifi_url` |
+| ble | `ble_name`, `ble_characteristic` |
 
-A missing field shows up clearly in the terminal and on the status badge,
-not as a silent failure. Optional extras (`serial_baud`,
-`wifi_idle_timeout`) are listed in `ESP32_INTEGRATION.md`.
+A missing field is reported on the badge and in the terminal.
 
 ## What's on the page
 
 | Part | Shows |
 |---|---|
-| Pitch, Roll | the latest angles, big. `--` means the sensor reported invalid or nothing arrived for 5 s. |
-| Power | the latest reading, with the average over the last 60 s under it |
-| Energy | power added up over time since the page opened or the last New run |
-| Pitch & Roll chart | the last 30 s, hover for exact values |
-| Tilt from level | the level card. The big number is how far the panel is from flat right now. Below it, a bubble level (roll left and right, pitch up and down, with a short trail; a hollow dot on the edge means past 10°), the RMS tilt over the last 30 s (lower is steadier), and the share of readings within 2°. |
-| Panel attitude | side and front views of the panel at the real angles |
-| Power chart | the last 60 s |
-| New run | clears the stability stats and energy total and starts a new run number |
-| Export CSV | downloads every reading this page received since it was opened, with a run column. Times are UTC. |
-| Sun/moon button | switches between the dark theme (default) and a light one. The browser remembers the choice. |
-| Send rate | BLE only. Sets how many readings per second the board sends (1, 2, 5, or 10) and shows the rate the board confirms. Hidden for the other sources. |
+| Pitch, Roll | latest angles. `--` means the sensor reported invalid or nothing arrived for 5 s. |
+| Power | latest reading, with the 60 s average under it |
+| Energy | power added up since the page opened or the last New run |
+| Pitch & Roll chart | last 30 s |
+| Tilt from level | how far the panel is from flat, a bubble level with a short trail, RMS tilt over 30 s, and the share of readings within 2° |
+| Panel attitude | side and front views at the real angles |
+| Power chart | last 60 s |
+| New run | resets the stats and energy and starts a new run number |
+| Export CSV | every reading this page received, with a run column (UTC times) |
+| Send rate | BLE only. Sets 1, 2, 5, or 10 readings a second and shows the rate the board confirms. |
 
-If the firmware sends `pitch_target` and `roll_target` (the sun angle the
-controller is steering toward), the page switches on its own: the level
-card measures error from the target, Pitch and Roll show their targets
-underneath, the chart adds dashed target lines, and the dashed outline in
-Panel attitude shows the target. When the targets stop, it goes back to
-level.
+If the firmware sends `pitch_target` and `roll_target`, the page measures
+error from the target instead of from level, and the charts and drawings
+show the target too. When the targets stop, it goes back to level.
 
-### Colors
+Notes on the numbers:
 
-All colors are CSS variables at the top of `static/css/style.css`, and
-the charts read them from there. Three line-color sets are built in,
-each checked for color-blind separation and contrast in both themes.
-Add one to the address to try it, for example
-`http://localhost:5001/?palette=lagoon`:
+- Without targets, tilt is measured from level. That is only the real
+  error while the controller is holding level.
+- RMS tilt comes from the telemetry rate (5 to 10 a second), so treat it
+  as an indicator, not a precise stability figure.
+- The 2° band is set by `BAND_DEG` at the top of
+  `static/js/dashboard.js`.
+- Energy is estimated in the browser and resets on reload.
+- If a drawing tilts the wrong way, flip `PITCH_DRAW_SIGN` or
+  `ROLL_DRAW_SIGN` at the top of `dashboard.js`.
 
-| palette | Pitch | Roll |
-|---|---|---|
-| `reef` (default) | cyan | coral |
-| `lagoon` | sea green | coral |
-| `sunset` | cyan | amber |
-
-Power is gold in all three. `?theme=light` works the same way. Both are
-remembered in that browser until changed.
-
-Things to keep in mind when presenting these:
-
-- Without targets in the telemetry, tilt is measured from level. That is
-  only the real error while the controller is holding level. With sun
-  tracking on, send the targets so the level card shows tracking error.
-- RMS tilt comes from the telemetry rate (5 to 10 a second), so it is an
-  indicator, not a benchmark to quote against the SOMAG 0.3° figure.
-- The 2° band is a placeholder. Change `BAND_DEG` at the top of
-  `static/js/dashboard.js` once the team agrees on a number.
-- Energy is estimated in the browser from when readings arrive, and resets
-  if the page reloads.
-- If a drawing tilts the opposite way from the real platform, flip
-  `PITCH_DRAW_SIGN` or `ROLL_DRAW_SIGN` at the top of `dashboard.js`.
-- For a stabilized vs. fixed comparison, use New run between the two and
-  split the CSV by the run column.
+The sun/moon button switches between dark and light themes. Three line
+color sets are built in: add `?palette=reef` (default), `lagoon`, or
+`sunset` to the address. All colors are CSS variables at the top of
+`static/css/style.css`.
 
 ## Saved readings
 
-With serial, WiFi, or BLE, every reading is also saved to a CSV file in
-`dashboard/logs/`, with the same columns as Export CSV. The page's own
-copy is lost on reload; this one isn't, so use it for test runs and
-TinyML training data.
+With serial, WiFi, or BLE, every reading is also written to a CSV in
+`logs/`, with the same columns as Export CSV. Use these for test runs and
+TinyML data, since the page's copy is lost on reload.
 
-- One file per session, named by start time. Pressing New run starts a
-  new file (`..._run2.csv`), so a stabilized run and a fixed-panel run
-  end up in separate files.
-- A file that passes 50 MB continues in a new one (`..._part2.csv`).
-- About 1 MB per hour at 5 readings a second. Nothing is deleted on its
-  own; the terminal warns at startup if `logs/` passes 500 MB.
+- One file per session, named by start time. New run starts a new file
+  (`..._run2.csv`), and a file over 50 MB continues in `..._part2.csv`.
+- About 1 MB per hour at 5 readings a second. Nothing is deleted
+  automatically; the terminal warns if `logs/` passes 500 MB.
 - Mock data isn't saved unless you add `--log`. `--no-log` turns saving
   off for any source.
-- `logs/` is in `.gitignore`. Copy a run out of it to keep or share it.
-- If saving fails (disk full, folder not writable), the terminal says so
-  once and the dashboard keeps running.
-- Pressing New run in any open browser starts the new file, so with
-  several viewers, agree on who presses it.
+- New run in any open browser starts the new file.
+- If saving fails, the terminal says so once and the dashboard keeps
+  running.
 
-## Viewing from another device (phone, another laptop)
+## Viewing from another device
 
-The server is already bound to your machine's network address (not just
-localhost), so as long as the other device is on the **same WiFi network**:
+Other devices on the same WiFi network can open `http://<this-ip>:5001`.
+Find the IP with `ipconfig getifaddr en0` (Mac) or `ipconfig` (Windows).
+Chart.js and Socket.IO are bundled locally, so the page works without
+internet access.
 
-1. Find this machine's local IP address:
-   - Mac: `ipconfig getifaddr en0`
-   - Windows: `ipconfig` (look for IPv4 Address)
-2. On the other device, go to `http://<that-ip>:5001`
+## Tests
 
-Chart.js and Socket.IO are bundled in `static/js/vendor/` instead of
-loaded from the internet, so the page also works with no internet
-connection, including over BLE with no WiFi at all.
+```
+python -m unittest discover -s tests -v
+```
 
-## Extra info
+No hardware needed. `tools/fake_esp32_ws.py` is a stand-in ESP32 for
+trying the WiFi source (see `ESP32_INTEGRATION.md`, section 6).
 
-- **Port 5001, not 5000**: macOS runs AirPlay Receiver on port 5000 by
-  default, which blocks Flask from using it. If you ever see a 403 error on
-  port 5000, this is why.
-- **Firewall prompt**: the first time you run this, macOS may ask whether to
-  allow incoming network connections for Python. Allow it, or other devices
-  won't be able to reach the dashboard.
-- **BLE on macOS**: macOS doesn't give apps a device's real Bluetooth
-  address, so the dashboard finds the ESP32 by its advertised name
-  instead. That's why BLE uses `ble_name` where WiFi uses an address.
+## Known issues
 
-## File structure
+- **Port 5000 on macOS**: AirPlay Receiver uses it, which is why the
+  default is 5001.
+- **Firewall prompt**: allow incoming connections for Python the first
+  time, or other devices can't reach the page.
+- **BLE on macOS**: macOS hides Bluetooth addresses, so the dashboard
+  finds the board by its advertised name (`ble_name`). The first scan may
+  ask for Bluetooth permission.
+
+## Files
 
 ```
 dashboard/
-  .gitignore                 <- keeps config.json and Python caches out of git
-  app.py                     <- Flask server + all four data sources
-  ble_transport.py           <- BLE receiver: split messages, reconnects, send rate (Jennifer)
-  BLE_PROTOCOL.md            <- BLE message and rate-setting format (Jennifer)
-  ESP32_INTEGRATION.md       <- message format and firmware guide
-  config.example.json        <- template, copy to config.json
-  config.json                <- your own local settings, gitignored
-  logs/                      <- saved readings, one CSV per run, gitignored
-  requirements.txt           <- just what the dashboard needs
-  tools/
-    fake_esp32_ws.py          <- stand-in ESP32 WebSocket server for testing
-  tests/
-    test_messages.py          <- checks for the message handling
-    test_serial.py            <- checks for port picking and line splitting
-    test_ble_hooks.py         <- checks for the BLE status messages and rate control visibility
-    test_logging.py           <- checks for saving readings to logs/
-  templates/
-    index.html                <- page structure
+  app.py                  Flask server and the four data sources
+  ble_transport.py        BLE receiver (Jennifer)
+  BLE_PROTOCOL.md         BLE message and rate format (Jennifer)
+  ESP32_INTEGRATION.md    message format and firmware guide
+  config.example.json     copy to config.json
+  requirements.txt
+  logs/                   saved readings (gitignored)
+  tools/fake_esp32_ws.py  stand-in ESP32 WebSocket server
+  tests/                  unit tests
+  templates/index.html
   static/
-    js/
-      dashboard.js             <- receives readings, draws the page
-      telemetry-rate.js        <- send-rate selector for BLE (Jennifer)
-      vendor/
-        chart.umd.js            <- Chart.js, bundled locally
-        socket.io.min.js        <- Socket.IO client, bundled locally
-    css/
-      style.css                <- styling
+    css/style.css
+    js/dashboard.js
+    js/telemetry-rate.js  BLE send-rate selector (Jennifer)
+    js/vendor/            Chart.js and Socket.IO, bundled
 ```
