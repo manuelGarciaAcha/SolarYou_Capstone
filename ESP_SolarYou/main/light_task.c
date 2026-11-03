@@ -32,8 +32,8 @@ esp_err_t light_update(system_state_t *state, const stab_config_t *config, float
     }
 
     // Save to system state, converted to target adjustment
-    state->roll_light += config->track_k * light.roll_error;
-    state->pitch_light += config->track_k * light.pitch_error;
+    state->roll_light += config->track_k * light.roll_error *dt;
+    state->pitch_light += config->track_k * light.pitch_error *dt;
 
     state->roll_light  = fmaxf(-LIGHT_ROLL_LIMIT_DEG,  fminf(LIGHT_ROLL_LIMIT_DEG,  state->roll_light));
     state->pitch_light = fmaxf(-LIGHT_PITCH_LIMIT_DEG, fminf(LIGHT_PITCH_LIMIT_DEG, state->pitch_light));

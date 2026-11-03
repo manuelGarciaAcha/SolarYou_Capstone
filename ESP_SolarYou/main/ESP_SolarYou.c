@@ -28,7 +28,7 @@ static const stab_config_t stab_config = {
     .pitch_Kp = 0.7f,
     .pitch_Ki = 1.5f,
     .pitch_Kd = 0.0f,
-    .deriv_time_const = 0.05f,
+    .deriv_time_const = 0.1f,
     .roll_servo_center = 100.0f,
     .pitch_servo_center = 60.0f,
     .pid_cmd_min = -50.0f,
@@ -36,7 +36,6 @@ static const stab_config_t stab_config = {
     .task_dt = STAB_TASK_DT_US / 1000000.0f,
     .track_k = 2.0f,  
     .imu_age_ms = 100U,                          //might need mod considering dt introduction to LDR position calc
-
     .servo_roll_min = MIN_SERVO_ANGLE_ROLL,
     .servo_roll_max = MAX_SERVO_ANGLE_ROLL,
     .servo_pitch_min = MIN_SERVO_ANGLE_PITCH,
