@@ -7,9 +7,10 @@
 
 static const char *TAG = "Light Task";
 
-#define LIGHT_SETPOINT_LIMIT_DEG 45.0f
+#define LIGHT_ROLL_LIMIT_DEG   45.0f
+#define LIGHT_PITCH_LIMIT_DEG  35.0f
 
-esp_err_t light_update(system_state_t *state, const stab_config_t *config)
+esp_err_t light_update(system_state_t *state, const stab_config_t *config, float dt)
 {
     if(state == NULL || config == NULL){
         return ESP_ERR_INVALID_ARG;
@@ -17,11 +18,16 @@ esp_err_t light_update(system_state_t *state, const stab_config_t *config)
 
     // grab light intensity reading
     sensor_light_sample_t light = {0};
-    if(!sensor_adapter_read_light(&light) || !light.valid){
-        ESP_LOGW(TAG, "Light invalid: faults=0x%lx TL=%u TR=%u BL=%u BR=%u",
-                 (unsigned long)light.health.active_faults,
-                 light.top_left_raw, light.top_right_raw,
-                 light.bottom_left_raw, light.bottom_right_raw);
+    bool read_ok = sensor_adapter_read_light(&light);
+
+    // log AFTER the read so the values are real
+    ESP_LOGI("Light_RAW", "TL=%u TR=%u BL=%u BR=%u | valid=%d faults=0x%x",
+             (unsigned)light.top_left_raw,  (unsigned)light.top_right_raw,
+             (unsigned)light.bottom_left_raw, (unsigned)light.bottom_right_raw,
+             light.valid, (unsigned)light.health.active_faults);
+
+    if(!read_ok || !light.valid){
+        ESP_LOGW(TAG, "Light sensor read failed");
         return ESP_ERR_INVALID_STATE;
     }
 
@@ -29,17 +35,12 @@ esp_err_t light_update(system_state_t *state, const stab_config_t *config)
     state->roll_light += config->track_k * light.roll_error;
     state->pitch_light += config->track_k * light.pitch_error;
 
-    state->roll_light  = fmaxf(-LIGHT_SETPOINT_LIMIT_DEG,
-                               fminf(LIGHT_SETPOINT_LIMIT_DEG, state->roll_light));
-    state->pitch_light = fmaxf(-LIGHT_SETPOINT_LIMIT_DEG,
-                               fminf(LIGHT_SETPOINT_LIMIT_DEG, state->pitch_light));
+    state->roll_light  = fmaxf(-LIGHT_ROLL_LIMIT_DEG,  fminf(LIGHT_ROLL_LIMIT_DEG,  state->roll_light));
+    state->pitch_light = fmaxf(-LIGHT_PITCH_LIMIT_DEG, fminf(LIGHT_PITCH_LIMIT_DEG, state->pitch_light));
 
     ESP_LOGI("Light_INPUTS", "error roll=%.3f pitch=%.3f | setpoint roll=%.2f pitch=%.2f",
              (double)light.roll_error, (double)light.pitch_error,
              (double)state->roll_light, (double)state->pitch_light);
-    ESP_LOGI("Light_RAW", "TL=%u TR=%u BL=%u BR=%u",
-             light.top_left_raw, light.top_right_raw,
-             light.bottom_left_raw, light.bottom_right_raw);
 
     return ESP_OK;
 }

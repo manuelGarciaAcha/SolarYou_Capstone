@@ -2,8 +2,9 @@
 #define SYSTEM_STATE_H_INCLUDED
 
 #include <stdint.h>
+#include <stdbool.h>
 
-#define STAB_TASK_DT_US         20000      // microseconds
+#define STAB_TASK_DT_US         50000      // microseconds
 #define TELEM_TASK_DT_US        200000
 #define LIGHT_TASK_DT_US        500000
 
@@ -39,7 +40,8 @@ typedef struct {
     float current;
     float power;
     float avg_power;
-    uint32_t power_samples;
+    uint64_t power_samples;
+    bool power_valid;
 
     // system
     system_mode_t mode;

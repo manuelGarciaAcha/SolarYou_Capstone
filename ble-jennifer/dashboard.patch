@@ -1,0 +1,611 @@
+--- a/dashboard/app.py
++++ b/dashboard/app.py
+@@ -30,6 +30,7 @@
+ 
+ from flask import Flask, render_template
+ from flask_socketio import SocketIO, emit
++from ble_transport import BleLink, valid_rate
+ 
+ app = Flask(__name__)
+ app.config["SECRET_KEY"] = "dev"
+@@ -71,6 +72,30 @@
+ # ---- shared data-source handling ----
+ 
+ connection_state = {"status": "connecting"}
++rate_state = {"available": False, "state": "disconnected"}
++_ble_link = None
++
++
++def set_rate_status(state):
++    global rate_state
++    rate_state = dict(state)
++    if rate_state.get("state") == "confirmed":
++        rate_state["confirmed_at"] = time.time()
++    socketio.emit("telemetry_rate", rate_state)
++
++
++@socketio.on("set_telemetry_rate")
++def set_telemetry_rate(data):
++    rate = data.get("rate_hz") if isinstance(data, dict) else None
++    try:
++        if not valid_rate(rate):
++            raise ValueError("Choose 1, 2, 5, or 10 updates per second")
++        if _ble_link is None:
++            raise RuntimeError("The rate control requires the BLE source")
++        _ble_link.request_rate(rate)
++    except (ValueError, RuntimeError) as exc:
++        emit("telemetry_rate", {"available": bool(rate_state.get("available")),
++                                "state": "error", "error": str(exc)})
+ 
+ 
+ def set_connection_status(status, message=None):
+@@ -91,6 +116,7 @@
+ def browser_connected():
+     """Catch up the browser that just connected with the current state."""
+     emit("connection_status", connection_state)
++    emit("telemetry_rate", rate_state)
+ 
+ 
+ def run_data_source(fn, config):
+@@ -597,60 +623,17 @@
+ # working the same way on macOS and Windows.
+ 
+ def ble_data_loop(config):
+-    """Subscribe to the ESP32's BLE notifications, rescanning when the link drops."""
++    """Use Zack's established telemetry UUID with bounded small-MTU reassembly."""
+     import asyncio
+     from bleak import BleakScanner, BleakClient
+-    try:
+-        from bleak.exc import BleakCharacteristicNotFoundError
+-    except ImportError:  # very old bleak
+-        BleakCharacteristicNotFoundError = ()
+-
+-    device_name = config.get("ble_name")
+-    characteristic_uuid = config.get("ble_characteristic")
+-    if not device_name or not characteristic_uuid:
+-        raise ValueError('config.json is missing "ble_name" or "ble_characteristic"')
+-
+-    async def handle_notify(_, data):
+-        process_reading(data)
+-
+-    async def run():
+-        while True:
+-            try:
+-                print(f"Scanning for BLE device '{device_name}'...")
+-                device = await BleakScanner.find_device_by_name(device_name, timeout=10.0)
+-                if device is None:
+-                    raise RuntimeError(f"Could not find BLE device '{device_name}'")
+-
+-                # The disconnect callback sets this event, which gives the
+-                # code below something to wait on. Sleeping in a loop
+-                # would never notice the link dropping.
+-                disconnected = asyncio.Event()
+-
+-                def on_disconnect(_client):
+-                    disconnected.set()
+-
+-                async with BleakClient(device, disconnected_callback=on_disconnect) as client:
+-                    await client.start_notify(characteristic_uuid, handle_notify)
+-                    print("BLE connected")
+-                    set_connection_status("connected")
+-                    await disconnected.wait()
+-                    print("BLE disconnected")
+-                    reason = "device disconnected"
+-
+-            except BleakCharacteristicNotFoundError:
+-                reason = (f"connected, but characteristic {characteristic_uuid} was not found. "
+-                          "Check ble_characteristic against the firmware "
+-                          "(NimBLE writes UUID bytes in reverse order)")
+-            except Exception as exc:
+-                reason = str(exc) or type(exc).__name__
+-
+-            print(f"BLE connection lost/failed: {reason}")
+-            set_connection_status("reconnecting", reason)
+-            print(f"Retrying in {RETRY_SECONDS} seconds...")
+-            await asyncio.sleep(RETRY_SECONDS)
+-
+-    asyncio.run(run())
+-
++    global _ble_link
++    def status(state, reason):
++        if state == "warning":
++            warn_dropped(reason, "BLE notification")
++        else:
++            set_connection_status(state, reason)
++    _ble_link = BleLink(config, process_reading, status, set_rate_status, RETRY_SECONDS)
++    asyncio.run(_ble_link.run(BleakScanner, BleakClient))
+ 
+ DATA_SOURCES = {
+     "mock": mock_data_loop,
+--- /dev/null
++++ b/dashboard/BLE_PROTOCOL.md
+@@ -0,0 +1,73 @@
++# BLE integration
++
++This will send the readings needed by Zack's existing dashboard, for example:
++
++```json
++{"pitch":1.25,"roll":-2.0,"power":null,"pitch_target":8.0,"roll_target":-4.0}
++```
++
++Angles are degrees and power is watts. Unavailable or invalid values are null;
++a real zero remains zero. The existing INA219 reader supplies power when valid.
++Full-control telemetry uses the existing pitch_light/roll_light controller
++setpoints after a valid light update. Motor-off testing sends null targets.
++
++The existing dashboard uses its zero/level reference when targets are unavailable.
++Changes to shared firmware and dashboard files are listed in the root README.
++
++## BLE identifiers
++
++- Device name: SolarYou-ASSTP
++- Service: 47e8841f-04c9-4ae2-af68-a7b6f4eb293d
++- Telemetry notification: f2d2680c-66bc-4e24-8eac-d8013a99320b
++- Rate read/write: f2d2680c-66bc-4e24-8eac-d8013a99320c
++
++The first three identifiers match Zack's parameters. The added rate characteristic
++accepts {"set_rate_hz":5}, where the value is an
++integer 1, 2, 5 or 10. Reading it returns the actual setting, e.g. {"rate_hz":5}.
++Invalid writes leave the existing setting unchanged. Rate replies are control
++information and never become sensor readings or CSV rows. Notification replies
++are advisory; only reading the rate setting back can confirm the applied rate.
++
++The initial connection check makes up to three read attempts, with a three-second
++timeout per read and 250 ms pauses between failures. Telemetry notifications stay
++active throughout. A missing-characteristic response means rate control is
++unsupported and is not retried. Other failures show an error after three attempts;
++the next Bluetooth connection starts a fresh check. These retries only read the
++setting and do not resend rate-setting commands.
++
++The selector immediately displays Applying. After the write, Verifying means
++the dashboard is reading the applied setting back. Success is reported only
++when that value matches the request. Error/disconnect cancels pending success.
++The last confirmed choice is requested again after reconnect during the running
++dashboard session. A failed restore keeps a healthy Bluetooth connection streaming,
++shows the rate error, and allows a manual retry. If no rate has been confirmed on
++this connection, the selector shows "Choose a rate" so the same choice can be
++requested again directly. The prompt never sends a rate command.
++A real disconnect still reconnects.
++Missing rate support
++leaves streaming available but disables the selector. The 450 ms minimum
++visual feedback duration does not delay firmware operation or fake a reply.
++The setting controls outgoing BLE updates, not IMU/PID sampling.
++
++## Split messages
++
++A complete UTF-8 JSON message is sent in one notification when it fits the
++negotiated MTU minus three bytes. Otherwise notifications carry six-byte headers:
++
++```text
++1e | 01 | message sequence low | sequence high | index | count
++```
++
++This message sequence is necessary for reassembly and is not an extra reading
++field. Indices start at zero. The backend joins matching ordered fragments
++within two seconds and bounds assemblies at 4096 bytes and 32 pieces. Missing,
++expired, out-of-order, or oversized assemblies are discarded; a new complete
++message recovers. Disconnect clears unfinished pieces. Zack's original receiver
++needs this matching backend addition to read split notifications.
++
++## Validation
++
++The full source package includes a separate preview with generated readings.
++It uses the production C formatter/framing/session code and identifies simulated
++data on screen. Test results and required hardware checks are in `VALIDATION.md`
++at the project root.
+--- /dev/null
++++ b/dashboard/ble_transport.py
+@@ -0,0 +1,275 @@
++"""SolarYou BLE transport. Hardware-independent framing and injectable BLE client.
++
++Existing whole-JSON notifications remain compatible. Small-MTU frames have a
++6-byte header: 1e, version=1, sequence little-endian u16, index u8, count u8.
++Only complete, ordered, bounded messages reach the dashboard or CSV recorder.
++"""
++import asyncio
++import json
++import time
++try:
++    from bleak.exc import BleakCharacteristicNotFoundError
++except ImportError:
++    # app.py also supports mock/serial/WiFi without installing Bleak.
++    BleakCharacteristicNotFoundError = ()
++
++RATE_UUID = 'f2d2680c-66bc-4e24-8eac-d8013a99320c'
++ALLOWED_RATES = (1, 2, 5, 10)
++INITIAL_RATE_ATTEMPTS = 3
++INITIAL_RATE_RETRY_SECONDS = 0.25
++
++
++def valid_rate(value):
++    return type(value) is int and value in ALLOWED_RATES
++
++
++class NotificationDecoder:
++    def __init__(self, max_bytes=4096, timeout=2.0):
++        self.max_bytes = max_bytes
++        self.timeout = timeout
++        self.reset()
++
++    def reset(self):
++        self.sequence = None
++        self.next_index = 0
++        self.count = 0
++        self.started = 0.0
++        self.buffer = bytearray()
++
++    def feed(self, packet, now=None):
++        now = time.monotonic() if now is None else now
++        packet = bytes(packet)
++        if not packet:
++            return None
++        if packet[0] != 0x1e:
++            self.reset()
++            if len(packet) > self.max_bytes:
++                raise ValueError('BLE message exceeds limit')
++            return json.loads(packet.decode('utf-8'))
++        if len(packet) <= 6 or packet[1] != 1:
++            self.reset()
++            raise ValueError('Invalid BLE fragment header')
++        sequence = int.from_bytes(packet[2:4], 'little')
++        index, count = packet[4:6]
++        if count < 2 or count > 32 or index >= count:
++            self.reset()
++            raise ValueError('Invalid BLE fragment index/count')
++        if index == 0:
++            self.reset()
++            self.sequence, self.count, self.started = sequence, count, now
++        if (self.sequence != sequence or self.count != count or index != self.next_index
++                or now - self.started > self.timeout):
++            self.reset()
++            raise ValueError('Missing, out-of-order, or expired BLE fragments')
++        if len(self.buffer) + len(packet) - 6 > self.max_bytes:
++            self.reset()
++            raise ValueError('BLE assembly exceeds limit')
++        self.buffer.extend(packet[6:])
++        self.next_index += 1
++        if self.next_index < self.count:
++            return None
++        complete = bytes(self.buffer)
++        self.reset()
++        return json.loads(complete.decode('utf-8'))
++
++
++class BleLink:
++    def __init__(self, config, on_reading, on_status, on_rate, retry_seconds=2):
++        self.name = config.get('ble_name')
++        self.telemetry_uuid = config.get('ble_characteristic')
++        self.rate_uuid = config.get('ble_rate_characteristic', RATE_UUID)
++        if not self.name or not self.telemetry_uuid:
++            raise ValueError('config.json is missing ble_name or ble_characteristic')
++        self.on_reading, self.on_status, self.on_rate = on_reading, on_status, on_rate
++        self.retry_seconds = retry_seconds
++        self.decoder = NotificationDecoder()
++        self.client = None
++        self.loop = None
++        self.change_lock = None
++        self.supports_rate = False
++        self.desired_rate = None
++        self.pending_rate = None
++
++    def handle_notification(self, _characteristic, packet):
++        try:
++            message = self.decoder.feed(packet)
++            if message is None:
++                return
++            if isinstance(message, dict) and 'rate_hz' in message:
++                rate = message['rate_hz']
++                if not valid_rate(rate):
++                    raise ValueError('Invalid applied-rate response')
++                # Notifications are advisory. Only a successful characteristic
++                # readback may confirm the setting, including after a failed
++                # request or a delayed acknowledgement from an old request.
++                return  # Acknowledgements never become sensor/CSV rows.
++            # Zack's existing processor accepts JSON text for batches, but not
++            # Python lists. Preserve its original validation and batch limit.
++            self.on_reading(json.dumps(message, separators=(',', ':'))
++                            if isinstance(message, list) else message)
++        except (ValueError, UnicodeError, RecursionError) as exc:
++            # A bad/missing fragment drops only that sample. Keep the radio link.
++            self.on_status('warning', str(exc))
++
++    def _is_current_client(self, client):
++        return (client is not None and self.client is client
++                and getattr(client, 'is_connected', True))
++
++    async def read_rate(self, client=None):
++        client = self.client if client is None else client
++        if client is None:
++            raise RuntimeError('BLE disconnected')
++        raw = await asyncio.wait_for(client.read_gatt_char(self.rate_uuid), timeout=3.0)
++        if not self._is_current_client(client):
++            raise RuntimeError('BLE disconnected during rate readback')
++        message = json.loads(bytes(raw).decode('utf-8'))
++        rate = message.get('rate_hz') if isinstance(message, dict) else None
++        if not valid_rate(rate):
++            raise ValueError('Firmware returned an invalid applied rate')
++        return rate
++
++    async def check_initial_rate(self, client):
++        """Retry reads on this connection without interrupting notifications."""
++        for attempt in range(1, INITIAL_RATE_ATTEMPTS + 1):
++            if not self._is_current_client(client):
++                raise RuntimeError('BLE disconnected during initial rate check')
++            self.on_rate({'available': False, 'state': 'checking',
++                          'attempt': attempt, 'max_attempts': INITIAL_RATE_ATTEMPTS})
++            try:
++                return await self.read_rate(client)
++            except BleakCharacteristicNotFoundError:
++                if not self._is_current_client(client):
++                    raise
++                # A missing characteristic proves the firmware has no rate control.
++                self.on_rate({'available': False, 'state': 'unsupported'})
++                return None
++            except Exception:
++                if not self._is_current_client(client):
++                    raise
++                if attempt == INITIAL_RATE_ATTEMPTS:
++                    self.on_rate({
++                        'available': False, 'state': 'error',
++                        'error': f'Could not check ESP32 rate after {INITIAL_RATE_ATTEMPTS} attempts. '
++                                 'Readings continue; reconnect Bluetooth to try again.'
++                    })
++                    return None
++                # Yield to telemetry callbacks while waiting for the next read.
++                await asyncio.sleep(INITIAL_RATE_RETRY_SECONDS)
++
++    async def change_rate(self, rate, expected_client=None):
++        if not valid_rate(rate):
++            raise ValueError('Choose 1, 2, 5, or 10 updates per second')
++        expected_client = self.client if expected_client is None else expected_client
++        async with self.change_lock:
++            if not self._is_current_client(expected_client) or not self.supports_rate:
++                raise RuntimeError('Connect to firmware supporting the rate setting first')
++            self.pending_rate = rate
++            client = self.client
++            self.on_rate({'available': True, 'requested_hz': rate, 'state': 'pending'})
++            try:
++                command = json.dumps({'set_rate_hz': rate}, separators=(',', ':')).encode('utf-8')
++                # At most 18 bytes: the command itself fits the default MTU.
++                await asyncio.wait_for(client.write_gatt_char(self.rate_uuid, command, response=True), timeout=3.0)
++                if not self._is_current_client(client):
++                    raise RuntimeError('BLE disconnected during rate request')
++                self.on_rate({'available': True, 'requested_hz': rate, 'state': 'verifying'})
++                # Readback verifies the actual setting even if an ack notification is lost.
++                applied = await self.read_rate(client)
++                if not self._is_current_client(client):
++                    raise RuntimeError('BLE connection changed during rate request')
++                if applied != rate:
++                    raise RuntimeError(f'Firmware applied {applied} Hz instead of {rate} Hz')
++                self.desired_rate = applied
++                self.on_rate({'available': True, 'rate_hz': applied, 'state': 'confirmed'})
++                return applied
++            except Exception as exc:
++                # Report before releasing the lock, so this failure cannot
++                # overwrite a queued request's newer pending status.
++                if self._is_current_client(client):
++                    self.on_rate({'available': self.supports_rate, 'state': 'error', 'error': str(exc)})
++                raise
++            finally:
++                self.pending_rate = None
++
++    def request_rate(self, rate):
++        """Called from Flask's thread; all BLE operations stay on the BLE loop."""
++        if not valid_rate(rate):
++            raise ValueError('Choose 1, 2, 5, or 10 updates per second')
++        client, loop = self.client, self.loop
++        if loop is None or not self._is_current_client(client) or not self.supports_rate:
++            raise RuntimeError('BLE rate setting is unavailable until connected')
++        future = asyncio.run_coroutine_threadsafe(self.change_rate(rate, client), loop)
++        def finished(result):
++            try:
++                result.result()
++            except Exception:
++                pass  # change_rate reports current-session failures while holding its lock.
++        future.add_done_callback(finished)
++        return future
++
++    async def run(self, scanner, client_factory, stop=None):
++        self.loop = asyncio.get_running_loop()
++        self.change_lock = asyncio.Lock()
++        try:
++            while stop is None or not stop.is_set():
++                self.decoder.reset()
++                reason = 'device disconnected'
++                try:
++                    self.on_status('connecting', f'Scanning for {self.name}')
++                    device = await scanner.find_device_by_name(self.name, timeout=10.0)
++                    if device is None:
++                        raise RuntimeError(f'Could not find BLE device {self.name}')
++                    disconnected = asyncio.Event()
++                    def lost(lost_client, event=disconnected, loop=self.loop):
++                        def mark_lost():
++                            if self.client is lost_client:
++                                self.client = None
++                                self.supports_rate = False
++                                self.decoder.reset()
++                                self.on_rate({'available': False, 'state': 'disconnected'})
++                            event.set()
++                        try:
++                            loop.call_soon_threadsafe(mark_lost)
++                        except RuntimeError:
++                            pass  # The dashboard's BLE loop has already closed.
++                    async with client_factory(device, disconnected_callback=lost) as client:
++                        self.client = client
++                        self.supports_rate = False
++                        def notify(characteristic, packet, expected=client):
++                            if self._is_current_client(expected):
++                                self.handle_notification(characteristic, packet)
++                        await client.start_notify(self.telemetry_uuid, notify)
++                        self.on_status('connected', None)
++                        applied = await self.check_initial_rate(client)
++                        if applied is not None:
++                            self.supports_rate = True
++                            if self.desired_rate is not None and applied != self.desired_rate:
++                                try:
++                                    await self.change_rate(self.desired_rate)
++                                except Exception:
++                                    # change_rate already reports the error while holding
++                                    # its lock. A setting failure must not stop telemetry;
++                                    # a genuinely lost connection still needs reconnecting.
++                                    if not self._is_current_client(client):
++                                        raise
++                            else:
++                                self.on_rate({'available': True, 'rate_hz': applied, 'state': 'confirmed'})
++                        if stop is None:
++                            await disconnected.wait()
++                        else:
++                            while not disconnected.is_set() and not stop.is_set():
++                                await asyncio.sleep(0.01)
++                except asyncio.CancelledError:
++                    raise
++                except Exception as exc:
++                    reason = str(exc) or type(exc).__name__
++                finally:
++                    self.client = None
++                    self.supports_rate = False
++                    self.decoder.reset()
++                    self.on_rate({'available': False, 'state': 'disconnected'})
++                if stop is None or not stop.is_set():
++                    self.on_status('reconnecting', reason)
++                    await asyncio.sleep(self.retry_seconds)
++        finally:
++            self.loop = None
+--- /dev/null
++++ b/dashboard/static/js/telemetry-rate.js
+@@ -0,0 +1,110 @@
++// Optional sending-rate control. Zack's dashboard.js remains unchanged.
++// Reuse its existing Socket.IO connection without changing readings, charts,
++// target calculations, statistics, or CSV export.
++(function () {
++    "use strict";
++
++    const selector = document.getElementById("telemetryRate");
++    const status = document.getElementById("telemetryRateStatus");
++    let appliedRate = null;
++    let feedbackStarted = null;
++    let feedbackRate = null;
++    let feedbackToken = 0;
++    let feedbackTimer = null;
++    const MIN_FEEDBACK_MS = 450;
++
++    function resetFeedback() {
++        ++feedbackToken;
++        if (feedbackTimer !== null) clearTimeout(feedbackTimer);
++        feedbackTimer = null;
++        feedbackStarted = null;
++        feedbackRate = null;
++    }
++
++    function showProgress(state, requestedRate) {
++        selector.disabled = true;
++        status.dataset.state = state;
++        status.setAttribute("aria-busy", "true");
++        status.innerText = state === "verifying"
++            ? "Verifying " + requestedRate + " updates/s with ESP32..."
++            : "Applying " + requestedRate + " updates/s...";
++        status.title = "Waiting for the applied setting to be read back";
++    }
++
++    selector.addEventListener("change", () => {
++        const rate = Number(selector.value);
++        if (![1, 2, 5, 10].includes(rate)) return;
++        resetFeedback();
++        feedbackStarted = performance.now();
++        feedbackRate = rate;
++        // Show feedback immediately, before a server round trip.
++        showProgress("applying", rate);
++        socket.emit("set_telemetry_rate", { rate_hz: rate });
++    });
++
++    socket.on("telemetry_rate", (state) => {
++        if (state.state === "confirmed" && [1, 2, 5, 10].includes(state.rate_hz)) {
++            appliedRate = state.rate_hz;
++            const token = feedbackToken;
++            const finish = () => {
++                if (token !== feedbackToken) return;
++                resetFeedback();
++                selector.disabled = !state.available;
++                selector.value = String(state.rate_hz);
++                status.dataset.state = "confirmed";
++                status.setAttribute("aria-busy", "false");
++                const checkedAt = new Date((state.confirmed_at || Date.now() / 1000) * 1000).toLocaleTimeString();
++                status.innerText = "ESP32 rate: " + state.rate_hz + " updates/s";
++                status.title = "Last read back from the ESP32 at " + checkedAt;
++            };
++            const remaining = feedbackStarted === null ? 0
++                : Math.max(0, MIN_FEEDBACK_MS - (performance.now() - feedbackStarted));
++            if (feedbackTimer !== null) clearTimeout(feedbackTimer);
++            if (remaining > 0) feedbackTimer = setTimeout(finish, remaining);
++            else finish();
++        } else if (state.state === "checking") {
++            resetFeedback();
++            appliedRate = null;
++            selector.disabled = true;
++            status.dataset.state = "checking";
++            status.setAttribute("aria-busy", "true");
++            status.innerText = "Checking ESP32 rate (" + state.attempt
++                + "/" + state.max_attempts + ")...";
++            status.title = "Reading the applied setting; live readings continue";
++        } else if (state.state === "pending" || state.state === "verifying") {
++            // Another browser may start a request while our previous success
++            // is waiting to display. Its old timer must not hide this request.
++            if (feedbackTimer !== null || feedbackRate !== state.requested_hz) resetFeedback();
++            if (feedbackStarted === null) feedbackStarted = performance.now();
++            feedbackRate = state.requested_hz;
++            showProgress(state.state === "pending" ? "applying" : "verifying", state.requested_hz);
++        } else if (state.state === "error") {
++            resetFeedback();
++            selector.disabled = !state.available;
++            status.dataset.state = "error";
++            status.setAttribute("aria-busy", "false");
++            status.innerText = state.error || "Rate change failed";
++            status.title = "";
++            selector.value = appliedRate === null ? "" : String(appliedRate);
++        } else {
++            resetFeedback();
++            selector.disabled = !state.available;
++            status.dataset.state = state.state;
++            status.setAttribute("aria-busy", "false");
++            appliedRate = null;
++            status.innerText = state.state === "unsupported"
++                ? "Firmware has no rate control" : "Connect BLE to change rate";
++            status.title = "";
++        }
++    });
++
++    socket.on("disconnect", () => {
++        resetFeedback();
++        selector.disabled = true;
++        status.dataset.state = "disconnected";
++        status.setAttribute("aria-busy", "false");
++        status.innerText = "Dashboard disconnected; reconnecting...";
++        status.title = "";
++        appliedRate = null;
++    });
++})();
+--- a/dashboard/templates/index.html
++++ b/dashboard/templates/index.html
+@@ -38,6 +38,15 @@
+             </p>
+         </div>
+         <div class="actions">
++            <label for="telemetryRate">Send rate</label>
++            <select id="telemetryRate" disabled aria-describedby="telemetryRateStatus">
++                <option value="" disabled>Choose a rate</option>
++                <option value="1">1 update/s</option>
++                <option value="2">2 updates/s</option>
++                <option value="5" selected>5 updates/s</option>
++                <option value="10">10 updates/s</option>
++            </select>
++            <span id="telemetryRateStatus" role="status">Connect BLE to change rate</span>
+             <span class="run-label">Run <span id="runNumber">1</span></span>
+             <button id="newRun" type="button"
+                     title="Clears the stability stats and energy total and starts a new run number in the CSV">New run</button>
+@@ -164,5 +173,6 @@
+     <script src="{{ url_for('static', filename='js/vendor/socket.io.min.js') }}"></script>
+     <script src="{{ url_for('static', filename='js/vendor/chart.umd.js') }}"></script>
+     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
++    <script src="{{ url_for('static', filename='js/telemetry-rate.js') }}"></script>
+ </body>
+ </html>

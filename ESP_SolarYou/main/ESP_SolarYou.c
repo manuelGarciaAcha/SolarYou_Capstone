@@ -10,16 +10,11 @@
 #include "freertos/task.h"
 #include "sensor_api.h"
 #include "light_task.h"
-#include "uart_telemetry.h"
+#include "power_n_telemetry.h"
 #include "sdkconfig.h"
+#include "esp_log.h"
 
 static const char *TAG  = "Main";
-
-/* 1 = servos follow the light setpoint directly (servo = center + light target).
- *     The IMU is still read and logged so its sign can be checked, but the PID
- *     is bypassed. Use this to confirm the panel turns toward the light.
- * 0 = normal closed loop: PID holds the IMU angle at the light target. */
-#define LIGHT_TRACK_ONLY 0
 
 system_state_t curr_state;
 
@@ -27,32 +22,26 @@ pid_controller_t roll_ctlr;
 pid_controller_t pitch_ctlr;
 
 static const stab_config_t stab_config = {
-    .roll_Kp = 0.2f,
-    .roll_Ki = 0.0f,
-    .roll_Kd = 0.00f,
-    .pitch_Kp = 0.2f,
-    .pitch_Ki = 0.0f,
-    .pitch_Kd = 0.00f,
+    .roll_Kp = 0.7f,
+    .roll_Ki = 1.5f,
+    .roll_Kd = 0.0f,
+    .pitch_Kp = 0.7f,
+    .pitch_Ki = 1.5f,
+    .pitch_Kd = 0.0f,
     .deriv_time_const = 0.05f,
     .roll_servo_center = 100.0f,
     .pitch_servo_center = 60.0f,
     .pid_cmd_min = -50.0f,
     .pid_cmd_max = 50.0f,
     .task_dt = STAB_TASK_DT_US / 1000000.0f,
-    .track_k = 2.0f,
+    .track_k = 2.0f,  
+    .imu_age_ms = 100U,                          //might need mod considering dt introduction to LDR position calc
+
+    .servo_roll_min = MIN_SERVO_ANGLE_ROLL,
+    .servo_roll_max = MAX_SERVO_ANGLE_ROLL,
+    .servo_pitch_min = MIN_SERVO_ANGLE_PITCH,
+    .servo_pitch_max = MAX_SERVO_ANGLE_PITCH,
 };
-
-float read_power_placeholder(void){
-    return 0;
-}
-
-void power_telemetry_update(system_state_t *state)
-{
-    float power = read_power_placeholder();
-    state->power = power;
-    state->power_samples ++;
-    state->avg_power += (power - state->avg_power) / (float) state->power_samples;
-}
 
 static void log_sensor_init_result(const char *name, bool enabled,
                                    bool initialized, bool required)
@@ -72,8 +61,7 @@ static void log_sensor_init_result(const char *name, bool enabled,
     }
 }
 
-#if !defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) || !CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL || LIGHT_TRACK_ONLY
-// Reads the IMU into the system state without commanding anything.
+#if !defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) || !CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
 static esp_err_t sensor_dashboard_update_imu(system_state_t *state)
 {
     if (state == NULL) {
@@ -147,25 +135,16 @@ void app_main(void)
     err = stabilization_init(&roll_ctlr, &pitch_ctlr, &stab_config);
     if (err != ESP_OK){
         curr_state.mode = SYSTEM_ERROR;
-        ESP_LOGE(TAG, "Stabilization Initialization failed: %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "Stabilization Initialization failed: %s\n", esp_err_to_name(err));
         return;
     }
-    ESP_LOGW(TAG, "FULL CONTROL MODE: motor outputs are enabled%s",
-             LIGHT_TRACK_ONLY ? " (LIGHT_TRACK_ONLY: PID bypassed)" : "");
-
-    // Put the panel at a known position before capturing either neutral, so
-    // "IMU zero" and "light balanced" both mean "panel at servo center".
-    err = command_motor_angle(stab_config.roll_servo_center, stab_config.pitch_servo_center);
-    if (err != ESP_OK){
-        curr_state.mode = SYSTEM_ERROR;
-        ESP_LOGE(TAG, "Could not center servos: %s", esp_err_to_name(err));
-        return;
-    }
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(1000));   // panel reaches center and stops moving
+    ESP_LOGW(TAG, "FULL CONTROL MODE: motor outputs are enabled");
 #else
     // Sensor/dashboard mode deliberately skips motor and PID initialization.
     ESP_LOGI(TAG, "SENSOR/DASHBOARD TEST MODE: motor outputs are disabled");
 #endif
+
 
     // calibrate IMU (50 samples in sensor_service/include/component_config.h)
     if(!sensor_adapter_capture_imu_neutral()){
@@ -177,16 +156,30 @@ void app_main(void)
 
     // Full integration requires the light array. Sensor/dashboard mode reports
     // its status but keeps pitch/roll UART running if it is unavailable.
-    bool light_ready = false;
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
-    if(!sensor_adapter_capture_light_neutral()){
+    const uint32_t LIGHT_CAL_MAX_ATTEMPTS = 20;
+    uint32_t light_cal_attempt = 0;
+    bool light_cal_ok = false;
+    while (light_cal_attempt < LIGHT_CAL_MAX_ATTEMPTS) {
+        light_cal_attempt++;
+        if (sensor_adapter_capture_light_neutral()) {
+            light_cal_ok = true;
+            break;
+        }
+        ESP_LOGE(TAG, "Light calibration attempt %u/%u failed; retrying in 2 s",
+                 (unsigned)light_cal_attempt, (unsigned)LIGHT_CAL_MAX_ATTEMPTS);
+        sensor_adapter_clear_latched_faults();
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+    if (!light_cal_ok) {
         curr_state.mode = SYSTEM_ERROR;
-        ESP_LOGE(TAG, "Light Sensor Calibration Error");
+        ESP_LOGE(TAG, "Light Sensor Calibration Error after %u attempts",
+                 (unsigned)LIGHT_CAL_MAX_ATTEMPTS);
         return;
     }
-    light_ready = true;
     ESP_LOGI(TAG, "Four-light array calibration: PASS");
 #else
+    bool light_ready = false;
     if (sensor_status.light_enabled && sensor_status.light_initialized) {
         light_ready = sensor_adapter_capture_light_neutral();
         if (light_ready) {
@@ -210,78 +203,81 @@ void app_main(void)
         curr_time = esp_timer_get_time();
 
         if(curr_time - last_stabilize_time >= STAB_TASK_DT_US){
+            float dt = (float)(curr_time - last_stabilize_time) / 1000000.0f;
             last_stabilize_time = curr_time;
 
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
-#if LIGHT_TRACK_ONLY
-            // Servos follow the light setpoint directly. The IMU is read only
-            // for logging (to verify IMU_*_SIGN against servo direction).
-            
-            (void)sensor_dashboard_update_imu(&curr_state);
-            err = command_motor_angle(stab_config.roll_servo_center + curr_state.roll_light,
-                                      stab_config.pitch_servo_center + curr_state.pitch_light);
-            if (err != ESP_OK){
-                curr_state.mode = SYSTEM_ERROR;
-                ESP_LOGE(TAG, "Servo command failed: %s", esp_err_to_name(err));
-            }
-#else
             stab_output_t stab_output = {0};
-            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, &stab_config.task_dt,
-                                       curr_state.roll_light, curr_state.pitch_light);
+            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_config, &stab_output, dt, curr_state.roll_light, curr_state.pitch_light);
 
             if (err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
-                ESP_LOGE(TAG, "Stabilization task failed: %s", esp_err_to_name(err));
+                ESP_LOGE(TAG, "Stabilization task failed: %s\n", esp_err_to_name(err));
+
             } else {
                 curr_state.roll_imu = stab_output.roll_imu;
                 curr_state.pitch_imu = stab_output.pitch_imu;
                 curr_state.roll_cmd = stab_output.roll_cmd;
                 curr_state.pitch_cmd = stab_output.pitch_cmd;
+
             }
-#endif
 #else
             // Read the real IMU for UART telemetry without issuing servo commands.
             err = sensor_dashboard_update_imu(&curr_state);
             if (err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
-                ESP_LOGE(TAG, "IMU telemetry update failed: %s", esp_err_to_name(err));
+                ESP_LOGE(TAG, "IMU telemetry update failed: %s\n", esp_err_to_name(err));
             }
 #endif
 
             curr_time = esp_timer_get_time();
         }
 
-        if(light_ready && curr_time - last_light_time >= LIGHT_TASK_DT_US){
+        if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
+            float dt = (float)(curr_time - last_light_time) / 1000000.0f;
             last_light_time = curr_time;
 
-            //err = light_update(&curr_state, &stab_config);
-            //if (err == ESP_ERR_INVALID_STATE) {
-            //    // Reading invalid (too dark, saturated, ...). light_update already
-            //    // logged it; the setpoint simply holds until light is valid again.
-            //} else if (err != ESP_OK) {
-            //    curr_state.mode = SYSTEM_ERROR;
-            //    ESP_LOGE(TAG, "Light task failed: %s", esp_err_to_name(err));
-            //}
+#if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
+            err = light_update(&curr_state, &stab_config, dt);
+            if(err == ESP_ERR_INVALID_STATE){
+              // chill out
+            } else if (err != ESP_OK) {
+                curr_state.mode = SYSTEM_ERROR;
+                ESP_LOGE(TAG, "Light task failed: %s\n", esp_err_to_name(err));
+            }
+#else
+            if (light_ready) {
+                err = light_update(&curr_state, &stab_config, dt);
+                if (err != ESP_OK) {
+                    light_ready = false;
+                    ESP_LOGW(TAG, "Four-light array read failed; continuing IMU UART testing");
+                }
+            }
+#endif
 
-            ESP_LOGI(TAG, "roll:  target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
-                     (double)curr_state.roll_light, (double)curr_state.roll_imu,
-                     (double)curr_state.roll_cmd,
-                     (double)(curr_state.roll_cmd + curr_state.roll_light + stab_config.roll_servo_center));
+            ESP_LOGI(TAG, "roll: target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
+         (double)curr_state.roll_light, (double)curr_state.roll_imu,
+         (double)curr_state.roll_cmd,
+         (double)(curr_state.roll_cmd + curr_state.roll_light + stab_config.roll_servo_center));
+
             ESP_LOGI(TAG, "pitch: target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
                      (double)curr_state.pitch_light, (double)curr_state.pitch_imu,
                      (double)curr_state.pitch_cmd,
                      (double)(curr_state.pitch_cmd + curr_state.pitch_light + stab_config.pitch_servo_center));
+
             curr_time = esp_timer_get_time();
         }
 
         if(curr_time - last_telem_time >= TELEM_TASK_DT_US){
             last_telem_time = curr_time;
 
-            // Send one newline-terminated JSON object for Zack's dashboard.
-            // Power remains null until the INA219 value is connected to curr_state.
-            //uart_telemetry_send(&curr_state);
+            err = power_update(&curr_state);
+            if(err != ESP_OK){
+                ESP_LOGW(TAG, "Power Update failed: %s", esp_err_to_name(err));
+            }
+            uart_telemetry_send(&curr_state);
         }
-
+    
         vTaskDelay(1);
     }
 }
