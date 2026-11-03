@@ -31,6 +31,12 @@ typedef struct {
     float pid_cmd_max;
     float task_dt;
 
+    // servo limits for physical clamping
+    const float servo_roll_min;
+    const float servo_roll_max;
+    const float servo_pitch_min;
+    const float servo_pitch_max;
+
     // Solar tracking gain
     float track_k;
 
@@ -41,5 +47,5 @@ typedef struct {
 
 esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config);
 esp_err_t stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch);
-esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config, stab_output_t *output, const float *dt, float roll_light_angle, float pitch_light_angle);
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config, stab_output_t *output, const float dt, float roll_light_angle, float pitch_light_angle);
 #endif

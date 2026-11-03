@@ -22,11 +22,11 @@ pid_controller_t roll_ctlr;
 pid_controller_t pitch_ctlr;
 
 static const stab_config_t stab_config = {
-    .roll_Kp = 0.2f,
-    .roll_Ki = 0.0f,
+    .roll_Kp = 0.7f,
+    .roll_Ki = 1.5f,
     .roll_Kd = 0.0f,
-    .pitch_Kp = 0.2f,
-    .pitch_Ki = 0.0f,
+    .pitch_Kp = 0.7f,
+    .pitch_Ki = 1.5f,
     .pitch_Kd = 0.0f,
     .deriv_time_const = 0.1f,
     .roll_servo_center = 100.0f,
@@ -36,6 +36,10 @@ static const stab_config_t stab_config = {
     .task_dt = STAB_TASK_DT_US / 1000000.0f,
     .track_k = 2.0f,  
     .imu_age_ms = 100U,                          //might need mod considering dt introduction to LDR position calc
+    .servo_roll_min = MIN_SERVO_ANGLE_ROLL,
+    .servo_roll_max = MAX_SERVO_ANGLE_ROLL,
+    .servo_pitch_min = MIN_SERVO_ANGLE_PITCH,
+    .servo_pitch_max = MAX_SERVO_ANGLE_PITCH,
 };
 
 static void log_sensor_init_result(const char *name, bool enabled,
@@ -123,6 +127,24 @@ void app_main(void)
     }
 #endif
 
+    esp_err_t err = ESP_OK;
+
+#if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
+    // Full integration mode can command the physical servos.
+    err = stabilization_init(&roll_ctlr, &pitch_ctlr, &stab_config);
+    if (err != ESP_OK){
+        curr_state.mode = SYSTEM_ERROR;
+        ESP_LOGE(TAG, "Stabilization Initialization failed: %s\n", esp_err_to_name(err));
+        return;
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000));   // panel reaches center and stops moving
+    ESP_LOGW(TAG, "FULL CONTROL MODE: motor outputs are enabled");
+#else
+    // Sensor/dashboard mode deliberately skips motor and PID initialization.
+    ESP_LOGI(TAG, "SENSOR/DASHBOARD TEST MODE: motor outputs are disabled");
+#endif
+
+
     // calibrate IMU (50 samples in sensor_service/include/component_config.h)
     if(!sensor_adapter_capture_imu_neutral()){
         curr_state.mode = SYSTEM_ERROR;
@@ -134,9 +156,24 @@ void app_main(void)
     // Full integration requires the light array. Sensor/dashboard mode reports
     // its status but keeps pitch/roll UART running if it is unavailable.
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
-    if(!sensor_adapter_capture_light_neutral()){
+    const uint32_t LIGHT_CAL_MAX_ATTEMPTS = 20;
+    uint32_t light_cal_attempt = 0;
+    bool light_cal_ok = false;
+    while (light_cal_attempt < LIGHT_CAL_MAX_ATTEMPTS) {
+        light_cal_attempt++;
+        if (sensor_adapter_capture_light_neutral()) {
+            light_cal_ok = true;
+            break;
+        }
+        ESP_LOGE(TAG, "Light calibration attempt %u/%u failed; retrying in 2 s",
+                 (unsigned)light_cal_attempt, (unsigned)LIGHT_CAL_MAX_ATTEMPTS);
+        sensor_adapter_clear_latched_faults();
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+    if (!light_cal_ok) {
         curr_state.mode = SYSTEM_ERROR;
-        ESP_LOGE(TAG, "Light Sensor Calibration Error");
+        ESP_LOGE(TAG, "Light Sensor Calibration Error after %u attempts",
+                 (unsigned)LIGHT_CAL_MAX_ATTEMPTS);
         return;
     }
     ESP_LOGI(TAG, "Four-light array calibration: PASS");
@@ -154,22 +191,6 @@ void app_main(void)
     }
 #endif
 
-    esp_err_t err = ESP_OK;
-
-#if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
-    // Full integration mode can command the physical servos.
-    err = stabilization_init(&roll_ctlr, &pitch_ctlr, &stab_config);
-    if (err != ESP_OK){
-        curr_state.mode = SYSTEM_ERROR;
-        ESP_LOGE(TAG, "Stabilization Initialization failed: %s\n", esp_err_to_name(err));
-        return;
-    }
-    ESP_LOGW(TAG, "FULL CONTROL MODE: motor outputs are enabled");
-#else
-    // Sensor/dashboard mode deliberately skips motor and PID initialization.
-    ESP_LOGI(TAG, "SENSOR/DASHBOARD TEST MODE: motor outputs are disabled");
-#endif
-
     curr_state.mode = SYSTEM_BASIC_CONTROL;
     int64_t curr_time;
     int64_t last_stabilize_time = esp_timer_get_time();
@@ -181,12 +202,12 @@ void app_main(void)
         curr_time = esp_timer_get_time();
 
         if(curr_time - last_stabilize_time >= STAB_TASK_DT_US){
-            float dt = (curr_time - last_stabilize_time) / 1000000.0f;
+            float dt = (float)(curr_time - last_stabilize_time) / 1000000.0f;
             last_stabilize_time = curr_time;
 
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
             stab_output_t stab_output = {0};
-            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_output, dt, curr_state.roll_light, curr_state.pitch_light);
+            err = stabilization_update(&roll_ctlr, &pitch_ctlr, &stab_config, &stab_output, dt, curr_state.roll_light, curr_state.pitch_light);
 
             if (err != ESP_OK){
                 curr_state.mode = SYSTEM_ERROR;
@@ -212,12 +233,14 @@ void app_main(void)
         }
 
         if(curr_time - last_light_time >= LIGHT_TASK_DT_US){
-            float dt = (curr_time - last_light_time) / 1000000.0f;
+            float dt = (float)(curr_time - last_light_time) / 1000000.0f;
             last_light_time = curr_time;
 
 #if defined(CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL) && CONFIG_SOLARYOU_RUNTIME_FULL_CONTROL
             err = light_update(&curr_state, &stab_config, dt);
-            if(err != ESP_OK){
+            if(err == ESP_ERR_INVALID_STATE){
+              // chill out
+            } else if (err != ESP_OK) {
                 curr_state.mode = SYSTEM_ERROR;
                 ESP_LOGE(TAG, "Light task failed: %s\n", esp_err_to_name(err));
             }
@@ -235,6 +258,11 @@ void app_main(void)
          (double)curr_state.roll_light, (double)curr_state.roll_imu,
          (double)curr_state.roll_cmd,
          (double)(curr_state.roll_cmd + curr_state.roll_light + stab_config.roll_servo_center));
+
+            ESP_LOGI(TAG, "pitch: target=%.2f imu=%.2f cmd=%.2f servo=%.1f",
+                     (double)curr_state.pitch_light, (double)curr_state.pitch_imu,
+                     (double)curr_state.pitch_cmd,
+                     (double)(curr_state.pitch_cmd + curr_state.pitch_light + stab_config.pitch_servo_center));
 
             curr_time = esp_timer_get_time();
         }

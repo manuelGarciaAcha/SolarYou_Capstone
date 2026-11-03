@@ -17,6 +17,13 @@ esp_err_t stabilization_init(pid_controller_t *roll, pid_controller_t *pitch, co
         return err;
     }
 
+    err = command_motor_angle(config->roll_servo_center, config->pitch_servo_center);
+    if (err != ESP_OK){
+        ESP_LOGE(TAG, "Could not center servos: %s", esp_err_to_name(err));
+        motor_del();
+        return err;
+    }
+
     err  = pid_init (roll, config->roll_Kp, config->roll_Ki, config->roll_Kd, config->deriv_time_const, config->pid_cmd_min, config->pid_cmd_max, config->roll_servo_center);
     if (err != ESP_OK){
         ESP_LOGE(TAG, "Roll PID controller initalization failed %s\n", esp_err_to_name(err));
@@ -52,14 +59,14 @@ esp_err_t stabilization_reset(pid_controller_t *roll, pid_controller_t *pitch)
     return ESP_OK;
 }
 
-esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config, stab_output_t *output, const float *dt, float roll_light_angle, float pitch_light_angle)
+esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, const stab_config_t *config, stab_output_t *output, float dt, float roll_light_angle, float pitch_light_angle)
 {
     // argument validation
-    if(roll == NULL || pitch == NULL || output == NULL || dt == NULL){
+    if(roll == NULL || pitch == NULL || output == NULL || config == NULL){
         return ESP_ERR_INVALID_ARG;
     }
 
-    if(!isfinite(roll_light_angle) || !isfinite(pitch_light_angle)){
+    if(!isfinite(roll_light_angle) || !isfinite(pitch_light_angle) || !isfinite(dt)){
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -92,20 +99,56 @@ esp_err_t stabilization_update(pid_controller_t *roll, pid_controller_t *pitch, 
     float roll_offset_baseline = roll_light_angle + roll->servo_center;
     float pitch_offset_baseline = pitch_light_angle + pitch->servo_center;
 
+    roll_offset_baseline  = fminf(fmaxf(roll_offset_baseline,  config->servo_roll_min),  config->servo_roll_max);
+    pitch_offset_baseline = fminf(fmaxf(pitch_offset_baseline, config->servo_pitch_min), config->servo_pitch_max);
+
     // determine PID command
-    esp_err_t err = pid_calculate(roll, roll_imu_angle, roll_light_angle, &roll_cmd, *dt);
+    esp_err_t err = pid_calculate(roll, roll_imu_angle, roll_light_angle, &roll_cmd, dt);
 
     if(err != ESP_OK){
         ESP_LOGW(TAG, "Roll PID skipped, calculation error: %s\n", esp_err_to_name(err));
         return err;
     }
 
-    err = pid_calculate(pitch, pitch_imu_angle, pitch_light_angle, &pitch_cmd, *dt);
+    err = pid_calculate(pitch, pitch_imu_angle, pitch_light_angle, &pitch_cmd, dt);
 
     if(err != ESP_OK){
         ESP_LOGW(TAG, "Pitch PID skipped, calculation error: %s\n", esp_err_to_name(err));
         return err;
     }
+
+    // Determine allowed PID correction ranges
+    float roll_min_cmd = fmaxf(
+        config->pid_cmd_min,
+        config->servo_roll_min - roll_offset_baseline
+    );
+
+    float roll_max_cmd = fminf(
+        config->pid_cmd_max,
+        config->servo_roll_max - roll_offset_baseline
+    );
+
+    float pitch_min_cmd = fmaxf(
+        config->pid_cmd_min,
+        config->servo_pitch_min - pitch_offset_baseline
+    );
+
+    float pitch_max_cmd = fminf(
+        config->pid_cmd_max,
+        config->servo_pitch_max - pitch_offset_baseline
+    );
+
+    // Reject invalid command ranges
+    if (roll_min_cmd > roll_max_cmd ||
+        pitch_min_cmd > pitch_max_cmd ||
+        !isfinite(roll_cmd) ||
+        !isfinite(pitch_cmd)) {
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    // Saturate PID corrections
+    roll_cmd = fminf(fmaxf(roll_cmd, roll_min_cmd), roll_max_cmd);
+    pitch_cmd = fminf(fmaxf(pitch_cmd, pitch_min_cmd), pitch_max_cmd);
 
     // map PID command angles to servo angles
     float servo_roll_angle = roll_cmd + roll_offset_baseline;

@@ -18,7 +18,7 @@
 #define IMU_CAL_MAX_SPREAD_DEG 0.75f
 #define IMU_PITCH_DEADBAND_DEG 0.25f
 #define IMU_ROLL_DEADBAND_DEG 0.25f
-#define IMU_PITCH_SIGN -1.0f
+#define IMU_PITCH_SIGN 1.0f
 #define IMU_ROLL_SIGN -1.0f
 
 /* GPIO3 affects esp startup, so I still need to coldboot test with the sensor dark, bright, and disconnected. GPIO4/5/6 are the other available ADC1
@@ -27,14 +27,14 @@
 #define LIGHT_NEUTRAL_SAMPLES 50
 #define LIGHT_CAL_MAX_SPREAD 0.08f
 #define LIGHT_DEADBAND 0.02f
-#define LIGHT_MIN_TOTAL_COUNT 204
-#define LIGHT_SATURATION_COUNT 4000
-#define LIGHT_OPEN_COUNT 8
+#define LIGHT_MIN_TOTAL_COUNT 100 // sum of all four (0x40) too dark
+#define LIGHT_SATURATION_COUNT 4000 // Light is too saturated (0x80)
+#define LIGHT_OPEN_COUNT 2
 #define LIGHT_SHORT_COUNT 4087
 /* Doen't accept a very uneven light setup as the neutral reference. */
 #define LIGHT_CAL_MAX_ABS_ERROR 0.95f
 #define LIGHT_CAL_MAX_STDDEV 0.03f
-#define LIGHT_PITCH_SIGN 1.0f
+#define LIGHT_PITCH_SIGN -1.0f
 #define LIGHT_ROLL_SIGN 1.0f
 
 #define POWER_MAX_BUS_VOLTAGE_V 26.0f

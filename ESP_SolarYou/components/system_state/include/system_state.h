@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define STAB_TASK_DT_US         20000      // microseconds
+#define STAB_TASK_DT_US         50000      // microseconds
 #define TELEM_TASK_DT_US        200000
 #define LIGHT_TASK_DT_US        500000
 

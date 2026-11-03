@@ -99,6 +99,9 @@ bool lightSensorCaptureNeutral(size_t sampleCount)
             return false;
         }
 
+
+
+
         pitchSum += pitch;
         rollSum += roll;
         pitchSqSum += pitch * pitch;
