@@ -13,8 +13,8 @@ config SOLARYOU_RUNTIME_SENSOR_DASHBOARD_TEST
         This is a safe test mode for checking the UART connection. The BNO085
         provides the pitch and roll readings. It also checks the light sensors,
         but a problem with them will not stop the IMU data from being sent.
-        The INA219 is optional for now because power data is not connected
-        yet. The servos stay off in this mode.
+        The INA219 is optional in this mode; unavailable power readings are
+        sent as null. The servos stay off in this mode.
 
 config SOLARYOU_RUNTIME_FULL_CONTROL
     bool "Full integration (motor outputs enabled)"
@@ -24,5 +24,15 @@ config SOLARYOU_RUNTIME_FULL_CONTROL
         connections and GPIO assignments have been verified.
 
 endchoice
+
+config SOLARYOU_BLE_TELEMETRY
+    bool "Bluetooth Low Energy dashboard telemetry"
+    depends on BT_NIMBLE_ENABLED
+    default n
+    help
+        Advertise as SolarYou-ASSTP and send the existing sensor/control
+        readings to the BLE dashboard. USB telemetry remains available.
+        The dashboard can select 1, 2, 5 or 10 outgoing updates per second;
+        this does not change the sensor or control-loop sampling periods.
 
 endmenu

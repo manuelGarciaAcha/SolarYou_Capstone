@@ -7,7 +7,7 @@ which it can write.
 ## Quick start
 
 **BLE** (Jennifer's firmware): build it with the BLE settings
-(`sdkconfig.ble.defaults`; see `BLE_INTEGRATION.md` in the repo root) and
+(`sdkconfig.ble.defaults`; see `README_BLE.md` in the repo root) and
 flash it. Make sure `config.json` has the BLE fields from
 `config.example.json`, then
 
@@ -17,8 +17,12 @@ python app.py --source ble
 
 The board advertises as `SolarYou-ASSTP` once its sensors pass their
 startup checks. The first scan on a Mac may ask for Bluetooth permission.
-BLE messages carry pitch, roll, power and the targets; voltage and current
-only come over serial.
+The updated integrated BLE firmware carries pitch, roll, voltage, current,
+power, average power, and the controller targets. Full-control USB also includes
+the targets. Invalid BLE values are null. USB sends null measured angles when
+the latest IMU update fails and resumes numbers after recovery.
+The current BLE build and Windows/Linux dashboard setup are in `README_BLE.md`
+at the repository root.
 
 **Serial**: close `idf.py monitor` (only one program can hold the port),
 plug the board in with a data cable, then

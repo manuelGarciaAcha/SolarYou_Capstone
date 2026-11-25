@@ -17,6 +17,14 @@ RATE_UUID = 'f2d2680c-66bc-4e24-8eac-d8013a99320c'
 ALLOWED_RATES = (1, 2, 5, 10)
 INITIAL_RATE_ATTEMPTS = 3
 INITIAL_RATE_RETRY_SECONDS = 0.25
+CALLBACK_SERVICE_SECONDS = 0.05
+
+
+async def _service_external_callbacks():
+    # WinRT posts callbacks from another thread. A short timer keeps those
+    # callbacks moving if the Windows event loop's socket wakeup fails.
+    while True:
+        await asyncio.sleep(CALLBACK_SERVICE_SECONDS)
 
 
 def valid_rate(value):
@@ -210,6 +218,7 @@ class BleLink:
     async def run(self, scanner, client_factory, stop=None):
         self.loop = asyncio.get_running_loop()
         self.change_lock = asyncio.Lock()
+        callback_service = asyncio.create_task(_service_external_callbacks())
         try:
             while stop is None or not stop.is_set():
                 self.decoder.reset()
@@ -272,4 +281,9 @@ class BleLink:
                     self.on_status('reconnecting', reason)
                     await asyncio.sleep(self.retry_seconds)
         finally:
+            callback_service.cancel()
+            try:
+                await callback_service
+            except asyncio.CancelledError:
+                pass
             self.loop = None

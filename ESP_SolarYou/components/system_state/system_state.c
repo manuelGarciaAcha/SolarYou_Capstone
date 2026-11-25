@@ -4,6 +4,7 @@ void sys_state_reset (system_state_t *state)
 {
     state->roll_imu = 0;
     state->pitch_imu = 0;
+    state->imu_valid = false;
     state->roll_light = 0;
     state->pitch_light = 0;
     state->roll_cmd = 0;

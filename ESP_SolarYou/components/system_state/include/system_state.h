@@ -21,6 +21,7 @@ typedef struct {
     // tracking and stabilization
     float roll_imu;         // last measured roll angle
     float pitch_imu;        // last measured pitch angle
+    bool imu_valid;        // latest IMU update succeeded with finite angles
     float roll_light;       // last measured target sun angle (roll)
     float pitch_light;      // "            ...             " (pitch)
     float roll_cmd;       // last correction command to roll servo

@@ -1,22 +1,27 @@
 # BLE integration
 
-This will send the readings needed by Zack's existing dashboard, for example:
+The integrated firmware sends all eight dashboard fields, for example:
 
 ```json
-{"pitch":1.25,"roll":-2.0,"power":null,"pitch_target":8.0,"roll_target":-4.0}
+{"pitch":1.25,"roll":-2.0,"power":1.235,"pitch_target":8.0,"roll_target":-4.0,"voltage":4.94,"current":0.25,"avg_power":1.125}
 ```
 
-Angles are degrees and power is watts. Unavailable or invalid values are null;
-a real zero remains zero. The existing INA219 reader supplies power when valid.
+Angles are degrees, voltage is volts, current is amps, and power/average power
+are watts. `avg_power` is the firmware's running average of valid power readings
+since boot; the dashboard's displayed 60-second average is calculated separately.
+All eight fields are present even when unavailable: invalid values are `null`,
+and a real zero remains zero. Readings more than one second old are invalidated.
+The existing INA219 reader supplies the electrical readings; BLE does not poll
+the sensor separately. Angles use two decimal places and electrical readings
+use three.
 Full-control telemetry uses the existing pitch_light/roll_light controller
 setpoints after a valid light update. Motor-off testing sends null targets.
 
 The existing dashboard uses its zero/level reference when targets are unavailable.
-Changes to shared firmware and dashboard files are listed in the root README.
 
 ## BLE identifiers
 
-- Device name: SolarYou-ASSTP
+- Real-sensor device name: SolarYou-ASSTP
 - Service: 47e8841f-04c9-4ae2-af68-a7b6f4eb293d
 - Telemetry notification: f2d2680c-66bc-4e24-8eac-d8013a99320b
 - Rate read/write: f2d2680c-66bc-4e24-8eac-d8013a99320c
@@ -65,9 +70,4 @@ expired, out-of-order, or oversized assemblies are discarded; a new complete
 message recovers. Disconnect clears unfinished pieces. Zack's original receiver
 needs this matching backend addition to read split notifications.
 
-## Validation
-
-The full source package includes a separate preview with generated readings.
-It uses the production C formatter/framing/session code and identifies simulated
-data on screen. Test results and required hardware checks are in `VALIDATION.md`
-at the project root.
+See [setup](ESP32_INTEGRATION.md) for building and connecting the firmware.
