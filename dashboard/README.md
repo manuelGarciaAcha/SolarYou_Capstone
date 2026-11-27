@@ -40,8 +40,8 @@ python app.py --source wifi
 python app.py --source ble
 ```
 
-Then open http://localhost:5001. The badge in the header turns green once
-data is arriving. If it says "Connected, waiting for data", the link is up
+Then open http://localhost:5001. The status next to the title turns green and
+shows the reading rate once data is arriving. If it says "connected, waiting for data", the link is up
 but nothing usable has come through, so check the terminal.
 
 - Serial finds the board on its own. `--list-ports` shows what it sees and
@@ -59,7 +59,7 @@ Every flag and setting is listed in `ESP32_INTEGRATION.md`, section 3.
 | wifi | `wifi_url` |
 | ble | `ble_name`, `ble_characteristic` |
 
-A missing field is reported on the badge and in the terminal.
+A missing field is reported in the header status and in the terminal.
 
 ## What's on the page
 
