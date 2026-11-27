@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team 11 - Stabilization Dashboard</title>
+    <title>SolarYou Dashboard</title>
     <script>
         // Set the theme and line colors before the page draws, so it doesn't
         // flash the wrong theme. ?theme=light and ?palette=lagoon also work.
@@ -27,15 +27,24 @@
     </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-    <!-- Header: title, connection badge, run controls, theme switch -->
+<body data-source="{{ data_source }}">
+    <!-- Header: name, link status, run controls, theme switch -->
     <header>
         <div class="title-block">
-            <h1>Active Stabilization &amp; Solar Tracking Platform</h1>
-            <p class="subtitle">
-                Team 11 live dashboard
-                <span id="connectionStatus" class="status-badge status-connecting">Connecting...</span>
-            </p>
+            <!-- sun over a wave, same idea as the team logo -->
+            <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true">
+                <path class="brand-rays" d="M18 3.5v4M7.8 8l2.8 2.8M28.2 8l-2.8 2.8"/>
+                <circle class="brand-sun" cx="18" cy="21" r="9"/>
+                <path class="brand-cut" d="M2 26.5c5.3-4 10.7-4 16 0s10.7 4 16 0V36H2z"/>
+                <path class="brand-wave" d="M3 26.5c5-3.8 10-3.8 15 0s10 3.8 15 0"/>
+            </svg>
+            <div>
+                <h1>SolarYou</h1>
+                <p class="subtitle">
+                    Active stabilization and solar tracking, FIU Senior Design Team 11
+                </p>
+            </div>
+            <span id="connectionStatus" class="status status-connecting">Connecting...</span>
         </div>
         <div class="actions">
             <!-- Send-rate control (telemetry-rate.js). Only shown with --source ble. -->
@@ -79,13 +88,13 @@
             <p class="stat-value" id="rollValue">--</p>
             <p class="stat-sub" id="rollSub">degrees</p>
         </div>
-        <div class="stat">
+        <div class="stat stat-secondary">
             <p class="stat-label"><span class="key key-power"></span>Power</p>
             <p class="stat-value"><span id="powerValue">--</span><span class="stat-unit">W</span></p>
             <p class="stat-sub">avg <span id="powerAvgValue">--</span> W, last 60 s</p>
             <p class="stat-sub" id="powerDetail"></p>
         </div>
-        <div class="stat">
+        <div class="stat stat-secondary">
             <p class="stat-label">Energy</p>
             <p class="stat-value" id="energy">--</p>
             <p class="stat-sub" id="energySub">since page opened</p>

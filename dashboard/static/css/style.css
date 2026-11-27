@@ -9,7 +9,6 @@
 :root[data-theme="dark"] {
     color-scheme: dark;
     --page: #0b1628;          /* deep water */
-    --page-glow: #10294a;
     --card: #13233b;
     --card-border: #1f3452;
     --ink: #e6edf6;
@@ -25,17 +24,18 @@
     --band-stroke: rgba(92, 200, 255, 0.45);
     --dot: #e6edf6;
     --dot-ring: #13233b;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 
-    --ok-bg: rgba(48, 196, 120, 0.16);    --ok-ink: #6fe0a5;
-    --wait-bg: rgba(240, 180, 40, 0.16);  --wait-ink: #f5cf6b;
-    --bad-bg: rgba(240, 90, 80, 0.18);    --bad-ink: #ff9b92;
+    --sun: #f2b531;
+    --wave: #ef8a1f;
+
+    --ok-ink: #6fe0a5;
+    --wait-ink: #f5cf6b;
+    --bad-ink: #ff9b92;
 }
 
 :root[data-theme="light"] {
     color-scheme: light;
     --page: #eaf1f8;          /* light sea haze instead of plain white */
-    --page-glow: #f4f8fc;
     --card: #ffffff;
     --card-border: #d8e2ee;
     --ink: #10213a;
@@ -51,11 +51,13 @@
     --band-stroke: rgba(11, 116, 209, 0.45);
     --dot: #10213a;
     --dot-ring: #ffffff;
-    --shadow: 0 1px 3px rgba(16, 33, 58, 0.08);
 
-    --ok-bg: #d6f5e3;    --ok-ink: #11683a;
-    --wait-bg: #fff1c7;  --wait-ink: #7a5800;
-    --bad-bg: #ffdcd8;   --bad-ink: #8f1d14;
+    --sun: #f0a81c;
+    --wave: #e5791a;
+
+    --ok-ink: #138a4b;
+    --wait-ink: #b07d00;
+    --bad-ink: #b3261e;
 }
 
 /* Line colors. "reef" is the default: cyan pitch, coral roll, gold power.
@@ -76,7 +78,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: var(--page) radial-gradient(ellipse 90% 60% at 50% -10%, var(--page-glow), transparent) no-repeat;
+    background: var(--page);
     color: var(--ink);
     margin: 0;
     padding: 0 1.5rem 2rem;
@@ -93,19 +95,38 @@ header {
     gap: 0.75rem 1.5rem;
     padding: 1.5rem 0 1.1rem;
 }
-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
-.subtitle { color: var(--ink-2); margin: 0.3rem 0 0; font-size: 0.9rem; }
+.title-block { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem 0.85rem; }
+.brand-mark { width: 40px; height: 40px; flex: none; }
+.brand-sun { fill: var(--sun); }
+.brand-rays { fill: none; stroke: var(--sun); stroke-width: 2.4; stroke-linecap: round; }
+.brand-cut { fill: var(--page); }
+.brand-wave { fill: none; stroke: var(--wave); stroke-width: 3; stroke-linecap: round; }
+header h1 { margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
+.subtitle { color: var(--ink-2); margin: 0.1rem 0 0; font-size: 0.85rem; }
 
-.status-badge {
-    font-size: 0.7rem;
+/* link status: a colored dot and plain text saying which link and how fast */
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    padding: 0.15rem 0.55rem;
-    border-radius: 999px;
-    margin-left: 0.5rem;
+    color: var(--ink-2);
+    padding-left: 0.85rem;
+    border-left: 1px solid var(--card-border);
+    align-self: stretch;
 }
-.status-connecting, .status-reconnecting { background: var(--wait-bg); color: var(--wait-ink); }
-.status-connected { background: var(--ok-bg); color: var(--ok-ink); }
-.status-error { background: var(--bad-bg); color: var(--bad-ink); }
+.status::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+}
+.status-connecting::before, .status-reconnecting::before { background: var(--wait-ink); }
+.status-connected::before { background: var(--ok-ink); }
+.status-error::before { background: var(--bad-ink); }
+.status-error { color: var(--bad-ink); }
 
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .run-label { font-size: 0.85rem; color: var(--ink-2); margin-right: 0.25rem; }
@@ -116,7 +137,7 @@ header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
     color: var(--button-ink);
     background: var(--button);
     border: 1px solid var(--card-border);
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 0.4rem 0.8rem;
     cursor: pointer;
 }
@@ -134,7 +155,7 @@ header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
     color: var(--ink);
     background: var(--button);
     border: 1px solid var(--card-border);
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 0.35rem 0.5rem;
 }
 .rate-control select:disabled { opacity: 0.6; }
@@ -153,15 +174,14 @@ header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
 
 .hero {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: 1.3fr 1.3fr 1fr 1fr;
     gap: 1rem;
     margin-bottom: 1rem;
 }
 .stat, .card {
     background: var(--card);
     border: 1px solid var(--card-border);
-    border-radius: 18px;
-    box-shadow: var(--shadow);
+    border-radius: 8px;
     min-width: 0;
 }
 .stat { padding: 1rem 1.25rem 1.1rem; }
@@ -184,6 +204,9 @@ header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
 }
 .stat-unit { font-size: 1.1rem; font-weight: 500; color: var(--ink-2); margin-left: 0.3rem; }
 .stat-sub { font-size: 0.8rem; color: var(--ink-3); }
+/* power and energy are context; pitch and roll are what the platform controls */
+.stat-secondary .stat-value { font-size: 1.9rem; margin-top: 0.45rem !important; }
+.stat-secondary .stat-unit { font-size: 0.95rem; }
 
 /* the small colored bar says which line is which; the numbers stay in the text color */
 .key { width: 14px; height: 4px; border-radius: 2px; flex: none; }
@@ -252,7 +275,9 @@ main {
 
 /* ---- panel attitude ---- */
 
-.attitude-views { display: flex; gap: 0.75rem; }
+/* the views sit in the middle of the card when the row next to it is taller */
+.attitude-card { display: flex; flex-direction: column; }
+.attitude-views { display: flex; gap: 0.75rem; flex: 1; align-items: center; }
 .attitude-views figure { flex: 1; margin: 0; min-width: 0; }
 .attitude-views svg { display: block; width: 100%; height: auto; }
 .attitude-views figcaption { text-align: center; font-size: 0.8rem; color: var(--ink-2); margin-top: 0.25rem; }
@@ -271,6 +296,7 @@ main {
 
 @media (max-width: 900px) {
     .hero { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .status { border-left: none; padding-left: 0; flex-basis: 100%; }
     main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 600px) {
@@ -279,7 +305,9 @@ main {
     .chart-card, .power-card { grid-column: auto; }
     .hero { gap: 0.75rem; }
     .stat { padding: 0.85rem 1rem; }
-    .stat-value { font-size: 1.6rem; }
+    .stat-value, .stat-secondary .stat-value { font-size: 1.5rem; }
+    .brand-mark { width: 32px; height: 32px; }
+    .title-block > div { flex: 1; min-width: 0; }
     .stat-unit { font-size: 0.95rem; }
     .chart-box { min-height: 240px; }
     .rate-control { flex-basis: 100%; }

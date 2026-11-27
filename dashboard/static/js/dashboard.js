@@ -22,7 +22,7 @@
 const CHART_WINDOW_MS = 30000;      // pitch/roll chart history
 const CHART_MIN_GAP_MS = 50;        // at most 20 chart points per second per line
 const STATS_WINDOW_MS = 30000;      // window for RMS tilt and the "within" stat
-const BAND_DEG = 2;                 // "within N degrees of level" (placeholder, agree as a team)
+const BAND_DEG = 2;                 // "within N degrees" stat, the 2 degree figure used in the report
 const POWER_AVG_WINDOW_MS = 60000;  // average power window
 const POWER_CHART_MS = 60000;       // power chart history
 const LEVEL_RANGE_DEG = 10;         // outer ring of the bubble level
@@ -30,7 +30,7 @@ const TRAIL_MS = 3000;              // length of the trail behind the bubble
 const ENERGY_MAX_GAP_MS = 5000;     // don't count energy across a gap longer than this
 const CSV_MAX_ROWS = 200000;        // about 11 hours at 5 messages per second
 const STALE_MS = 5000;              // a readout with no update for this long shows "--"
-const NO_DATA_MS = 5000;            // badge says "no recent data" after this long
+const NO_DATA_MS = 5000;            // status says "no recent data" after this long
 const RENDER_MS = 100;              // redraw at most 10 times a second while data flows
 const IDLE_RENDER_MS = 500;         // and twice a second while it doesn't
 
@@ -78,6 +78,8 @@ let csvDropped = false;
 
 let serverStatus = { status: "connecting" };
 let lastDataAt = null;
+let arrivals = [];                  // message times over the last few seconds, for the rate shown in the header
+const RATE_WINDOW_MS = 5000;
 let dirty = true;
 let lastRenderAt = 0;
 let lastPruneAt = 0;
@@ -165,6 +167,7 @@ function handleReading(reading) {
     if (!reading || typeof reading !== "object") return;
     const now = Date.now();
     lastDataAt = now;
+    arrivals.push(now);
 
     for (const key of KEYS) {
         if (key in reading) {
@@ -271,6 +274,7 @@ const orientationChart = new Chart(document.getElementById("orientationChart").g
         interaction: { mode: "nearest", axis: "x", intersect: false },
         plugins: {
             legend: {
+                align: "start", // reads left to right with the card title
                 labels: {
                     usePointStyle: true,
                     boxHeight: 6,
@@ -382,8 +386,8 @@ function renderReadouts(now) {
     el("rollValue").innerText = formatDegrees(freshValue("roll", now), 1);
     const pitchTarget = freshValue("pitch_target", now);
     const rollTarget = freshValue("roll_target", now);
-    el("pitchSub").innerText = pitchTarget === null ? "degrees" : "target " + formatDegrees(pitchTarget, 1);
-    el("rollSub").innerText = rollTarget === null ? "degrees" : "target " + formatDegrees(rollTarget, 1);
+    el("pitchSub").innerText = targetText(freshValue("pitch", now), pitchTarget);
+    el("rollSub").innerText = targetText(freshValue("roll", now), rollTarget);
     const power = freshValue("power", now);
     el("powerValue").innerText = power === null ? "--" : power.toFixed(2);
     // voltage and current under the power number, only when the firmware sends them
@@ -391,6 +395,14 @@ function renderReadouts(now) {
     const amps = freshValue("current", now);
     el("powerDetail").innerText = volts === null || amps === null
         ? "" : volts.toFixed(2) + " V, " + amps.toFixed(3) + " A";
+}
+
+// "target 9.2°, off by 0.4°" while tracking, plain "degrees" otherwise
+function targetText(value, target) {
+    if (target === null) return "degrees";
+    let text = "target " + formatDegrees(target, 1);
+    if (value !== null) text += ", off by " + formatDegrees(Math.abs(value - target), 1);
+    return text;
 }
 
 // Labels follow whether a target is arriving, so the page never calls
@@ -471,32 +483,43 @@ function renderCharts(now) {
     powerChart.update("none");
 }
 
-// Connection badge. The server reports whether the link to the ESP32 is up.
+// Link status in the header. The server reports whether the link to the ESP32 is up.
 // This page adds whether data is arriving, because a link can be up with
 // nothing coming through it.
 const STATUS_TEXT = {
-    connecting: "Connecting...",
-    connected: "Connected",
-    reconnecting: "Reconnecting...",
-    error: "Connection Error",
+    connecting: "connecting...",
+    connected: "connected",
+    reconnecting: "reconnecting...",
+    error: "connection error",
 };
+const SOURCE_NAME = { serial: "USB serial", ble: "Bluetooth", wifi: "Wi-Fi", mock: "Mock data" };
+const sourceName = SOURCE_NAME[document.body.dataset.source] || "Board";
+
+// readings per second over the last few seconds
+function messageRate(now) {
+    while (arrivals.length && now - arrivals[0] > RATE_WINDOW_MS) arrivals.shift();
+    const perSecond = arrivals.length / (RATE_WINDOW_MS / 1000);
+    return perSecond >= 2 ? Math.round(perSecond).toString() : perSecond.toFixed(1);
+}
 
 function renderStatus(now) {
     let cls = serverStatus.status;
-    let text = STATUS_TEXT[cls] || cls;
+    let text = sourceName + " " + (STATUS_TEXT[cls] || cls);
     if (cls === "connected") {
         if (lastDataAt === null) {
             cls = "connecting";
-            text = "Connected, waiting for data";
+            text = sourceName + " connected, waiting for data";
         } else if (now - lastDataAt > NO_DATA_MS) {
             cls = "reconnecting";
-            text = "Connected, no recent data";
+            text = sourceName + " connected, no recent data";
+        } else {
+            text = sourceName + ", " + messageRate(now) + " readings/s";
         }
     }
-    const badge = el("connectionStatus");
-    badge.className = "status-badge status-" + cls;
-    badge.innerText = text;
-    badge.title = serverStatus.message || ""; // hover for the actual error text
+    const status = el("connectionStatus");
+    status.className = "status status-" + cls;
+    status.innerText = text;
+    status.title = serverStatus.message || ""; // hover for the actual error text
 }
 
 function renderCsvCount() {
@@ -628,7 +651,7 @@ socket.on("connection_status", (status) => {
 });
 // The dashboard server itself went away (stopped, laptop asleep, phone out
 // of WiFi range). The page keeps retrying on its own; until it succeeds,
-// don't leave a green badge sitting over frozen numbers.
+// don't leave a green status sitting over frozen numbers.
 socket.on("disconnect", () => {
     serverStatus = {
         status: "reconnecting",

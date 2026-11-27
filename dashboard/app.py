@@ -117,7 +117,7 @@ def set_connection_status(status, message=None):
     """
     Save the connection state and send it to every open page. emit() only
     reaches pages that are already open, so a page opened later would
-    never hear about the change and its badge would stay on "Connecting".
+    never hear about the change and its status would stay on "connecting".
     Saving the state lets browser_connected() send it to each new page.
     """
     global connection_state
@@ -139,7 +139,7 @@ def run_data_source(fn, config):
     Run a data source in the background thread. An exception in a thread
     only prints a traceback and ends the thread, so the page would sit on
     its last status with no sign of the problem. This catches it and shows
-    the reason in the terminal and on the badge.
+    the reason in the terminal and in the page header.
     """
     try:
         set_connection_status("connecting")

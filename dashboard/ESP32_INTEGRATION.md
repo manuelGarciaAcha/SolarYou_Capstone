@@ -217,14 +217,16 @@ Reference: https://github.com/espressif/esp-idf/tree/master/examples/bluetooth/n
 
 ## 4. Troubleshooting
 
-| Badge | Meaning |
+The status next to the title names the link (USB serial, Bluetooth, Wi-Fi or Mock data):
+
+| Status | Meaning |
 |---|---|
-| Connecting... | starting up |
-| Connected, waiting for data | link is up, nothing has arrived yet |
-| Connected (green) | data is arriving |
-| Connected, no recent data | nothing for 5 s |
-| Reconnecting... | link dropped, retrying. Hover for the reason. |
-| Connection Error (red) | settings problem. Hover for the reason. |
+| connecting... | starting up |
+| connected, waiting for data | link is up, nothing has arrived yet |
+| green dot, "5 readings/s" | data is arriving at that rate |
+| connected, no recent data | nothing for 5 s |
+| reconnecting... | link dropped, retrying. Hover for the reason. |
+| connection error (red) | settings problem. Hover for the reason. |
 
 | You see | Likely cause |
 |---|---|
@@ -258,7 +260,7 @@ tab closes is harmless.
 | Board loses power or WiFi drops | reconnects after 10 s of silence |
 | BLE link drops | rescans and reconnects |
 | One bad message | dropped, the stream continues |
-| Wrong settings | red badge with the reason, no endless retrying |
+| Wrong settings | red status with the reason, no endless retrying |
 
 ## 6. Testing without a board
 
